@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programmation Multimédia — Jour 5 : Analyse audio et visualisation</title>
+    <style>
+        :root {
+            --primary: #1a2b4a;
+            --secondary: #4a5568;
+            --accent: #2c5282;
+            --bg: #f7f7f5;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --muted: #4a4a4a;
+            --border: #c8c8c8;
+            --code-bg: #f4f4f0;
+            --code-border: #d0d0c8;
+            --warning-bg: #fdfaf2;
+            --warning-border: #b8860b;
+            --info-bg: #f2f6fa;
+            --info-border: #2c5282;
+            --success-bg: #f2f8f3;
+            --success-border: #2f6b3a;
+            --danger-bg: #faf3f3;
+            --danger-border: #8b2c2c;
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            font-family: "Times New Roman", "Liberation Serif", Georgia, serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 12pt;
+            line-height: 1.5;
+        }
+
+        header {
+            background: var(--primary);
+            color: #ffffff;
+            padding: 45px 25px 35px;
+            border-bottom: 3px solid #0f1a30;
+        }
+
+        .header-content { max-width: 1050px; margin: auto; }
+
+        header h1 {
+            font-size: 1.9rem;
+            margin: 0 0 6px;
+            font-weight: 700;
+        }
+
+        header h2 {
+            color: #d8e0ec;
+            border: none;
+            margin: 0 0 16px;
+            font-weight: 400;
+            font-size: 1.15rem;
+            font-style: italic;
+        }
+
+        header p {
+            font-size: 1rem;
+            max-width: 760px;
+            color: #e8edf4;
+        }
+
+        .badge {
+            display: inline-block;
+            background: transparent;
+            border: 1px solid #8fa3c0;
+            padding: 3px 10px;
+            border-radius: 2px;
+            margin: 3px 6px 3px 0;
+            font-size: 0.75rem;
+            font-family: Arial, Helvetica, sans-serif;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #d8e0ec;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #0f1a30;
+            border-bottom: 1px solid #2a3a55;
+        }
+
+        .nav-content {
+            max-width: 1050px;
+            margin: auto;
+            display: flex;
+            overflow-x: auto;
+            gap: 0;
+            padding: 4px 10px;
+        }
+
+        nav a {
+            color: #c8d4e4;
+            text-decoration: none;
+            padding: 9px 13px;
+            white-space: nowrap;
+            font-size: 0.82rem;
+            font-family: Arial, Helvetica, sans-serif;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.15s, color 0.15s;
+        }
+
+        nav a:hover {
+            color: #ffffff;
+            border-bottom-color: #8fa3c0;
+        }
+
+        main { max-width: 1050px; margin: auto; padding: 35px 20px; }
+
+        section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 28px 32px;
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.35rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 0;
+            margin-bottom: 18px;
+        }
+
+        h3 {
+            color: #2a3a55;
+            margin-top: 24px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        h4 {
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+
+        p { margin: 10px 0; }
+        ul, ol { padding-left: 28px; }
+        li { margin: 4px 0; }
+
+        .objectifs {
+            background: var(--info-bg);
+            border-left: 3px solid var(--info-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        .important {
+            background: var(--warning-bg);
+            border-left: 3px solid var(--warning-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        .success {
+            background: var(--success-bg);
+            border-left: 3px solid var(--success-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        .danger {
+            background: var(--danger-bg);
+            border-left: 3px solid var(--danger-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        .info {
+            background: var(--info-bg);
+            border-left: 3px solid var(--info-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #1a1a1a;
+            padding: 16px 20px;
+            border: 1px solid var(--code-border);
+            overflow-x: auto;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 0.85rem;
+            line-height: 1.45;
+            margin: 14px 0;
+        }
+
+        code {
+            font-family: "Consolas", "Courier New", monospace;
+            background: #eeeeea;
+            color: #1a1a1a;
+            padding: 1px 5px;
+            font-size: 0.88em;
+            border: 1px solid #dcdcd6;
+        }
+
+        pre code {
+            background: transparent;
+            border: none;
+            padding: 0;
+            font-size: 0.85rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 9px 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #eef1f5;
+            color: #1a2b4a;
+            font-weight: 700;
+        }
+
+        tr:nth-child(even) { background: #fafaf8; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin: 18px 0;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            padding: 16px;
+            background: #fcfcfa;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--accent);
+            font-size: 1rem;
+        }
+
+        .exercise {
+            border: 1px solid #a0a0a0;
+            border-left: 3px solid var(--primary);
+            background: #fcfcfa;
+            padding: 18px 22px;
+            margin: 20px 0;
+        }
+
+        .level {
+            display: inline-block;
+            padding: 2px 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-family: Arial, Helvetica, sans-serif;
+            border: 1px solid;
+            margin-bottom: 8px;
+        }
+
+        .easy { background: #eef6ee; color: #2f6b3a; border-color: #2f6b3a; }
+        .medium { background: #fdf8ee; color: #8a6508; border-color: #8a6508; }
+        .hard { background: #f8eeee; color: #8b2c2c; border-color: #8b2c2c; }
+
+        .canvas-wrapper {
+            background: #1a1a1a;
+            padding: 14px;
+            border: 1px solid #333333;
+            margin: 18px 0;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            margin: auto;
+            background: #111111;
+            border: 1px solid #444444;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        button {
+            border: 1px solid #1a2b4a;
+            background: #1a2b4a;
+            color: #ffffff;
+            padding: 7px 16px;
+            cursor: pointer;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.85rem;
+            transition: background 0.15s;
+        }
+
+        button:hover { background: #2c5282; }
+        button.secondary { background: #ffffff; color: #1a2b4a; }
+        button.secondary:hover { background: #eef1f5; }
+        button.success { background: #2f6b3a; border-color: #2f6b3a; }
+        button.success:hover { background: #24522e; }
+
+        .key {
+            display: inline-block;
+            background: #ffffff;
+            border: 1px solid #888888;
+            padding: 4px 9px;
+            margin: 2px;
+            min-width: 30px;
+            text-align: center;
+            font-family: "Consolas", monospace;
+            font-size: 0.85rem;
+            box-shadow: 0 1px 0 #888888;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.88rem;
+        }
+
+        .slider-row label {
+            min-width: 130px;
+            color: var(--text);
+        }
+
+        .slider-row input[type="range"] {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .slider-row .value {
+            min-width: 60px;
+            font-family: "Consolas", monospace;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        footer {
+            background: #1a2b4a;
+            color: #c8d4e4;
+            text-align: center;
+            padding: 28px 20px;
+            margin-top: 30px;
+            font-size: 0.85rem;
+            font-family: Arial, Helvetica, sans-serif;
+            border-top: 3px solid #0f1a30;
+        }
+
+        footer p { margin: 4px 0; }
+
+        @media (max-width: 700px) {
+            header h1 { font-size: 1.4rem; }
+            header h2 { font-size: 1rem; }
+            section { padding: 20px 18px; }
+            pre { font-size: 0.78rem; }
+            h2 { font-size: 1.15rem; }
+        }
+    
+/* ===== Illustrations pédagogiques intégrées — Jour 5 ===== */
+.audio-illustration{
+    margin:22px 0 26px;
+    padding:18px;
+    border:1px solid #aeb8c5;
+    background:#f8fafc;
+}
+.audio-illustration h4{
+    margin-top:0;
+    color:#1a2b4a;
+}
+.audio-illustration canvas{
+    width:100%;
+    max-width:900px;
+    height:auto;
+    background:#0d1117;
+    border:1px solid #384252;
+}
+.ill-caption{
+    margin:10px 0 0;
+    font-size:.92rem;
+    color:#4a5568;
+}
+.ill-controls{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px 16px;
+    margin-top:12px;
+    font-family:Arial,Helvetica,sans-serif;
+    font-size:.88rem;
+}
+.ill-controls label{display:flex;align-items:center;gap:7px;}
+.ill-controls input[type=range]{width:150px;}
+.ill-controls output{min-width:55px;font-family:Consolas,monospace;}
+.wave-compare{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+    margin-top:14px;
+}
+.wave-card{
+    border:1px solid #c8c8c8;
+    background:#fff;
+    padding:10px;
+}
+.wave-card strong{display:block;margin-bottom:5px;color:#2a3a55;}
+.mini-canvas{width:100%!important;max-width:none!important;height:auto!important;}
+@media(max-width:700px){.wave-compare{grid-template-columns:1fr;}}
+
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-content">
+        <span class="badge">Programmation Multimédia</span>
+        <span class="badge">Jour 5 / 6</span>
+        <span class="badge">Audio</span>
+        <span class="badge">Visualisation</span>
+
+        <h1>Jour 5 — Analyse audio et visualisation</h1>
+        <h2>Traitement du signal, FFT et synchronisation avec Canvas</h2>
+
+        <p>
+            Cette journée prolonge le Jour 4. Elle couvre le chargement
+            de fichiers audio, l'analyse fréquentielle en temps réel
+            et la synchronisation entre le son et l'affichage graphique.
+        </p>
+
+        <p>
+            <strong>Durée :</strong> 5 heures &nbsp;|&nbsp;
+            <strong>Prérequis :</strong> Jour 4 (Web Audio API, graphe audio)
+        </p>
+    </div>
+</header>
+
+
+<nav>
+    <div class="nav-content">
+        <a href="#objectifs">Objectifs</a>
+        <a href="#buffer">Charger un fichier</a>
+        <a href="#effets">Effets audio</a>
+        <a href="#analyse">Analyse du signal</a>
+        <a href="#fft">Transformée de Fourier</a>
+        <a href="#analyser">AnalyserNode</a>
+        <a href="#visualisation">Visualisation</a>
+        <a href="#synchronisation">Synchronisation</a>
+        <a href="#tp1">TP1 — Visualiseur</a>
+        <a href="#tp2">TP2 — Spectrogramme</a>
+        <a href="#tp3">TP3 — Réactif au son</a>
+        <a href="#demo">Démonstration</a>
+        <a href="#bilan">Bilan</a>
+    </div>
+</nav>
+
+
+<main>
+
+<!-- OBJECTIFS -->
+
+<section id="objectifs">
+    <h2>1. Objectifs pédagogiques</h2>
+
+    <div class="objectifs">
+        <p>
+            À l'issue de cette cinquième journée, l'étudiant doit être capable de :
+        </p>
+        <ul>
+            <li>charger un fichier audio et le décoder en mémoire ;</li>
+            <li>lire un buffer audio avec <code>AudioBufferSourceNode</code> ;</li>
+            <li>appliquer des effets simples (delay, réverbération) ;</li>
+            <li>comprendre le principe de la transformée de Fourier ;</li>
+            <li>utiliser un <code>AnalyserNode</code> pour extraire le spectre ;</li>
+            <li>récupérer les données temporelles et fréquentielles ;</li>
+            <li>dessiner un visualiseur audio sur Canvas ;</li>
+            <li>synchroniser une animation avec le signal audio.</li>
+        </ul>
+    </div>
+
+    <h3>Organisation de la journée</h3>
+    <table>
+        <tr><th>Activité</th><th>Durée</th></tr>
+        <tr><td>Cours — Chargement de fichiers et effets</td><td>1 h 00</td></tr>
+        <tr><td>Cours — Analyse du signal et FFT</td><td>1 h 00</td></tr>
+        <tr><td>TP guidé — Visualiseur audio</td><td>1 h 15</td></tr>
+        <tr><td>Cours — Synchronisation et spectrogramme</td><td>0 h 45</td></tr>
+        <tr><td>TP — Scène réactive au son</td><td>0 h 45</td></tr>
+        <tr><td>Synthèse et questions</td><td>0 h 15</td></tr>
+    </table>
+</section>
+
+
+<!-- BUFFER -->
+
+<section id="buffer">
+    <h2>2. Charger un fichier audio</h2>
+
+    <p>
+        La Web Audio API travaille sur des <strong>AudioBuffer</strong> :
+        des tableaux de samples en mémoire. Pour charger un fichier,
+        on utilise <code>fetch</code> puis <code>decodeAudioData</code>.
+    </p>
+
+
+    <div class="audio-illustration">
+        <h4>Visualisation — un AudioBuffer contient des échantillons</h4>
+        <canvas id="bufferCanvas" width="900" height="230"></canvas>
+        <p class="ill-caption">
+            À gauche, le signal audio continu est représenté par sa forme d'onde.
+            Les points montrent les samples conservés en mémoire dans l’AudioBuffer.
+            Le fichier n’est donc pas « une onde » stockée telle quelle : il devient une suite de valeurs numériques.
+        </p>
+    </div>
+
+
+<pre><code>async function chargerAudio(url) {
+    const reponse = await fetch(url);
+    const donnees = await reponse.arrayBuffer();
+    const buffer = await audioCtx.decodeAudioData(donnees);
+    return buffer;
+}</code></pre>
+
+    <h3>Lire le buffer</h3>
+
+<pre><code>const source = audioCtx.createBufferSource();
+source.buffer = buffer;
+
+source.connect(audioCtx.destination);
+source.start();</code></pre>
+
+    <h3>Contrôle de la lecture</h3>
+
+    <table>
+        <tr><th>Méthode / propriété</th><th>Rôle</th></tr>
+        <tr><td><code>start(when, offset)</code></td><td>Démarre la lecture</td></tr>
+        <tr><td><code>stop(when)</code></td><td>Arrête la lecture</td></tr>
+        <tr><td><code>playbackRate</code></td><td>Vitesse de lecture (1 = normal)</td></tr>
+        <tr><td><code>loop</code></td><td>Lecture en boucle</td></tr>
+        <tr><td><code>onended</code></td><td>Événement de fin de lecture</td></tr>
+    </table>
+
+    <div class="important">
+        <strong>Attention :</strong>
+        <p>
+            Un <code>AudioBufferSourceNode</code> ne peut être démarré
+            qu'<strong>une seule fois</strong>. Pour rejouer un son,
+            il faut en créer un nouveau.
+        </p>
+    </div>
+</section>
+
+
+<!-- EFFETS -->
+
+<section id="effets">
+    <h2>3. Effets audio simples</h2>
+
+    <h3>Écho (delay)</h3>
+
+    <p>
+        Un <code>DelayNode</code> retarde le signal d'un temps donné.
+        En rebouclant partiellement la sortie sur l'entrée via un gain,
+        on crée un écho répété.
+    </p>
+
+
+    <div class="audio-illustration">
+        <h4>Visualisation — comment un Delay crée un écho</h4>
+        <canvas id="delayCanvas" width="900" height="250"></canvas>
+        <div class="ill-controls">
+            <label>Délai <input id="delayRange" type="range" min="0.1" max="0.8" step="0.05" value="0.3"></label>
+            <output id="delayValue">0,30 s</output>
+            <label>Feedback <input id="feedbackRange" type="range" min="0" max="0.8" step="0.05" value="0.4"></label>
+            <output id="feedbackValue">0,40</output>
+        </div>
+        <p class="ill-caption">
+            Le premier pic est le son direct. Les pics suivants sont des copies retardées et
+            atténuées. Augmentez le feedback pour voir apparaître davantage de répétitions.
+        </p>
+    </div>
+
+
+<pre><code>const delay = audioCtx.createDelay();
+delay.delayTime.value = 0.3;
+
+const feedback = audioCtx.createGain();
+feedback.gain.value = 0.4;
+
+source.connect(delay);
+delay.connect(feedback);
+feedback.connect(delay);
+delay.connect(audioCtx.destination);</code></pre>
+
+    <h3>Réverbération (convolver)</h3>
+
+    <p>
+        Un <code>ConvolverNode</code> applique une réponse
+        impulsionnelle (IR) au signal. Cela simule l'acoustique
+        d'un lieu (église, salle de concert, etc.).
+    </p>
+
+<pre><code>const convolver = audioCtx.createConvolver();
+convolver.buffer = reponseImpulsionnelle;
+
+source.connect(convolver);
+convolver.connect(audioCtx.destination);</code></pre>
+
+    <h3>Autres effets</h3>
+
+    <table>
+        <tr><th>Nœud</th><th>Effet</th></tr>
+        <tr><td><code>WaveShaperNode</code></td><td>Distorsion</td></tr>
+        <tr><td><code>StereoPannerNode</code></td><td>Position stéréo</td></tr>
+        <tr><td><code>DynamicsCompressorNode</code></td><td>Compression dynamique</td></tr>
+    </table>
+</section>
+
+
+<!-- ANALYSE -->
+
+<section id="analyse">
+    <h2>4. Analyse du signal</h2>
+
+    <p>
+        Pour visualiser un son, il faut l'analyser. Deux représentations
+        complémentaires :
+    </p>
+
+    <table>
+        <tr>
+            <th>Domaine</th>
+            <th>Représentation</th>
+            <th>Usage</th>
+        </tr>
+        <tr>
+            <td>Temporel</td>
+            <td>Amplitude en fonction du temps</td>
+            <td>Oscilloscope, forme d'onde</td>
+        </tr>
+        <tr>
+            <td>Fréquentiel</td>
+            <td>Amplitude en fonction de la fréquence</td>
+            <td>Spectre, analyse harmonique</td>
+        </tr>
+    </table>
+
+    <div class="info">
+        <strong>Analogie :</strong>
+        <p>
+            Le domaine temporel montre « comment le son vibre ».
+            Le domaine fréquentiel montre « quelles fréquences
+            composent le son ».
+        </p>
+    </div>
+
+
+    <div class="audio-illustration">
+        <h4>Comparaison — même son, deux lectures</h4>
+        <div class="wave-compare">
+            <div class="wave-card">
+                <strong>Domaine temporel : amplitude au cours du temps</strong>
+                <canvas id="timeDomainCanvas" class="mini-canvas" width="420" height="190"></canvas>
+            </div>
+            <div class="wave-card">
+                <strong>Domaine fréquentiel : énergie par fréquence</strong>
+                <canvas id="freqDomainCanvas" class="mini-canvas" width="420" height="190"></canvas>
+            </div>
+        </div>
+        <p class="ill-caption">
+            La forme d’onde montre les variations instantanées du signal.
+            Le spectre révèle au contraire les composantes fréquentielles cachées dans ce signal complexe.
+        </p>
+    </div>
+
+</section>
+
+
+<!-- FFT -->
+
+<section id="fft">
+    <h2>5. Transformée de Fourier</h2>
+
+    <p>
+        La <strong>transformée de Fourier</strong> décompose un signal
+        en une somme de sinusoïdes. En informatique, on utilise la
+        <strong>FFT</strong> (Fast Fourier Transform), qui calcule
+        cette décomposition rapidement.
+    </p>
+
+    <h3>Principe intuitif</h3>
+
+    <p>
+        Un accord de piano est un signal complexe. La FFT permet
+        d'extraire les fréquences qui le composent : on voit apparaître
+        des pics aux fréquences des notes jouées.
+    </p>
+
+
+    <div class="audio-illustration">
+        <h4>Visualisation — décomposer un signal en fréquences</h4>
+        <canvas id="fourierCanvas" width="900" height="300"></canvas>
+        <div class="ill-controls">
+            <button id="fourierAddFund">Ajouter harmonique</button>
+            <button id="fourierReset" class="secondary">Réinitialiser</button>
+        </div>
+        <p class="ill-caption">
+            Le signal complexe du haut peut être vu comme la somme de plusieurs sinusoïdes.
+            Chaque composante produit un pic identifiable dans le spectre du bas.
+        </p>
+    </div>
+
+
+    <h3>Sortie de la FFT</h3>
+
+    <p>
+        La FFT produit un tableau de valeurs complexes. En pratique,
+        on utilise la <strong>magnitude</strong> (module) pour obtenir
+        l'amplitude de chaque bande de fréquences.
+    </p>
+
+    <table>
+        <tr><th>Indice</th><th>Fréquence</th></tr>
+        <tr><td>0</td><td>0 Hz (DC)</td></tr>
+        <tr><td>1</td><td>échantillonnage / taille</td></tr>
+        <tr><td>n</td><td>n × échantillonnage / taille</td></tr>
+    </table>
+
+    <div class="important">
+        <strong>Dans la pratique :</strong>
+        <p>
+            Le <code>AnalyserNode</code> de la Web Audio API effectue
+            la FFT pour nous. Il suffit de récupérer le tableau de
+            magnitudes.
+        </p>
+    </div>
+</section>
+
+
+<!-- ANALYSER -->
+
+<section id="analyser">
+    <h2>6. Le nœud AnalyserNode</h2>
+
+    <p>
+        Le <code>AnalyserNode</code> s'insère dans le graphe audio
+        et fournit en temps réel deux tableaux :
+    </p>
+
+    <ul>
+        <li><code>getByteTimeDomainData()</code> : forme d'onde ;</li>
+        <li><code>getByteFrequencyData()</code> : spectre de fréquences.</li>
+    </ul>
+
+
+    <div class="audio-illustration">
+        <h4>Visualisation — les deux sorties de l'AnalyserNode</h4>
+        <canvas id="analyserCanvas" width="900" height="330"></canvas>
+        <p class="ill-caption">
+            Un seul analyseur permet donc d’observer deux aspects du même signal :
+            les samples dans le temps et leur répartition en bandes de fréquences.
+        </p>
+    </div>
+
+
+    <h3>Création</h3>
+
+<pre><code>const analyseur = audioCtx.createAnalyser();
+
+analyseur.fftSize = 2048;              // taille de la FFT
+analyseur.smoothingTimeConstant = 0.8; // lissage temporel
+
+source.connect(analyseur);
+analyseur.connect(audioCtx.destination);</code></pre>
+
+    <h3>Paramètres</h3>
+
+    <table>
+        <tr><th>Paramètre</th><th>Rôle</th></tr>
+        <tr>
+            <td><code>fftSize</code></td>
+            <td>
+                Nombre d'échantillons analysés (puissance de 2).
+                Plus il est grand, plus la résolution fréquentielle est fine.
+            </td>
+        </tr>
+        <tr>
+            <td><code>frequencyBinCount</code></td>
+            <td>Nombre de bandes = fftSize / 2</td>
+        </tr>
+
+
+    <div class="audio-illustration">
+        <h4>Visualisation — fftSize et résolution fréquentielle</h4>
+        <canvas id="fftResolutionCanvas" width="900" height="250"></canvas>
+        <div class="ill-controls">
+            <label>fftSize
+                <select id="fftSizeSelect">
+                    <option value="256">256</option>
+                    <option value="512">512</option>
+                    <option value="1024">1024</option>
+                    <option value="2048" selected>2048</option>
+                    <option value="4096">4096</option>
+                </select>
+            </label>
+            <output id="fftResolutionValue">2048 → 1024 bandes</output>
+        </div>
+        <p class="ill-caption">
+            Plus <code>fftSize</code> est grand, plus les bandes fréquentielles sont fines,
+            mais l’analyse porte sur une fenêtre temporelle plus longue.
+        </p>
+    </div>
+
+        <tr>
+            <td><code>smoothingTimeConstant</code></td>
+            <td>Lissage entre deux images (0 = aucun, 1 = très lissé)</td>
+        </tr>
+    </table>
+
+    <h3>Récupérer les données</h3>
+
+<pre><code>const donneesFreq = new Uint8Array(analyseur.frequencyBinCount);
+
+analyseur.getByteFrequencyData(donneesFreq);
+
+// donneesFreq[i] ∈ [0, 255]
+// i correspond à une bande de fréquences</code></pre>
+
+    <div class="info">
+        <strong>Correspondance fréquence / indice :</strong>
+<pre><code>fréquence = i × (sampleRate / 2) / frequencyBinCount</code></pre>
+    </div>
+</section>
+
+
+<!-- VISUALISATION -->
+
+<section id="visualisation">
+    <h2>7. Visualisation sur Canvas</h2>
+
+    <h3>Barres de spectre</h3>
+
+    <p>
+        Chaque bande de fréquence est représentée par une barre
+        verticale dont la hauteur dépend de l'amplitude.
+    </p>
+
+
+    <div class="audio-illustration">
+        <h4>Visualisation — barres de spectre en temps réel</h4>
+        <canvas id="spectrumCanvas" width="900" height="280"></canvas>
+        <div class="ill-controls">
+            <label>Fréquence <input id="spectrumFreq" type="range" min="80" max="1200" value="220"></label>
+            <output id="spectrumFreqValue">220 Hz</output>
+        </div>
+        <p class="ill-caption">
+            Chaque barre correspond à une bande de fréquences. Une note fondamentale
+            et ses harmoniques produisent plusieurs zones d’énergie.
+        </p>
+    </div>
+
+
+<pre><code>const largeur = canvas.width / donneesFreq.length;
+
+for (let i = 0; i < donneesFreq.length; i++) {
+    const hauteur = donneesFreq[i] / 255 * canvas.height;
+
+    ctx.fillRect(
+        i * largeur,
+        canvas.height - hauteur,
+        largeur - 1,
+        hauteur
+    );
+}</code></pre>
+
+    <h3>Forme d'onde</h3>
+
+<pre><code>const donneesTemp = new Uint8Array(analyseur.fftSize);
+
+analyseur.getByteTimeDomainData(donneesTemp);
+
+ctx.beginPath();
+ctx.moveTo(0, canvas.height / 2);
+
+for (let i = 0; i < donneesTemp.length; i++) {
+    const x = i / donneesTemp.length * canvas.width;
+    const y = donneesTemp[i] / 128 * canvas.height / 2;
+    ctx.lineTo(x, y);
+}
+
+ctx.stroke();</code></pre>
+
+    <h3>Cercles réactifs</h3>
+
+
+    <div class="audio-illustration">
+        <h4>Visualisation — la forme d'onde</h4>
+        <canvas id="waveformCanvas" width="900" height="230"></canvas>
+        <div class="ill-controls">
+            <label>Type
+                <select id="waveformType">
+                    <option value="sine">Sinusoïde</option>
+                    <option value="square">Carrée</option>
+                    <option value="triangle">Triangle</option>
+                    <option value="sawtooth">Dent de scie</option>
+                </select>
+            </label>
+            <label>Fréquence <input id="waveformFreq" type="range" min="1" max="12" value="3"></label>
+            <output id="waveformFreqValue">3 cycles</output>
+        </div>
+        <p class="ill-caption">
+            Ici, on visualise directement l’amplitude du signal au cours du temps,
+            comme un oscilloscope.
+        </p>
+    </div>
+
+
+    <p>
+        Une autre approche consiste à moduler la taille de cercles
+        selon l'amplitude globale du signal.
+    </p>
+
+<pre><code>let somme = 0;
+for (const v of donneesFreq) somme += v;
+const intensite = somme / donneesFreq.length / 255;
+
+const rayon = 50 + intensite * 150;
+ctx.arc(canvas.width / 2, canvas.height / 2, rayon, 0, Math.PI * 2);
+ctx.stroke();</code></pre>
+</section>
+
+
+<!-- SYNCHRONISATION -->
+
+<section id="synchronisation">
+    <h2>8. Synchronisation son / image</h2>
+
+    <p>
+        Pour synchroniser un effet visuel avec la musique, on peut :
+    </p>
+
+
+    <div class="audio-illustration">
+        <h4>Visualisation — deux horloges, une référence audio</h4>
+        <canvas id="syncCanvas" width="900" height="250"></canvas>
+        <div class="ill-controls">
+            <button id="syncStart">Lancer la simulation</button>
+            <button id="syncReset" class="secondary">Réinitialiser</button>
+        </div>
+        <p class="ill-caption">
+            La ligne supérieure représente l’horloge audio. Les marqueurs visuels sont
+            déclenchés à des instants précis de cette horloge. Le but est d’éviter que
+            l’animation dépende uniquement de la cadence graphique.
+        </p>
+    </div>
+
+
+    <ul>
+        <li>utiliser le <code>currentTime</code> du contexte audio ;</li>
+        <li>analyser le signal à chaque image ;</li>
+        <li>programmer des événements avec <code>setValueAtTime</code>.</li>
+    </ul>
+
+    <h3>Horloge audio</h3>
+
+<pre><code>const temps = audioCtx.currentTime;   // en secondes</code></pre>
+
+    <p>
+        Contrairement à <code>performance.now()</code>, cette horloge
+        est <strong>échantillon-précise</strong> et reste synchronisée
+        avec le son, même en cas de ralentissement graphique.
+    </p>
+
+    <div class="important">
+        <strong>Bonne pratique :</strong>
+        <p>
+            Pour une synchronisation précise, utilisez toujours
+            <code>audioCtx.currentTime</code> comme référence
+            temporelle pour la programmation audio.
+        </p>
+    </div>
+
+    <h3>Exemple : flash visuel synchronisé</h3>
+
+<pre><code>const temps = audioCtx.currentTime;
+
+// Programmer un gain
+const gain = audioCtx.createGain();
+gain.gain.setValueAtTime(0, temps);
+gain.gain.linearRampToValueAtTime(1, temps + 0.05);
+gain.gain.linearRampToValueAtTime(0, temps + 0.3);
+
+// Programmer un flash (mémoriser l'instant)
+flashs.push({ temps: temps, duree: 0.3 });</code></pre>
+
+    <p>
+        Dans la boucle de rendu, on compare <code>audioCtx.currentTime</code>
+        aux instants programmés pour déclencher l'effet visuel.
+    </p>
+</section>
+
+
+<!-- TP1 -->
+
+<section id="tp1">
+    <h2>9. TP 1 — Visualiseur audio</h2>
+
+    <div class="exercise">
+        <span class="level medium">Moyen</span>
+
+        <h3>Objectif</h3>
+        <p>
+            Charger un fichier audio (ou générer un son) et afficher
+            sur Canvas un visualiseur à barres.
+        </p>
+
+        <h3>Étapes</h3>
+        <ol>
+            <li>Créer un <code>AudioContext</code> et un oscillateur
+                ou charger un fichier.</li>
+            <li>Insérer un <code>AnalyserNode</code> entre la source
+                et la destination.</li>
+            <li>Dans la boucle <code>requestAnimationFrame</code>,
+                récupérer les données fréquentielles.</li>
+            <li>Dessiner des barres dont la hauteur dépend de l'amplitude.</li>
+            <li>Ajouter un dégradé de couleur pour les barres.</li>
+        </ol>
+
+        <h3>Extension</h3>
+        <p>
+            Ajouter un second mode d'affichage : forme d'onde.
+        </p>
+    </div>
+</section>
+
+
+<!-- TP2 -->
+
+<section id="tp2">
+    <h2>10. TP 2 — Spectrogramme</h2>
+
+    <div class="exercise">
+        <span class="level hard">Difficile</span>
+
+        <h3>Objectif</h3>
+        <p>
+            Construire un spectrogramme : représentation 2D où
+            l'axe horizontal est le temps, l'axe vertical la fréquence,
+            et la couleur l'amplitude.
+        </p>
+
+        <h3>Principe</h3>
+        <p>
+            À chaque image, on décale l'image existante d'un pixel
+            vers la gauche, puis on dessine une nouvelle colonne
+            à droite représentant le spectre instantané.
+        </p>
+
+
+    <div class="audio-illustration">
+        <h4>Visualisation — lire un spectrogramme</h4>
+        <canvas id="spectrogramCanvas" width="900" height="330"></canvas>
+        <div class="ill-controls">
+            <button id="spectroToggle">Animer</button>
+            <label>Vitesse <input id="spectroSpeed" type="range" min="1" max="8" value="3"></label>
+            <output id="spectroSpeedValue">3</output>
+        </div>
+        <p class="ill-caption">
+            Horizontalement : le temps avance vers la droite. Verticalement : les fréquences.
+            L’intensité lumineuse représente l’amplitude. Une trace permet donc de voir
+            comment le contenu fréquentiel évolue dans le temps.
+        </p>
+    </div>
+
+
+<pre><code>ctx.drawImage(
+    canvas,
+    -1, 0,
+    canvas.width, canvas.height
+);
+
+for (let i = 0; i < donneesFreq.length; i++) {
+    const y = canvas.height - i / donneesFreq.length * canvas.height;
+    const intensite = donneesFreq[i];
+
+    ctx.fillStyle = `rgb(${intensite}, ${intensite}, ${intensite})`;
+    ctx.fillRect(canvas.width - 1, y, 1, 1);
+}</code></pre>
+
+        <h3>Extension</h3>
+        <p>
+            Utiliser une palette de couleurs (bleu → rouge)
+            pour un rendu plus lisible.
+        </p>
+    </div>
+</section>
+
+
+<!-- TP3 -->
+
+<section id="tp3">
+    <h2>11. TP 3 — Scène réactive au son</h2>
+
+    <div class="exercise">
+        <span class="level hard">Difficile</span>
+
+        <h3>Objectif</h3>
+        <p>
+            Créer une scène graphique dont les éléments réagissent
+            à la musique : taille, couleur, position, rotation.
+        </p>
+
+        <h3>Contraintes</h3>
+        <ul>
+            <li>Utiliser les données fréquentielles pour moduler
+                au moins trois paramètres visuels ;</li>
+            <li>Utiliser les données temporelles pour un effet
+                de traînée ou d'oscillation ;</li>
+            <li>Séparer les basses, médiums et aigus pour des
+                réactions distinctes.</li>
+        </ul>
+
+        <h3>Indice</h3>
+        <p>
+            Pour séparer les bandes :
+        </p>
+
+
+    <div class="audio-illustration">
+        <h4>Visualisation — basses, médiums et aigus pilotent la scène</h4>
+        <canvas id="bandsCanvas" width="900" height="300"></canvas>
+        <div class="ill-controls">
+            <label>Basses <input id="bassControl" type="range" min="0" max="1" step=".01" value=".7"></label>
+            <label>Médiums <input id="midControl" type="range" min="0" max="1" step=".01" value=".45"></label>
+            <label>Aigus <input id="highControl" type="range" min="0" max="1" step=".01" value=".6"></label>
+        </div>
+        <p class="ill-caption">
+            Les basses peuvent contrôler la taille, les médiums la rotation et les aigus
+            la position ou le nombre d’éléments. C’est le principe d’une scène graphique
+            réellement réactive au contenu musical.
+        </p>
+    </div>
+
+<pre><code>const basses = moyenne(donneesFreq, 0, 10);
+const mediums = moyenne(donneesFreq, 10, 50);
+const aigus = moyenne(donneesFreq, 50, 100);</code></pre>
+    </div>
+</section>
+
+
+<!-- DEMO -->
+
+<section id="demo">
+    <h2>12. Démonstration interactive</h2>
+
+    <p>
+        Cliquez sur « Activer l'audio » puis lancez une note.
+        Le visualiseur affiche le spectre en temps réel.
+    </p>
+
+
+    <div class="audio-illustration">
+        <h4>Avant de lancer la démonstration — ce qui se passe réellement</h4>
+        <canvas id="pipelineCanvas" width="900" height="220"></canvas>
+        <p class="ill-caption">
+            Chaîne logique : <strong>Oscillateur → Gain → AnalyserNode → sortie audio</strong>.
+            Le même signal peut donc être entendu et mesuré en même temps, puis transformé
+            en données utilisables par Canvas.
+        </p>
+    </div>
+
+
+    <div class="canvas-wrapper">
+        <canvas id="demoCanvas" width="800" height="300"></canvas>
+
+        <div class="controls">
+            <button id="btnStart">Activer l'audio</button>
+            <button class="secondary" id="btnNote">Note continue</button>
+            <button class="success" id="btnStop">Arrêter</button>
+        </div>
+    </div>
+
+    <div class="info">
+        <strong>À observer :</strong>
+        <ul>
+            <li>Le spectre se concentre autour de la fréquence de la note.</li>
+            <li>Une note plus aiguë décale le pic vers la droite.</li>
+            <li>L'amplitude du pic dépend du volume.</li>
+        </ul>
+    </div>
+</section>
+
+
+<!-- BILAN -->
+
+<section id="bilan">
+    <h2>13. À retenir — Jour 5</h2>
+
+    <div class="success">
+        <ul>
+            <li>Un fichier audio se charge avec <code>fetch</code> puis
+                <code>decodeAudioData</code>.</li>
+            <li>Un <code>AudioBufferSourceNode</code> ne peut être
+                démarré qu'une seule fois.</li>
+            <li>Les effets simples (écho, réverbération) s'obtiennent
+                avec des nœuds dédiés.</li>
+            <li>La transformée de Fourier décompose un signal en fréquences.</li>
+            <li>Le <code>AnalyserNode</code> fournit en temps réel
+                les données temporelles et fréquentielles.</li>
+            <li>Un visualiseur audio combine analyse et rendu Canvas.</li>
+            <li>L'horloge <code>audioCtx.currentTime</code> est la référence
+                pour la synchronisation son / image.</li>
+        </ul>
+    </div>
+
+    <h3>Travail à remettre pour le Jour 5</h3>
+
+    <p>Chaque étudiant remet un visualiseur audio organisé comme suit :</p>
+
+<pre><code>jour5/
+│
+├── index.html
+├── style.css
+└── script.js</code></pre>
+
+    <p>L'application doit comporter :</p>
+    <ul>
+        <li>un chargement de fichier audio ou une génération de son ;</li>
+        <li>un <code>AnalyserNode</code> ;</li>
+        <li>au moins deux modes de visualisation ;</li>
+        <li>une séparation en bandes de fréquences ;</li>
+        <li>une animation fluide et synchrone.</li>
+    </ul>
+</section>
+
+
+</main>
+
+
+<footer>
+    <p><strong>Programmation Multimédia — Jour 5</strong></p>
+    <p>Analyse audio et visualisation</p>
+    <p>HTML5 · CSS3 · JavaScript</p>
+</footer>
+
+
+<!-- =====================================================
+     JAVASCRIPT DE LA DEMONSTRATION
+====================================================== -->
+
+
+<script>
+/* ==========================================================
+   ILLUSTRATIONS PÉDAGOGIQUES — JOUR 5
+   Chaque illustration est volontairement autonome.
+========================================================== */
+(function(){
+    const TAU = Math.PI * 2;
+    function ctx(id){
+        const c = document.getElementById(id);
+        return c ? {c, x:c.getContext("2d")} : null;
+    }
+    function clear(g){
+        g.x.fillStyle="#0d1117";
+        g.x.fillRect(0,0,g.c.width,g.c.height);
+    }
+    function grid(g, w, h, step=45){
+        g.x.strokeStyle="#253044"; g.x.lineWidth=1;
+        for(let x=0;x<=w;x+=step){g.x.beginPath();g.x.moveTo(x,0);g.x.lineTo(x,h);g.x.stroke();}
+        for(let y=0;y<=h;y+=step){g.x.beginPath();g.x.moveTo(0,y);g.x.lineTo(w,y);g.x.stroke();}
+    }
+    function label(g, t, x, y, size=13){
+        g.x.fillStyle="#dbe5f2"; g.x.font=size+"px Arial"; g.x.fillText(t,x,y);
+    }
+
+    // AudioBuffer samples
+    const b=ctx("bufferCanvas");
+    if(b){
+        function drawBuffer(){
+            clear(b); grid(b,900,230,45);
+            const mid=115;
+            b.x.strokeStyle="#6fa3d8"; b.x.lineWidth=2; b.x.beginPath();
+            for(let i=0;i<900;i++){
+                const t=i/900*8;
+                const y=mid-(Math.sin(t*TAU)+.35*Math.sin(t*TAU*3))*48;
+                if(i===0)b.x.moveTo(i,y); else b.x.lineTo(i,y);
+            }
+            b.x.stroke();
+            b.x.fillStyle="#f4c95d";
+            for(let i=0;i<45;i++){
+                const px=i/44*900, t=i/44*8;
+                const py=mid-(Math.sin(t*TAU)+.35*Math.sin(t*TAU*3))*48;
+                b.x.beginPath();b.x.arc(px,py,3,0,TAU);b.x.fill();
+            }
+            label(b,"signal",16,22); label(b,"samples stockés dans l’AudioBuffer",530,215);
+        }
+        drawBuffer();
+    }
+
+    // Delay
+    const d=ctx("delayCanvas"), dr=document.getElementById("delayRange"), fr=document.getElementById("feedbackRange");
+    function drawDelay(){
+        if(!d)return; clear(d);
+        const delay=+(dr?.value||.3), fb=+(fr?.value||.4);
+        const mid=125;
+        d.x.strokeStyle="#6fa3d8"; d.x.lineWidth=2; d.x.beginPath();
+        d.x.moveTo(30,mid);
+        d.x.lineTo(90,mid);
+        d.x.lineTo(90,50); d.x.lineTo(110,50); d.x.lineTo(110,mid);
+        d.x.stroke();
+        const start=120, gap=delay/0.8*170+45;
+        for(let k=0;k<6;k++){
+            const x=start+k*gap, a=Math.pow(fb,k);
+            if(x>880)break;
+            d.x.strokeStyle=`rgba(244,201,93,${Math.max(.15,a)})`;
+            d.x.lineWidth=4;
+            d.x.beginPath(); d.x.moveTo(x,mid+45*a); d.x.lineTo(x,mid-45*a); d.x.stroke();
+        }
+        label(d,"direct",75,28); label(d,"répétitions retardées →",400,30);
+        if(document.getElementById("delayValue")) document.getElementById("delayValue").textContent=delay.toFixed(2).replace(".",",")+" s";
+        if(document.getElementById("feedbackValue")) document.getElementById("feedbackValue").textContent=fb.toFixed(2);
+    }
+    dr?.addEventListener("input",drawDelay); fr?.addEventListener("input",drawDelay); drawDelay();
+
+    // Time / frequency
+    function drawTime(){
+        const g=ctx("timeDomainCanvas"); if(!g)return; clear(g);
+        g.x.strokeStyle="#6fa3d8";g.x.lineWidth=2;g.x.beginPath();
+        for(let i=0;i<420;i++){let t=i/420*TAU*3, y=95-55*(.65*Math.sin(t)+.25*Math.sin(3*t)+.12*Math.sin(5*t)); if(i===0)g.x.moveTo(i,y);else g.x.lineTo(i,y);}
+        g.x.stroke(); label(g,"temps →",350,175);
+    }
+    function drawFreq(){
+        const g=ctx("freqDomainCanvas"); if(!g)return; clear(g);
+        const peaks=[.9,.52,.32,.2,.12], xs=[70,145,220,295,370];
+        xs.forEach((x,i)=>{g.x.fillStyle="#f4c95d";g.x.fillRect(x,155-peaks[i]*115,26,peaks[i]*115);});
+        label(g,"fréquence →",330,175); label(g,"pics",70,25);
+    }
+    drawTime(); drawFreq();
+
+    // Fourier
+    const f=ctx("fourierCanvas"); let harmonics=3;
+    function drawFourier(){
+        if(!f)return; clear(f);
+        const top=120,bottom=255;
+        f.x.strokeStyle="#253044"; f.x.beginPath(); f.x.moveTo(0,top); f.x.lineTo(900,top); f.x.moveTo(0,bottom); f.x.lineTo(900,bottom); f.x.stroke();
+        f.x.strokeStyle="#6fa3d8"; f.x.lineWidth=2; f.x.beginPath();
+        for(let i=0;i<900;i++){let t=i/900*TAU*2, y=top-45*(Math.sin(t)+.5*(harmonics>=2?Math.sin(2*t):0)+.32*(harmonics>=3?Math.sin(3*t):0)+.18*(harmonics>=4?Math.sin(4*t):0)); if(i===0)f.x.moveTo(i,y);else f.x.lineTo(i,y);} f.x.stroke();
+        const amps=[1,.5,.32,.18].slice(0,harmonics);
+        amps.forEach((a,i)=>{let x=100+i*120,h=a*100;f.x.fillStyle="#f4c95d";f.x.fillRect(x,bottom-h,34,h);label(f,(i+1)+"f",x,bottom+20);});
+        label(f,"signal complexe",15,25);label(f,"spectre : composantes",15,170);
+    }
+    document.getElementById("fourierAddFund")?.addEventListener("click",()=>{harmonics=harmonics<4?harmonics+1:1;drawFourier();});
+    document.getElementById("fourierReset")?.addEventListener("click",()=>{harmonics=1;drawFourier();});
+    drawFourier();
+
+    // AnalyserNode dual output
+    const an=ctx("analyserCanvas");
+    function drawAnalyser(){
+        if(!an)return; clear(an);
+        an.x.strokeStyle="#253044";an.x.beginPath();an.x.moveTo(0,155);an.x.lineTo(900,155);an.x.stroke();
+        an.x.strokeStyle="#6fa3d8";an.x.lineWidth=2;an.x.beginPath();
+        for(let i=0;i<450;i++){let y=155-60*Math.sin(i/450*TAU*4)*(.7+.3*Math.sin(i/450*TAU));if(i===0)an.x.moveTo(i*2,y);else an.x.lineTo(i*2,y);}an.x.stroke();
+        for(let i=0;i<80;i++){let h=(Math.sin(i*.8)**2)*100+10;an.x.fillStyle="#f4c95d";an.x.fillRect(570+i*4,145-h,3,h);}
+        label(an,"getByteTimeDomainData()  → forme d’onde",15,25);
+        label(an,"getByteFrequencyData()  → spectre",575,25);
+    }
+    drawAnalyser();
+
+    // FFT resolution
+    const rr=ctx("fftResolutionCanvas"), sel=document.getElementById("fftSizeSelect");
+    function drawRes(){
+        if(!rr)return; clear(rr); const n=+(sel?.value||2048), bins=n/2;
+        const count=Math.min(120,Math.max(12,bins/12));
+        for(let i=0;i<count;i++){let x=i*(880/count), h=35+70*Math.exp(-Math.pow((i-count*.18)/(count*.09),2));rr.x.fillStyle="#6fa3d8";rr.x.fillRect(10+x,200-h,Math.max(2,880/count-1),h);}
+        label(rr,"petites bandes = meilleure résolution fréquentielle",18,25);
+        label(rr,"FFT "+n+" → "+bins+" bandes",650,225);
+        if(document.getElementById("fftResolutionValue"))document.getElementById("fftResolutionValue").textContent=n+" → "+bins+" bandes";
+    }
+    sel?.addEventListener("change",drawRes);drawRes();
+
+    // Spectrum interactive
+    const sp=ctx("spectrumCanvas"), sf=document.getElementById("spectrumFreq");
+    function drawSpectrum(){
+        if(!sp)return; clear(sp); const hz=+(sf?.value||220);
+        for(let i=0;i<90;i++){
+            const freq=i/90*1800;
+            const base=Math.exp(-Math.pow((freq-hz)/55,2))*.95;
+            const harm=Math.exp(-Math.pow((freq-hz*2)/75,2))*.5+Math.exp(-Math.pow((freq-hz*3)/90,2))*.32;
+            const h=(base+harm)*230;
+            sp.x.fillStyle="#6fa3d8";sp.x.fillRect(i*10,270-h,8,h);
+        }
+        label(sp,"fréquence →",780,292);
+        if(document.getElementById("spectrumFreqValue"))document.getElementById("spectrumFreqValue").textContent=hz+" Hz";
+    }
+    sf?.addEventListener("input",drawSpectrum);drawSpectrum();
+
+    // Waveform
+    const wg=ctx("waveformCanvas"), wt=document.getElementById("waveformType"), wf=document.getElementById("waveformFreq");
+    function waveVal(type,t){
+        const p=(t/(TAU))%1;
+        if(type==="square")return p<.5?1:-1;
+        if(type==="triangle")return 4*Math.abs(p-.5)-1;
+        if(type==="sawtooth")return 2*p-1;
+        return Math.sin(t);
+    }
+    function drawWave(){
+        if(!wg)return;clear(wg);const type=wt?.value||"sine",cycles=+(wf?.value||3);
+        wg.x.strokeStyle="#253044";wg.x.beginPath();wg.x.moveTo(0,115);wg.x.lineTo(900,115);wg.x.stroke();
+        wg.x.strokeStyle="#f4c95d";wg.x.lineWidth=3;wg.x.beginPath();
+        for(let i=0;i<900;i++){let y=115-waveVal(type,i/900*TAU*cycles)*85;if(i===0)wg.x.moveTo(i,y);else wg.x.lineTo(i,y);}wg.x.stroke();
+        if(document.getElementById("waveformFreqValue"))document.getElementById("waveformFreqValue").textContent=cycles+" cycles";
+    }
+    wt?.addEventListener("change",drawWave);wf?.addEventListener("input",drawWave);drawWave();
+
+    // Sync
+    const sy=ctx("syncCanvas"), syncStart=document.getElementById("syncStart"), syncReset=document.getElementById("syncReset");
+    let syncT=0,syncRun=false,syncRAF;
+    function drawSync(){
+        if(!sy)return;clear(sy);
+        sy.x.strokeStyle="#6fa3d8";sy.x.lineWidth=3;sy.x.beginPath();sy.x.moveTo(40,75);sy.x.lineTo(860,75);sy.x.stroke();
+        sy.x.strokeStyle="#f4c95d";sy.x.beginPath();sy.x.moveTo(40,170);sy.x.lineTo(860,170);sy.x.stroke();
+        [150,310,500,700].forEach(x=>{sy.x.fillStyle="#f4c95d";sy.x.fillRect(x-2,150,4,40);});
+        const px=40+(syncT%8)/8*820;sy.x.fillStyle="#fff";sy.x.beginPath();sy.x.arc(px,75,7,0,TAU);sy.x.fill();
+        sy.x.fillStyle="#6fa3d8";sy.x.beginPath();sy.x.arc(px,170,7,0,TAU);sy.x.fill();
+        label(sy,"audioCtx.currentTime",45,55);label(sy,"rendu visuel",45,150);
+        if(syncRun){syncT+=.025;syncRAF=requestAnimationFrame(drawSync);}
+    }
+    syncStart?.addEventListener("click",()=>{if(!syncRun){syncRun=true;drawSync();}});
+    syncReset?.addEventListener("click",()=>{syncRun=false;cancelAnimationFrame(syncRAF);syncT=0;drawSync();});
+    drawSync();
+
+    // Spectrogram
+    const sg=ctx("spectrogramCanvas"), st=document.getElementById("spectroToggle"), ss=document.getElementById("spectroSpeed");
+    let spectroRun=false, spectroX=0;
+    function drawSpectro(){
+        if(!sg)return;
+        if(!spectroRun){clear(sg);label(sg,"temps →",800,315);label(sg,"fréquence",10,25);return;}
+        sg.x.drawImage(sg.c,-2,0,sg.c.width,sg.c.height);
+        const speed=+(ss?.value||3);
+        const grad=sg.x.createLinearGradient(0,0,0,330);
+        grad.addColorStop(0,"#e8eef7");grad.addColorStop(.45,"#6fa3d8");grad.addColorStop(1,"#0d1117");
+        sg.x.fillStyle=grad;
+        for(let y=0;y<330;y+=4){
+            const wave=Math.sin((y*.08)+(spectroX*.08))+Math.sin((y*.021)-(spectroX*.03));
+            const intensity=(wave+2)/4;
+            sg.x.globalAlpha=.15+intensity*.75;sg.x.fillRect(898,y,2,4);
+        }
+        sg.x.globalAlpha=1;
+        spectroX+=speed;requestAnimationFrame(drawSpectro);
+    }
+    st?.addEventListener("click",()=>{spectroRun=!spectroRun;st.textContent=spectroRun?"Pause":"Animer";if(spectroRun)drawSpectro();else{clear(sg);label(sg,"temps →",800,315);}});
+    ss?.addEventListener("input",()=>{if(document.getElementById("spectroSpeedValue"))document.getElementById("spectroSpeedValue").textContent=ss.value;});
+    clear(sg);label(sg,"temps →",800,315);label(sg,"fréquence",10,25);
+
+    // Bands
+    const bc=ctx("bandsCanvas");
+    function drawBands(){
+        if(!bc)return;clear(bc);
+        const vals=[+(document.getElementById("bassControl")?.value||.7),+(document.getElementById("midControl")?.value||.45),+(document.getElementById("highControl")?.value||.6)];
+        const names=["BASSES","MÉDIUMS","AIGUS"], xs=[150,430,710];
+        vals.forEach((v,i)=>{
+            const r=35+v*70, x=xs[i];
+            bc.x.strokeStyle="#6fa3d8";bc.x.lineWidth=3;bc.x.beginPath();bc.x.arc(x,150,r,0,TAU);bc.x.stroke();
+            bc.x.fillStyle="#f4c95d";bc.x.beginPath();bc.x.arc(x,150,8+v*18,0,TAU);bc.x.fill();
+            label(bc,names[i],x-38,35);label(bc,Math.round(v*100)+" %",x-20,260);
+        });
+    }
+    ["bassControl","midControl","highControl"].forEach(id=>document.getElementById(id)?.addEventListener("input",drawBands));
+    drawBands();
+
+    // Pipeline
+    const pc=ctx("pipelineCanvas");
+    if(pc){
+        clear(pc);
+        const boxes=[["Oscillateur",40],["Gain",250],["AnalyserNode",460],["Destination",710]];
+        boxes.forEach(([t,x],i)=>{pc.x.strokeStyle="#8fa3c0";pc.x.strokeRect(x,80,140,60);label(pc,t,x+28,115);if(i<boxes.length-1){pc.x.strokeStyle="#f4c95d";pc.x.lineWidth=3;pc.x.beginPath();pc.x.moveTo(x+140,110);pc.x.lineTo(x+205,110);pc.x.stroke();}});
+        label(pc,"signal audio",350,45);label(pc,"données → Canvas",470,185);
+    }
+})();
+</script>
+
+<script>
+    const canvas = document.getElementById("demoCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let audioCtx = null;
+    let analyseur = null;
+    let oscillateur = null;
+    let gain = null;
+
+    /* ==============================
+       INITIALISATION
+    =============================== */
+
+    function initialiserAudio() {
+        if (audioCtx) return;
+
+        audioCtx = new AudioContext();
+
+        analyseur = audioCtx.createAnalyser();
+        analyseur.fftSize = 2048;
+        analyseur.smoothingTimeConstant = 0.8;
+
+        gain = audioCtx.createGain();
+        gain.gain.value = 0.2;
+
+        gain.connect(analyseur);
+        analyseur.connect(audioCtx.destination);
+    }
+
+    document.getElementById("btnStart").addEventListener("click", () => {
+        initialiserAudio();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        document.getElementById("btnStart").textContent = "Audio actif";
+    });
+
+    /* ==============================
+       NOTE CONTINUE
+    =============================== */
+
+    document.getElementById("btnNote").addEventListener("click", () => {
+        if (!audioCtx) return;
+        if (oscillateur) return;
+
+        oscillateur = audioCtx.createOscillator();
+        oscillateur.type = "sawtooth";
+        oscillateur.frequency.value = 220;
+
+        oscillateur.connect(gain);
+        oscillateur.start();
+    });
+
+    document.getElementById("btnStop").addEventListener("click", () => {
+        if (oscillateur) {
+            oscillateur.stop();
+            oscillateur = null;
+        }
+    });
+
+    /* ==============================
+       VISUALISATION
+    =============================== */
+
+    function dessiner() {
+        const largeur = canvas.width;
+        const hauteur = canvas.height;
+
+        // Fond
+        ctx.fillStyle = "#0f1a30";
+        ctx.fillRect(0, 0, largeur, hauteur);
+
+        if (analyseur) {
+            const donnees = new Uint8Array(analyseur.frequencyBinCount);
+            analyseur.getByteFrequencyData(donnees);
+
+            // Barres
+            const nbBarres = 100;
+            const largeurBarre = largeur / nbBarres;
+
+            for (let i = 0; i < nbBarres; i++) {
+                const valeur = donnees[i];
+                const h = valeur / 255 * hauteur;
+
+                // Dégradé
+                const intensite = valeur / 255;
+                const r = Math.round(60 + 120 * intensite);
+                const g = Math.round(80 + 140 * intensite);
+                const b = Math.round(140 + 115 * intensite);
+
+                ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                ctx.fillRect(
+                    i * largeurBarre,
+                    hauteur - h,
+                    largeurBarre - 1,
+                    h
+                );
+            }
+
+            // Forme d'onde en surimpression
+            const donneesTemp = new Uint8Array(analyseur.fftSize);
+            analyseur.getByteTimeDomainData(donneesTemp);
+
+            ctx.beginPath();
+            ctx.strokeStyle = "#c8d4e4";
+            ctx.lineWidth = 1;
+
+            for (let i = 0; i < donneesTemp.length; i++) {
+                const x = i / donneesTemp.length * largeur;
+                const y = donneesTemp[i] / 128 * hauteur / 2;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        } else {
+            ctx.fillStyle = "#c8d4e4";
+            ctx.font = "16px Arial";
+            ctx.fillText("Cliquez sur « Activer l'audio »", 20, 30);
+        }
+
+        requestAnimationFrame(dessiner);
+    }
+
+    requestAnimationFrame(dessiner);
+</script>
+
+</body>
+</html>

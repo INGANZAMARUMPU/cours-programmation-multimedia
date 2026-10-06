@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programmation Multimédia — Jour 2 : Animation et interaction</title>
+    <style>
+        :root {
+            --primary: #1a2b4a;
+            --secondary: #4a5568;
+            --accent: #2c5282;
+            --bg: #f7f7f5;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --muted: #4a4a4a;
+            --border: #c8c8c8;
+            --code-bg: #f4f4f0;
+            --code-border: #d0d0c8;
+            --warning-bg: #fdfaf2;
+            --warning-border: #b8860b;
+            --info-bg: #f2f6fa;
+            --info-border: #2c5282;
+            --success-bg: #f2f8f3;
+            --success-border: #2f6b3a;
+            --danger-bg: #faf3f3;
+            --danger-border: #8b2c2c;
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            font-family: "Times New Roman", "Liberation Serif", Georgia, serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 12pt;
+            line-height: 1.5;
+        }
+
+        header {
+            background: var(--primary);
+            color: #ffffff;
+            padding: 45px 25px 35px;
+            border-bottom: 3px solid #0f1a30;
+        }
+
+        .header-content { max-width: 1050px; margin: auto; }
+
+        header h1 {
+            font-size: 1.9rem;
+            margin: 0 0 6px;
+            font-weight: 700;
+        }
+
+        header h2 {
+            color: #d8e0ec;
+            border: none;
+            margin: 0 0 16px;
+            font-weight: 400;
+            font-size: 1.15rem;
+            font-style: italic;
+        }
+
+        header p {
+            font-size: 1rem;
+            max-width: 760px;
+            color: #e8edf4;
+        }
+
+        .badge {
+            display: inline-block;
+            background: transparent;
+            border: 1px solid #8fa3c0;
+            padding: 3px 10px;
+            border-radius: 2px;
+            margin: 3px 6px 3px 0;
+            font-size: 0.75rem;
+            font-family: Arial, Helvetica, sans-serif;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #d8e0ec;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #0f1a30;
+            border-bottom: 1px solid #2a3a55;
+        }
+
+        .nav-content {
+            max-width: 1050px;
+            margin: auto;
+            display: flex;
+            overflow-x: auto;
+            gap: 0;
+            padding: 4px 10px;
+        }
+
+        nav a {
+            color: #c8d4e4;
+            text-decoration: none;
+            padding: 9px 13px;
+            white-space: nowrap;
+            font-size: 0.82rem;
+            font-family: Arial, Helvetica, sans-serif;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.15s, color 0.15s;
+        }
+
+        nav a:hover {
+            color: #ffffff;
+            border-bottom-color: #8fa3c0;
+        }
+
+        main { max-width: 1050px; margin: auto; padding: 35px 20px; }
+
+        section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 28px 32px;
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.35rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 0;
+            margin-bottom: 18px;
+        }
+
+        h3 {
+            color: #2a3a55;
+            margin-top: 24px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        h4 {
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+
+        p { margin: 10px 0; }
+        ul, ol { padding-left: 28px; }
+        li { margin: 4px 0; }
+
+        .objectifs {
+            background: var(--info-bg);
+            border-left: 3px solid var(--info-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        .important {
+            background: var(--warning-bg);
+            border-left: 3px solid var(--warning-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        .success {
+            background: var(--success-bg);
+            border-left: 3px solid var(--success-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        .danger {
+            background: var(--danger-bg);
+            border-left: 3px solid var(--danger-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        .info {
+            background: var(--info-bg);
+            border-left: 3px solid var(--info-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #1a1a1a;
+            padding: 16px 20px;
+            border: 1px solid var(--code-border);
+            overflow-x: auto;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 0.85rem;
+            line-height: 1.45;
+            margin: 14px 0;
+        }
+
+        code {
+            font-family: "Consolas", "Courier New", monospace;
+            background: #eeeeea;
+            color: #1a1a1a;
+            padding: 1px 5px;
+            font-size: 0.88em;
+            border: 1px solid #dcdcd6;
+        }
+
+        pre code {
+            background: transparent;
+            border: none;
+            padding: 0;
+            font-size: 0.85rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 9px 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #eef1f5;
+            color: #1a2b4a;
+            font-weight: 700;
+        }
+
+        tr:nth-child(even) { background: #fafaf8; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin: 18px 0;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            padding: 16px;
+            background: #fcfcfa;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--accent);
+            font-size: 1rem;
+        }
+
+        .exercise {
+            border: 1px solid #a0a0a0;
+            border-left: 3px solid var(--primary);
+            background: #fcfcfa;
+            padding: 18px 22px;
+            margin: 20px 0;
+        }
+
+        .level {
+            display: inline-block;
+            padding: 2px 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-family: Arial, Helvetica, sans-serif;
+            border: 1px solid;
+            margin-bottom: 8px;
+        }
+
+        .easy { background: #eef6ee; color: #2f6b3a; border-color: #2f6b3a; }
+        .medium { background: #fdf8ee; color: #8a6508; border-color: #8a6508; }
+        .hard { background: #f8eeee; color: #8b2c2c; border-color: #8b2c2c; }
+
+        .canvas-wrapper {
+            background: #1a1a1a;
+            padding: 14px;
+            border: 1px solid #333333;
+            margin: 18px 0;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            margin: auto;
+            background: #111111;
+            border: 1px solid #444444;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        button {
+            border: 1px solid #1a2b4a;
+            background: #1a2b4a;
+            color: #ffffff;
+            padding: 7px 16px;
+            cursor: pointer;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.85rem;
+            transition: background 0.15s;
+        }
+
+        button:hover { background: #2c5282; }
+        button.secondary { background: #ffffff; color: #1a2b4a; }
+        button.secondary:hover { background: #eef1f5; }
+        button.success { background: #2f6b3a; border-color: #2f6b3a; }
+        button.success:hover { background: #24522e; }
+
+        .key {
+            display: inline-block;
+            background: #ffffff;
+            border: 1px solid #888888;
+            padding: 4px 9px;
+            margin: 2px;
+            min-width: 30px;
+            text-align: center;
+            font-family: "Consolas", monospace;
+            font-size: 0.85rem;
+            box-shadow: 0 1px 0 #888888;
+        }
+
+        /* Diagramme PlantUML */
+        .plantuml {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            padding: 18px;
+            margin: 18px 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .plantuml svg,
+        .plantuml img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .plantuml-caption {
+            font-size: 0.85rem;
+            font-style: italic;
+            color: var(--muted);
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        footer {
+            background: #1a2b4a;
+            color: #c8d4e4;
+            text-align: center;
+            padding: 28px 20px;
+            margin-top: 30px;
+            font-size: 0.85rem;
+            font-family: Arial, Helvetica, sans-serif;
+            border-top: 3px solid #0f1a30;
+        }
+
+        footer p { margin: 4px 0; }
+
+        @media (max-width: 700px) {
+            header h1 { font-size: 1.4rem; }
+            header h2 { font-size: 1rem; }
+            section { padding: 20px 18px; }
+            pre { font-size: 0.78rem; }
+            h2 { font-size: 1.15rem; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-content">
+        <span class="badge">Programmation Multimédia</span>
+        <span class="badge">Jour 2 / 6</span>
+        <span class="badge">HTML5 Canvas</span>
+        <span class="badge">Interaction</span>
+
+        <h1>Jour 2 — Animation et interaction</h1>
+        <h2>Boucle de rendu, deltaTime, clavier, souris et projet</h2>
+
+        <p>
+            Cette deuxième journée introduit le mouvement et l'interaction.
+            Elle couvre la boucle d'animation, la gestion du temps, les entrées
+            clavier et souris, et se conclut par un mini-projet interactif.
+        </p>
+
+        <p>
+            <strong>Durée :</strong> 5 heures &nbsp;|&nbsp;
+            <strong>Prérequis :</strong> Jour 1 (Canvas, formes, transformations)
+        </p>
+    </div>
+</header>
+
+
+<nav>
+    <div class="nav-content">
+        <a href="#objectifs">Objectifs</a>
+        <a href="#effacer">Effacer / redessiner</a>
+        <a href="#animation">Animation</a>
+        <a href="#update-render">Update / Render</a>
+        <a href="#delta">Delta Time</a>
+        <a href="#rebond">Rebond</a>
+        <a href="#clavier">Clavier</a>
+        <a href="#souris">Souris</a>
+        <a href="#tp1">TP1 — Personnage</a>
+        <a href="#tp2">TP2 — Objet suiveur</a>
+        <a href="#tp-principal">TP principal</a>
+        <a href="#demo">Démonstration</a>
+        <a href="#defi">Défi final</a>
+        <a href="#evaluation">Évaluation</a>
+        <a href="#bilan">Bilan</a>
+    </div>
+</nav>
+
+
+<main>
+
+<!-- OBJECTIFS -->
+
+<section id="objectifs">
+    <h2>1. Objectifs pédagogiques</h2>
+
+    <div class="objectifs">
+        <p>
+            À l'issue de cette deuxième journée, l'étudiant doit être capable de :
+        </p>
+        <ul>
+            <li>produire une animation fluide avec <code>requestAnimationFrame()</code> ;</li>
+            <li>utiliser <code>deltaTime</code> pour un mouvement indépendant du framerate ;</li>
+            <li>séparer la logique de mise à jour (<code>update</code>) de l'affichage (<code>render</code>) ;</li>
+            <li>gérer les entrées clavier pour contrôler un objet graphique ;</li>
+            <li>gérer les interactions souris dans Canvas ;</li>
+            <li>intégrer ces notions dans un mini-projet interactif complet.</li>
+        </ul>
+    </div>
+
+    <h3>Organisation de la journée</h3>
+    <table>
+        <tr><th>Activité</th><th>Durée</th></tr>
+        <tr><td>Cours — Animation et boucle de rendu</td><td>0 h 45</td></tr>
+        <tr><td>Cours — deltaTime et update/render</td><td>0 h 45</td></tr>
+        <tr><td>TP guidé — Personnage contrôlable</td><td>1 h 00</td></tr>
+        <tr><td>Cours — Souris</td><td>0 h 30</td></tr>
+        <tr><td>TP — Objet suiveur</td><td>0 h 30</td></tr>
+        <tr><td>TP principal — Balle interactive</td><td>1 h 00</td></tr>
+        <tr><td>Défi, évaluation et synthèse</td><td>0 h 30</td></tr>
+    </table>
+</section>
+
+
+<!-- EFFACER -->
+
+<section id="effacer">
+    <h2>2. Effacer et redessiner</h2>
+
+    <p>
+        Pour créer une animation, nous devons régulièrement
+        effacer l'image précédente.
+    </p>
+
+<pre><code>ctx.clearRect(0, 0, canvas.width, canvas.height);</code></pre>
+
+    <p>Le cycle devient :</p>
+
+    <div class="diagram">
+        <table style="width:auto; margin:auto; border:none;">
+            <tr style="background:none;">
+                <td style="border:1px solid #1a2b4a; padding:10px 18px; background:#eef1f5;">1. Effacer</td>
+                <td style="border:none; padding:0 8px; font-size:1.3rem;">→</td>
+                <td style="border:1px solid #1a2b4a; padding:10px 18px; background:#eef1f5;">2. Mettre à jour</td>
+                <td style="border:none; padding:0 8px; font-size:1.3rem;">→</td>
+                <td style="border:1px solid #1a2b4a; padding:10px 18px; background:#eef1f5;">3. Dessiner</td>
+                <td style="border:none; padding:0 8px; font-size:1.3rem;">→</td>
+                <td style="border:1px solid #1a2b4a; padding:10px 18px; background:#eef1f5;">4. Recommencer</td>
+            </tr>
+        </table>
+    </div>
+</section>
+
+
+<!-- ANIMATION -->
+
+<section id="animation">
+    <h2>3. Première animation</h2>
+
+    <p>
+        Une animation est obtenue en modifiant progressivement
+        les propriétés d'un objet puis en redessinant la scène.
+    </p>
+
+<pre><code>let x = 0;
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "cyan";
+    ctx.fillRect(x, 100, 60, 60);
+
+    x += 2;
+
+    requestAnimationFrame(animate);
+}
+
+animate();</code></pre>
+
+    <div class="success">
+        <strong>Principe fondamental :</strong>
+        <p>
+            Une animation graphique est une succession très rapide
+            d'images légèrement différentes.
+        </p>
+    </div>
+
+    <div class="important">
+        <strong>Pourquoi <code>requestAnimationFrame()</code> ?</strong>
+        <p>
+            Cette fonction synchronise l'animation avec le rafraîchissement
+            de l'écran (généralement 60 images par seconde). Elle est plus
+            efficace et plus fluide que <code>setInterval()</code>.
+        </p>
+    </div>
+</section>
+
+
+<!-- UPDATE RENDER -->
+
+<section id="update-render">
+    <h2>4. Séparer Update et Render</h2>
+
+    <p>
+        Dans une application interactive, il est préférable de séparer :
+    </p>
+    <ul>
+        <li><strong>Update :</strong> calcul de l'état du programme ;</li>
+        <li><strong>Render :</strong> affichage de cet état.</li>
+    </ul>
+
+<pre><code>const player = {
+    x: 100,
+    y: 200,
+    speed: 200
+};
+
+function update() {
+    player.x += 2;
+}
+
+function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "cyan";
+    ctx.fillRect(player.x, player.y, 50, 50);
+}
+
+function loop() {
+    update();
+    render();
+    requestAnimationFrame(loop);
+}
+
+loop();</code></pre>
+
+    <p>
+        Cette séparation est le seul point d'architecture vraiment
+        crucial de la séance. Elle structure toute application interactive :
+    </p>
+
+    <div class="plantuml">
+        <img src="https://www.plantuml.com/plantuml/svg/SoWkIImgAStDuNBAJrBGjLDmpCbCJbMmKiX8pSd9vt98pKi1IW80"
+             alt="Diagramme PlantUML : séparation update / render">
+        <div class="plantuml-caption">
+          Figure 1 — La boucle principale appelle update() puis render(),
+          puis se réinscrit via requestAnimationFrame().
+        </div>
+    </div>
+</section>
+
+
+<!-- DELTA TIME -->
+
+<section id="delta">
+    <h2>5. Le temps et Delta Time</h2>
+
+    <p>Si nous écrivons :</p>
+
+<pre><code>player.x += 5;</code></pre>
+
+    <p>
+        nous indiquons une distance par image. Or le nombre d'images
+        affichées par seconde peut varier (60 Hz, 120 Hz, etc.).
+        Le mouvement serait alors plus rapide sur un écran 120 Hz.
+    </p>
+
+    <p>
+        Pour rendre le mouvement indépendant du nombre d'images
+        par seconde, nous utilisons le temps écoulé.
+    </p>
+
+<pre><code>let lastTime = performance.now();
+
+function loop(currentTime) {
+    const deltaTime = (currentTime - lastTime) / 1000;
+    lastTime = currentTime;
+
+    update(deltaTime);
+    render();
+
+    requestAnimationFrame(loop);
+}
+
+function update(dt) {
+    player.x += player.speed * dt;
+}
+
+requestAnimationFrame(loop);</code></pre>
+
+    <div class="important">
+        <strong>À comprendre :</strong>
+        <p>
+            Si <code>speed = 200</code>, cela signifie maintenant
+            environ <strong>200 pixels par seconde</strong>, quelle que
+            soit la fréquence de rafraîchissement de l'écran.
+        </p>
+    </div>
+</section>
+
+
+<!-- REBOND -->
+
+<section id="rebond">
+    <h2>6. Faire rebondir un objet</h2>
+
+<pre><code>let x = 100;
+let speed = 4;
+
+function update() {
+    x += speed;
+
+    if (x <= 0 || x >= canvas.width - 50) {
+        speed *= -1;
+    }
+}</code></pre>
+
+    <p>
+        Le changement de signe de la vitesse inverse la direction
+        du mouvement.
+    </p>
+</section>
+
+
+<!-- CLAVIER -->
+
+<section id="clavier">
+    <h2>7. Interaction avec le clavier</h2>
+
+    <p>
+        On peut détecter les touches avec les événements
+        <code>keydown</code> et <code>keyup</code>.
+    </p>
+
+<pre><code>const keys = {};
+
+document.addEventListener("keydown", event => {
+    keys[event.key] = true;
+});
+
+document.addEventListener("keyup", event => {
+    keys[event.key] = false;
+});</code></pre>
+
+    <p>Puis dans <code>update()</code> :</p>
+
+<pre><code>function update(dt) {
+    if (keys["ArrowRight"]) {
+        player.x += player.speed * dt;
+    }
+    if (keys["ArrowLeft"]) {
+        player.x -= player.speed * dt;
+    }
+    if (keys["ArrowUp"]) {
+        player.y -= player.speed * dt;
+    }
+    if (keys["ArrowDown"]) {
+        player.y += player.speed * dt;
+    }
+}</code></pre>
+
+    <p>Les touches :</p>
+    <span class="key">↑</span>
+    <span class="key">↓</span>
+    <span class="key">←</span>
+    <span class="key">→</span>
+</section>
+
+
+<!-- SOURIS -->
+
+<section id="souris">
+    <h2>8. Interaction avec la souris</h2>
+
+    <p>
+        La position de la souris peut être récupérée
+        relativement au Canvas.
+    </p>
+
+<pre><code>canvas.addEventListener("mousemove", event => {
+    const rect = canvas.getBoundingClientRect();
+
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+
+    console.log(mouseX, mouseY);
+});</code></pre>
+
+    <p>Cette technique permet de créer :</p>
+    <ul>
+        <li>des boutons graphiques ;</li>
+        <li>des jeux ;</li>
+        <li>des applications de dessin ;</li>
+        <li>des interfaces interactives.</li>
+    </ul>
+
+    <div class="important">
+        <strong>Attention :</strong>
+        <p>
+            <code>getBoundingClientRect()</code> est indispensable si le Canvas
+            est redimensionné ou décalé par CSS. Sans cela, les coordonnées
+            souris ne correspondent pas aux coordonnées Canvas.
+        </p>
+    </div>
+</section>
+
+
+<!-- TP1 -->
+
+<section id="tp1">
+    <h2>9. TP 1 — Personnage contrôlable</h2>
+
+    <div class="exercise">
+        <span class="level medium">Moyen</span>
+
+        <p>Créer un carré représentant un personnage.</p>
+
+        <p>Le personnage doit être contrôlable avec :</p>
+
+        <div>
+            <span class="key">W</span>
+            <span class="key">A</span>
+            <span class="key">S</span>
+            <span class="key">D</span>
+        </div>
+
+        <p>ou les quatre flèches.</p>
+
+        <p>
+            Ajouter des limites pour empêcher le personnage
+            de sortir du Canvas.
+        </p>
+
+        <p><strong>Extension :</strong> ajouter une vitesse réglable.</p>
+    </div>
+</section>
+
+
+<!-- TP2 -->
+
+<section id="tp2">
+    <h2>10. TP 2 — Objet suivant la souris</h2>
+
+    <div class="exercise">
+        <span class="level medium">Moyen</span>
+
+        <p>
+            Créer un cercle qui suit la position de la souris dans Canvas.
+        </p>
+
+        <p>
+            Lorsque la souris entre dans une zone donnée,
+            le cercle doit changer de couleur.
+        </p>
+
+        <p>
+            <strong>Défi :</strong> créer un effet de traînée
+            avec plusieurs cercles.
+        </p>
+    </div>
+</section>
+
+
+<!-- TP PRINCIPAL -->
+
+<section id="tp-principal">
+    <h2>11. TP principal — Balle interactive</h2>
+
+    <div class="exercise">
+        <span class="level hard">Projet de séance</span>
+        <h3>Interactive Ball</h3>
+
+        <p>
+            Construire une petite application graphique interactive.
+        </p>
+
+        <h4>L'application doit contenir :</h4>
+        <ul>
+            <li>une balle animée ;</li>
+            <li>des rebonds sur les murs ;</li>
+            <li>un joueur contrôlé au clavier ;</li>
+            <li>une cible ;</li>
+            <li>un système de score ;</li>
+            <li>une interaction avec la souris ;</li>
+            <li>une condition de victoire.</li>
+        </ul>
+
+        <h4>Architecture minimale</h4>
+
+<pre><code>function update(deltaTime) {
+    // calculs
+}
+
+function render() {
+    // affichage
+}
+
+function loop(time) {
+    // deltaTime
+    update(deltaTime);
+    render();
+    requestAnimationFrame(loop);
+}</code></pre>
+    </div>
+</section>
+
+
+<!-- DEMO -->
+
+<section id="demo">
+    <h2>12. Démonstration interactive</h2>
+
+    <p>
+        Utilisez les flèches du clavier pour déplacer le carré cyan.
+        Le carré rebondit automatiquement sur les bords.
+    </p>
+
+    <div class="canvas-wrapper">
+        <canvas id="demoCanvas" width="800" height="400"></canvas>
+
+        <div class="controls">
+            <button onclick="startDemo()">Démarrer</button>
+            <button class="secondary" onclick="pauseDemo()">Pause</button>
+            <button class="success" onclick="resetDemo()">Réinitialiser</button>
+        </div>
+    </div>
+</section>
+
+
+<!-- DEFI -->
+
+<section id="defi">
+    <h2>13. Défi final</h2>
+
+    <div class="exercise">
+        <span class="level hard">Défi</span>
+        <h3>Mini-jeu Canvas</h3>
+
+        <p>
+            À partir des notions vues pendant la séance,
+            créer un mini-jeu.
+        </p>
+
+        <p>Le joueur doit :</p>
+        <ul>
+            <li>déplacer son personnage ;</li>
+            <li>atteindre des cibles ;</li>
+            <li>gagner des points ;</li>
+            <li>éviter au moins un obstacle ;</li>
+            <li>terminer la partie après une condition définie.</li>
+        </ul>
+
+        <h3>Extensions possibles</h3>
+        <ul>
+            <li>plusieurs niveaux ;</li>
+            <li>chronomètre ;</li>
+            <li>système de vies ;</li>
+            <li>effets de couleur ;</li>
+            <li>sons ;</li>
+            <li>écran de démarrage ;</li>
+            <li>écran Game Over.</li>
+        </ul>
+    </div>
+</section>
+
+
+<!-- EVALUATION -->
+
+<section id="evaluation">
+    <h2>14. Évaluation formative</h2>
+
+    <table>
+        <tr><th>Compétence</th><th>Points</th></tr>
+        <tr><td>Création et configuration du Canvas</td><td>2</td></tr>
+        <tr><td>Dessin et transformations</td><td>3</td></tr>
+        <tr><td>Animation avec requestAnimationFrame</td><td>4</td></tr>
+        <tr><td>Gestion du clavier et de la souris</td><td>4</td></tr>
+        <tr><td>Organisation update / render</td><td>2</td></tr>
+        <tr><td>Mini-projet</td><td>5</td></tr>
+        <tr><th>Total</th><th>20</th></tr>
+    </table>
+</section>
+
+
+<!-- BILAN -->
+
+<section id="bilan">
+    <h2>15. À retenir — Jour 2</h2>
+
+    <div class="success">
+        <ul>
+            <li>Une animation consiste à mettre à jour puis redessiner une scène.</li>
+            <li><code>requestAnimationFrame()</code> est adapté aux animations Web.</li>
+            <li><code>deltaTime</code> permet de gérer correctement la vitesse,
+                indépendamment du framerate.</li>
+            <li>Le clavier et la souris rendent la scène interactive.</li>
+            <li><code>getBoundingClientRect()</code> est nécessaire pour convertir
+                les coordonnées souris en coordonnées Canvas.</li>
+            <li>La séparation <strong>update()</strong> / <strong>render()</strong>
+                facilite l'organisation du programme.</li>
+        </ul>
+    </div>
+
+    <h3>Travail à remettre pour le Jour 2</h3>
+
+    <p>Chaque étudiant remet une application Canvas interactive organisée comme suit :</p>
+
+<pre><code>jour2/
+│
+├── index.html
+├── style.css
+└── script.js</code></pre>
+
+    <p>L'application doit comporter :</p>
+    <ul>
+        <li>une scène graphique animée ;</li>
+        <li>une interaction clavier ;</li>
+        <li>une interaction souris ;</li>
+        <li>un score ou compteur ;</li>
+        <li>une condition de fin.</li>
+    </ul>
+</section>
+
+
+</main>
+
+
+<footer>
+    <p><strong>Programmation Multimédia — Jour 2</strong></p>
+    <p>Animation et interaction</p>
+    <p>HTML5 · CSS3 · JavaScript</p>
+</footer>
+
+
+<!-- =====================================================
+     JAVASCRIPT DE LA DEMONSTRATION
+====================================================== -->
+
+<script>
+    const canvas = document.getElementById("demoCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const player = {
+        x: 100,
+        y: 160,
+        size: 50,
+        speed: 250,
+        vx: 1,
+        vy: 0.7,
+        color: "#22d3ee"
+    };
+
+    const keys = {};
+
+    document.addEventListener("keydown", event => {
+        keys[event.key] = true;
+    });
+
+    document.addEventListener("keyup", event => {
+        keys[event.key] = false;
+    });
+
+    let running = true;
+    let lastTime = performance.now();
+
+    function update(deltaTime) {
+        if (keys["ArrowLeft"]) {
+            player.x -= player.speed * deltaTime;
+        }
+        if (keys["ArrowRight"]) {
+            player.x += player.speed * deltaTime;
+        }
+        if (keys["ArrowUp"]) {
+            player.y -= player.speed * deltaTime;
+        }
+        if (keys["ArrowDown"]) {
+            player.y += player.speed * deltaTime;
+        }
+
+        if (!keys["ArrowLeft"] && !keys["ArrowRight"] &&
+            !keys["ArrowUp"] && !keys["ArrowDown"]) {
+            player.x += player.vx * 120 * deltaTime;
+            player.y += player.vy * 120 * deltaTime;
+        }
+
+        if (player.x <= 0) {
+            player.x = 0;
+            player.vx *= -1;
+        }
+        if (player.x + player.size >= canvas.width) {
+            player.x = canvas.width - player.size;
+            player.vx *= -1;
+        }
+        if (player.y <= 0) {
+            player.y = 0;
+            player.vy *= -1;
+        }
+        if (player.y + player.size >= canvas.height) {
+            player.y = canvas.height - player.size;
+            player.vy *= -1;
+        }
+    }
+
+    function render() {
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, "#020617");
+        gradient.addColorStop(1, "#172554");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = "#ffffff12";
+        ctx.lineWidth = 1;
+
+        for (let x = 0; x < canvas.width; x += 40) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height);
+            ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += 40) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvas.width, y);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = player.color;
+        ctx.fillRect(player.x, player.y, player.size, player.size);
+
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(player.x, player.y, player.size, player.size);
+
+        ctx.fillStyle = "white";
+        ctx.font = "18px Arial";
+        ctx.fillText("Utilisez les flèches du clavier", 20, 30);
+    }
+
+    function loop(currentTime) {
+        const deltaTime = (currentTime - lastTime) / 1000;
+        lastTime = currentTime;
+
+        if (running) {
+            update(deltaTime);
+            render();
+        }
+
+        requestAnimationFrame(loop);
+    }
+
+    function startDemo() { running = true; }
+    function pauseDemo() { running = false; }
+    function resetDemo() {
+        player.x = 100;
+        player.y = 160;
+        player.vx = 1;
+        player.vy = 0.7;
+        running = true;
+        render();
+    }
+
+    requestAnimationFrame(loop);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1687 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programmation Multimédia — Jour 1 : Dessin 2D et transformations — Version approfondie</title>
+    <style>
+        :root {
+            --primary: #1a2b4a;
+            --secondary: #4a5568;
+            --accent: #2c5282;
+            --bg: #f7f7f5;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --muted: #4a4a4a;
+            --border: #c8c8c8;
+            --code-bg: #f4f4f0;
+            --code-border: #d0d0c8;
+            --warning-bg: #fdfaf2;
+            --warning-border: #b8860b;
+            --info-bg: #f2f6fa;
+            --info-border: #2c5282;
+            --success-bg: #f2f8f3;
+            --success-border: #2f6b3a;
+            --danger-bg: #faf3f3;
+            --danger-border: #8b2c2c;
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            font-family: "Times New Roman", "Liberation Serif", Georgia, serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 12pt;
+            line-height: 1.5;
+        }
+
+        header {
+            background: var(--primary);
+            color: #ffffff;
+            padding: 45px 25px 35px;
+            border-bottom: 3px solid #0f1a30;
+        }
+
+        .header-content { max-width: 1050px; margin: auto; }
+
+        header h1 {
+            font-size: 1.9rem;
+            margin: 0 0 6px;
+            font-weight: 700;
+        }
+
+        header h2 {
+            color: #d8e0ec;
+            border: none;
+            margin: 0 0 16px;
+            font-weight: 400;
+            font-size: 1.15rem;
+            font-style: italic;
+        }
+
+        header p {
+            font-size: 1rem;
+            max-width: 760px;
+            color: #e8edf4;
+        }
+
+        .badge {
+            display: inline-block;
+            background: transparent;
+            border: 1px solid #8fa3c0;
+            padding: 3px 10px;
+            border-radius: 2px;
+            margin: 3px 6px 3px 0;
+            font-size: 0.75rem;
+            font-family: Arial, Helvetica, sans-serif;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #d8e0ec;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #0f1a30;
+            border-bottom: 1px solid #2a3a55;
+        }
+
+        .nav-content {
+            max-width: 1050px;
+            margin: auto;
+            display: flex;
+            overflow-x: auto;
+            gap: 0;
+            padding: 4px 10px;
+        }
+
+        nav a {
+            color: #c8d4e4;
+            text-decoration: none;
+            padding: 9px 13px;
+            white-space: nowrap;
+            font-size: 0.82rem;
+            font-family: Arial, Helvetica, sans-serif;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.15s, color 0.15s;
+        }
+
+        nav a:hover {
+            color: #ffffff;
+            border-bottom-color: #8fa3c0;
+        }
+
+        main { max-width: 1050px; margin: auto; padding: 35px 20px; }
+
+        section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 28px 32px;
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.35rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 0;
+            margin-bottom: 18px;
+        }
+
+        h3 {
+            color: #2a3a55;
+            margin-top: 24px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        h4 {
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+
+        p { margin: 10px 0; }
+        ul, ol { padding-left: 28px; }
+        li { margin: 4px 0; }
+
+        .objectifs {
+            background: var(--info-bg);
+            border-left: 3px solid var(--info-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        /* Illustrations comparatives */
+        .comparatif-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:18px;margin:18px 0 24px}
+        .comparatif{border:1px solid var(--border);background:#fff;padding:14px}
+        .comparatif h4{margin-top:0}.comparatif canvas{display:block;width:100%;height:auto;background:#fbfbfa;border:1px solid #cfcfc8;margin:10px 0}
+        .comparatif .code-mini{background:var(--code-bg);border:1px solid var(--code-border);padding:9px 11px;margin:8px 0;font-family:Consolas,Monaco,monospace;font-size:.82rem;white-space:pre-wrap}
+        .comparatif .caption{font-size:.92rem;color:var(--muted);margin-bottom:0}
+        .demo-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0;font-family:Arial,Helvetica,sans-serif;font-size:.88rem}
+        .demo-controls button{border:1px solid #8c98a8;background:#f6f7f8;padding:5px 9px;cursor:pointer}.demo-controls button:hover{background:#e9edf2}
+        .demo-controls input[type=range]{flex:1;min-width:130px}
+        @media(max-width:650px){.comparatif-grid{grid-template-columns:1fr}}
+
+        .important {
+            background: var(--warning-bg);
+            border-left: 3px solid var(--warning-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        .success {
+            background: var(--success-bg);
+            border-left: 3px solid var(--success-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        .danger {
+            background: var(--danger-bg);
+            border-left: 3px solid var(--danger-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        .info {
+            background: var(--info-bg);
+            border-left: 3px solid var(--info-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #1a1a1a;
+            padding: 16px 20px;
+            border: 1px solid var(--code-border);
+            overflow-x: auto;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 0.85rem;
+            line-height: 1.45;
+            margin: 14px 0;
+        }
+
+        code {
+            font-family: "Consolas", "Courier New", monospace;
+            background: #eeeeea;
+            color: #1a1a1a;
+            padding: 1px 5px;
+            font-size: 0.88em;
+            border: 1px solid #dcdcd6;
+        }
+
+        pre code {
+            background: transparent;
+            border: none;
+            padding: 0;
+            font-size: 0.85rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 9px 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #eef1f5;
+            color: #1a2b4a;
+            font-weight: 700;
+        }
+
+        tr:nth-child(even) { background: #fafaf8; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin: 18px 0;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            padding: 16px;
+            background: #fcfcfa;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--accent);
+            font-size: 1rem;
+        }
+
+        .exercise {
+            border: 1px solid #a0a0a0;
+            border-left: 3px solid var(--primary);
+            background: #fcfcfa;
+            padding: 18px 22px;
+            margin: 20px 0;
+        }
+
+        .level {
+            display: inline-block;
+            padding: 2px 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-family: Arial, Helvetica, sans-serif;
+            border: 1px solid;
+            margin-bottom: 8px;
+        }
+
+        .easy { background: #eef6ee; color: #2f6b3a; border-color: #2f6b3a; }
+        .medium { background: #fdf8ee; color: #8a6508; border-color: #8a6508; }
+        .hard { background: #f8eeee; color: #8b2c2c; border-color: #8b2c2c; }
+
+        .canvas-wrapper {
+            background: #1a1a1a;
+            padding: 14px;
+            border: 1px solid #333333;
+            margin: 18px 0;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            margin: auto;
+            background: #111111;
+            border: 1px solid #444444;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        button {
+            border: 1px solid #1a2b4a;
+            background: #1a2b4a;
+            color: #ffffff;
+            padding: 7px 16px;
+            cursor: pointer;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.85rem;
+            transition: background 0.15s;
+        }
+
+        button:hover { background: #2c5282; }
+        button.secondary { background: #ffffff; color: #1a2b4a; }
+        button.secondary:hover { background: #eef1f5; }
+        button.success { background: #2f6b3a; border-color: #2f6b3a; }
+        button.success:hover { background: #24522e; }
+
+        .key {
+            display: inline-block;
+            background: #ffffff;
+            border: 1px solid #888888;
+            padding: 4px 9px;
+            margin: 2px;
+            min-width: 30px;
+            text-align: center;
+            font-family: "Consolas", monospace;
+            font-size: 0.85rem;
+            box-shadow: 0 1px 0 #888888;
+        }
+
+        footer {
+            background: #1a2b4a;
+            color: #c8d4e4;
+            text-align: center;
+            padding: 28px 20px;
+            margin-top: 30px;
+            font-size: 0.85rem;
+            font-family: Arial, Helvetica, sans-serif;
+            border-top: 3px solid #0f1a30;
+        }
+
+        footer p { margin: 4px 0; }
+
+        @media (max-width: 700px) {
+            header h1 { font-size: 1.4rem; }
+            header h2 { font-size: 1rem; }
+            section { padding: 20px 18px; }
+            pre { font-size: 0.78rem; }
+            h2 { font-size: 1.15rem; }
+        }
+    </style>
+</head>
+
+
+<body>
+<header>
+  <div class="header-content">
+    <span class="badge">Programmation Multimédia</span>
+    <span class="badge">Jour 1 / 6</span>
+    <span class="badge">HTML5 Canvas</span>
+    <span class="badge">Version très détaillée</span>
+
+    <h1>Jour 1 — Dessin 2D et transformations</h1>
+    <h2>Système de coordonnées, formes, couleurs, texte, chemins et transformations</h2>
+
+    <p>
+      Cette séance constitue la base graphique du module de programmation multimédia.
+      L'objectif n'est pas seulement de mémoriser quelques méthodes Canvas, mais de
+      comprendre précisément <strong>ce que le navigateur dessine, dans quel repère,
+      dans quel ordre, avec quel état graphique et avec quelles transformations</strong>.
+    </p>
+
+    <p>
+      <strong>Durée indicative :</strong> 5 heures &nbsp;|&nbsp;
+      <strong>Prérequis :</strong> JavaScript (variables, fonctions, objets, boucles)
+    </p>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-content">
+    <a href="#objectifs">Objectifs</a>
+    <a href="#multimedia">Multimédia</a>
+    <a href="#mental">Modèle mental</a>
+    <a href="#canvas">Canvas</a>
+    <a href="#coordonnees">Coordonnées</a>
+    <a href="#formes">Formes</a>
+    <a href="#chemins">Chemins</a>
+    <a href="#couleurs">Couleurs</a>
+    <a href="#texte">Texte</a>
+    <a href="#etat">État graphique</a>
+    <a href="#transformations">Transformations</a>
+    <a href="#ordre">Ordre des opérations</a>
+    <a href="#debug">Débogage</a>
+    <a href="#tp1">TP1</a>
+    <a href="#tp2">TP2</a>
+    <a href="#exercices">Exercices</a>
+    <a href="#bilan">Bilan</a>
+  </div>
+</nav>
+
+<main>
+
+<section id="objectifs">
+  <h2>1. Objectifs pédagogiques détaillés</h2>
+
+  <div class="objectifs">
+    <p>À la fin de la séance, l'étudiant doit être capable de :</p>
+    <ul>
+      <li>créer un élément <code>&lt;canvas&gt;</code> et récupérer son contexte 2D ;</li>
+      <li>expliquer la différence entre la surface Canvas et l'objet JavaScript <code>ctx</code> ;</li>
+      <li>lire et produire des coordonnées <code>(x, y)</code> dans le repère Canvas ;</li>
+      <li>dessiner rectangles, cercles, segments et polygones ;</li>
+      <li>expliquer la différence entre <em>remplissage</em> et <em>contour</em> ;</li>
+      <li>configurer couleurs, transparence, épaisseur et extrémités des traits ;</li>
+      <li>construire et remplir des chemins avec <code>beginPath()</code>, <code>moveTo()</code>,
+          <code>lineTo()</code> et <code>closePath()</code> ;</li>
+      <li>afficher du texte en contrôlant police, alignement et ligne de base ;</li>
+      <li>comprendre que Canvas fonctionne comme une surface de dessin immédiat : le dessin
+          est produit par des commandes successives ;</li>
+      <li>comprendre l'état du contexte graphique et utiliser correctement
+          <code>save()</code> / <code>restore()</code> ;</li>
+      <li>déplacer, tourner et mettre à l'échelle le repère avec
+          <code>translate()</code>, <code>rotate()</code> et <code>scale()</code> ;</li>
+      <li>raisonner sur l'ordre des transformations et sur le centre de rotation ;</li>
+      <li>construire une scène complète uniquement avec Canvas.</li>
+    </ul>
+  </div>
+
+  <h3>1.1 Ce que vous devez savoir faire vs. ce que vous devez comprendre</h3>
+  <table>
+    <tr><th>Niveau</th><th>Attendu</th></tr>
+    <tr>
+      <td><strong>Reproduire</strong></td>
+      <td>Écrire correctement <code>fillRect()</code>, <code>arc()</code>, <code>fill()</code>,
+          <code>stroke()</code>, etc.</td>
+    </tr>
+    <tr>
+      <td><strong>Expliquer</strong></td>
+      <td>Dire ce que représentent les paramètres et pourquoi une instruction produit
+          tel résultat.</td>
+    </tr>
+    <tr>
+      <td><strong>Diagnostiquer</strong></td>
+      <td>Identifier pourquoi une forme est invisible, mal positionnée, mal orientée ou
+          dessinée avec le mauvais style.</td>
+    </tr>
+    <tr>
+      <td><strong>Composer</strong></td>
+      <td>Combiner plusieurs primitives pour fabriquer un objet visuel plus complexe.</td>
+    </tr>
+    <tr>
+      <td><strong>Raisonner</strong></td>
+      <td>Prévoir l'effet de plusieurs transformations appliquées successivement.</td>
+    </tr>
+  </table>
+
+  <h3>1.2 Organisation conseillée</h3>
+  <table>
+    <tr><th>Étape</th><th>Durée</th><th>But</th></tr>
+    <tr><td>Cours : Canvas + modèle mental</td><td>0 h 45</td><td>Comprendre la surface et le contexte.</td></tr>
+    <tr><td>Coordonnées + primitives</td><td>0 h 45</td><td>Savoir placer et construire les formes.</td></tr>
+    <tr><td>Couleurs + chemins + texte</td><td>0 h 45</td><td>Contrôler l'apparence.</td></tr>
+    <tr><td>TP guidé : paysage</td><td>1 h 15</td><td>Combiner toutes les primitives.</td></tr>
+    <tr><td>Transformations</td><td>0 h 45</td><td>Comprendre le repère transformé.</td></tr>
+    <tr><td>TP : rosace / composition</td><td>0 h 45</td><td>Automatiser avec une boucle.</td></tr>
+  </table>
+</section>
+
+<section id="multimedia">
+  <h2>2. Introduction à la programmation multimédia</h2>
+
+  <p>
+    Une application multimédia combine plusieurs types de contenus et plusieurs formes
+    d'interaction. Dans ce module, la partie graphique constitue un langage visuel :
+    les coordonnées, les formes, les couleurs et les transformations sont les briques
+    qui permettent de construire une scène.
+  </p>
+
+  <div class="grid">
+    <div class="card"><h3>Graphique</h3><p>Images, formes, couleurs, texte, dessins et animations.</p></div>
+    <div class="card"><h3>Audio</h3><p>Musique, voix et effets sonores.</p></div>
+    <div class="card"><h3>Vidéo</h3><p>Images animées et séquences vidéo.</p></div>
+    <div class="card"><h3>Interaction</h3><p>Clavier, souris, tactile, caméra et autres entrées.</p></div>
+  </div>
+
+  <div class="info">
+    <strong>Dans cette séance :</strong>
+    <p>
+      On se concentre volontairement sur le <strong>dessin 2D statique</strong>.
+      Le mouvement et l'interaction appartiennent aux étapes suivantes. Cette restriction
+      est pédagogique : avant de faire bouger un objet, il faut savoir précisément
+      comment le dessiner et comment contrôler son repère.
+    </p>
+  </div>
+
+  <h3>2.1 Pourquoi commencer par le dessin statique ?</h3>
+  <p>
+    Une animation est essentiellement une répétition de dessins à des instants différents.
+    Si vous ne maîtrisez pas le dessin d'une image, vous aurez beaucoup plus de mal à
+    comprendre pourquoi un objet animé se déplace, tourne ou change d'échelle.
+  </p>
+  <p>
+    Le raisonnement à retenir est donc :
+    <strong>géométrie → dessin → transformation → répétition dans le temps → animation</strong>.
+  </p>
+</section>
+
+<section id="mental">
+  <h2>3. Modèle mental : comment penser Canvas</h2>
+
+  <p>
+    Avant d'apprendre les méthodes, il faut construire un modèle mental correct.
+    Imaginez Canvas comme une feuille quadrillée invisible sur laquelle JavaScript
+    donne des instructions de dessin.
+  </p>
+
+  <h3>3.1 Une surface + un contexte</h3>
+  <p>
+    Le navigateur affiche une surface rectangulaire. JavaScript ne dessine pas
+    directement avec l'élément HTML : il récupère un <strong>contexte de rendu</strong>.
+    Pour cette séance, il s'agit du contexte <code>"2d"</code>.
+  </p>
+
+  <pre><code>const canvas = document.getElementById("scene");
+const ctx = canvas.getContext("2d");</code></pre>
+
+  <p>
+    Il est utile de distinguer les deux :
+  </p>
+  <table>
+    <tr><th>Élément</th><th>Rôle</th><th>Question à se poser</th></tr>
+    <tr><td><code>canvas</code></td><td>Surface HTML sur laquelle le rendu apparaît.</td><td>Où dessine-t-on ?</td></tr>
+    <tr><td><code>ctx</code></td><td>Contexte contenant les méthodes et l'état de dessin.</td><td>Comment dessine-t-on ?</td></tr>
+  </table>
+
+  <h3>3.2 Canvas ne connaît pas votre « maison »</h3>
+  <p>
+    Pour Canvas, une maison n'est pas une primitive magique. Une maison est une
+    <strong>composition</strong> de primitives : rectangle pour le mur, polygone
+    pour le toit, rectangles pour les fenêtres, etc.
+  </p>
+
+  <div class="important">
+    <strong>Idée fondamentale :</strong>
+    <p>
+      Le navigateur exécute des commandes de dessin. Il ne comprend pas spontanément
+      « ceci est une maison » ou « ceci est un arbre ». C'est votre programme qui
+      décompose l'objet visuel en éléments géométriques.
+    </p>
+  </div>
+
+  <h3>3.3 Le dessin est sensible à l'ordre</h3>
+  <p>
+    Si vous dessinez d'abord le soleil puis un grand rectangle couvrant tout le ciel,
+    le rectangle peut recouvrir le soleil. Inversement, dessiner le soleil après le
+    ciel le place visuellement au-dessus.
+  </p>
+  <p>
+    On peut donc penser la scène comme des <strong>couches successives</strong> :
+    arrière-plan → éléments éloignés → sol → bâtiments → végétation → détails → texte.
+  </p>
+</section>
+
+<section id="canvas">
+  <h2>4. HTML5 Canvas</h2>
+
+  <h3>4.1 Déclarer la surface</h3>
+  <pre><code>&lt;canvas id="scene" width="800" height="500"&gt;&lt;/canvas&gt;</code></pre>
+
+  <p>
+    Les attributs <code>width</code> et <code>height</code> définissent la taille interne
+    de la surface de dessin. Dans cet exemple, la surface possède 800 unités horizontales
+    et 500 unités verticales dans son repère de dessin.
+  </p>
+
+  <div class="important">
+    <strong>Subtilité importante : taille interne ≠ taille CSS.</strong>
+    <p>
+      Modifier uniquement <code>width</code>/<code>height</code> de l'élément ou modifier
+      sa taille avec CSS ne signifie pas la même chose. Le Canvas possède une résolution
+      interne de dessin et peut ensuite être affiché à une autre taille. Pour les
+      exercices de cette séance, on garde les deux notions distinctes.
+    </p>
+  </div>
+
+  <h3>4.2 Récupérer le contexte 2D</h3>
+  <pre><code>const canvas = document.getElementById("scene");
+const ctx = canvas.getContext("2d");
+
+if (!ctx) {
+  throw new Error("Le contexte 2D n'est pas disponible.");
+}</code></pre>
+
+  <p>
+    <code>getElementById()</code> récupère l'élément HTML. Ensuite,
+    <code>getContext("2d")</code> demande au navigateur un contexte de dessin 2D.
+    Toutes les opérations étudiées dans cette séance passent principalement par
+    <code>ctx</code>.
+  </p>
+
+  <h3>4.3 Le piège classique : exécuter le JavaScript trop tôt</h3>
+  <p>
+    Si le script s'exécute avant que le navigateur ait créé l'élément Canvas dans le DOM,
+    <code>document.getElementById("scene")</code> peut renvoyer <code>null</code>.
+    Une solution simple est de placer le script après le Canvas ou de charger le script
+    avec une stratégie adaptée.
+  </p>
+
+  <pre><code>&lt;canvas id="scene" width="800" height="500"&gt;&lt;/canvas&gt;
+&lt;script src="script.js"&gt;&lt;/script&gt;</code></pre>
+
+  <div class="danger">
+    <strong>Erreur typique :</strong>
+    <pre><code>const ctx = document.getElementById("scene").getContext("2d");
+// Si #scene n'existe pas encore, une erreur apparaît.</code></pre>
+  </div>
+</section>
+
+<section id="coordonnees">
+  <h2>5. Système de coordonnées 2D</h2>
+
+  <h3>5.1 Origine et axes</h3>
+  <p>
+    Le repère Canvas commence par défaut dans le coin supérieur gauche.
+  </p>
+
+  <table>
+    <tr><th>Élément</th><th>Direction</th><th>Conséquence</th></tr>
+    <tr><td>X</td><td>vers la droite</td><td>Augmenter X déplace un objet vers la droite.</td></tr>
+    <tr><td>Y</td><td>vers le bas</td><td>Augmenter Y déplace un objet vers le bas.</td></tr>
+    <tr><td>(0,0)</td><td>coin supérieur gauche</td><td>Point de départ du repère par défaut.</td></tr>
+  </table>
+
+  <div class="important">
+    <strong>Attention au réflexe mathématique.</strong>
+    <p>
+      Dans un repère cartésien scolaire classique, l'axe Y positif monte.
+      Dans le repère Canvas par défaut, Y positif descend. Il faut donc abandonner
+      l'idée « Y positif = vers le haut » lorsque vous raisonnez directement dans Canvas.
+    </p>
+  </div>
+
+  <h3>5.2 Comparaison visuelle : repère mathématique vs repère Canvas</h3>
+  <div class="comparatif-grid">
+    <div class="comparatif"><h4>Repère mathématique</h4><canvas id="cmpMath" width="460" height="220"></canvas><p class="caption">Y augmente vers le haut.</p></div>
+    <div class="comparatif"><h4>Repère Canvas</h4><canvas id="cmpCanvasAxis" width="460" height="220"></canvas><p class="caption">(0,0) est en haut à gauche et Y augmente vers le bas.</p></div>
+  </div>
+
+  <h3>5.3 Lire une primitive rectangulaire</h3>
+  <pre><code>ctx.fillRect(100, 50, 120, 80);</code></pre>
+
+  <p>Les quatre paramètres correspondent à :</p>
+  <ol>
+    <li><code>100</code> : position X du point de départ ;</li>
+    <li><code>50</code> : position Y du point de départ ;</li>
+    <li><code>120</code> : largeur ;</li>
+    <li><code>80</code> : hauteur.</li>
+  </ol>
+
+  <p>
+    Pour éviter les confusions, entraînez-vous à lire systématiquement une signature
+    sous la forme <strong>position → dimensions</strong> :
+    <code>(x, y, largeur, hauteur)</code>.
+  </p>
+
+  <h3>5.4 Coordonnée d'un centre</h3>
+  <p>
+    Beaucoup d'objets sont plus faciles à construire si l'on raisonne à partir de leur
+    centre. Pour un rectangle de largeur <code>w</code> et de hauteur <code>h</code>,
+    dont le coin supérieur gauche est <code>(x, y)</code>, son centre est :
+  </p>
+
+  <pre><code>centreX = x + w / 2;
+centreY = y + h / 2;</code></pre>
+
+  <p>
+    Cette relation deviendra particulièrement importante pour les rotations.
+  </p>
+
+  <h3>5.5 Dépassement de la surface</h3>
+  <p>
+    Une forme peut être partiellement ou totalement située hors du Canvas. Il ne faut
+    pas supposer que toutes les coordonnées doivent être positives et à l'intérieur
+    des dimensions visibles. Le navigateur ne dessinera simplement que ce qui est
+    visible dans la zone de rendu.
+  </p>
+</section>
+
+<section id="formes">
+  <h2>6. Dessiner les formes géométriques</h2>
+
+  <h3>6.1 Rectangle plein : <code>fillRect()</code></h3>
+  <pre><code>ctx.fillStyle = "royalblue";
+ctx.fillRect(100, 80, 150, 100);</code></pre>
+
+  <p>
+    <code>fillRect()</code> dessine immédiatement un rectangle rempli avec le
+    <code>fillStyle</code> courant.
+  </p>
+
+  <p><strong>Lecture :</strong> « utilise le style de remplissage actuel et remplis
+  le rectangle dont le coin de référence est (100,80), de largeur 150 et de hauteur 100 ».</p>
+
+  <h3>6.2 Rectangle contour : <code>strokeRect()</code></h3>
+  <pre><code>ctx.strokeStyle = "red";
+ctx.lineWidth = 4;
+ctx.strokeRect(300, 80, 150, 100);</code></pre>
+
+  <p>
+    Ici, on ne remplit pas l'intérieur : on trace le contour avec le style de trait courant.
+  </p>
+
+  <h3>6.3 Comparaison visuelle : <code>fillRect()</code> vs <code>strokeRect()</code></h3>
+  <div class="comparatif-grid">
+    <div class="comparatif"><h4>Remplir : <code>fillRect</code></h4><canvas id="cmpFillStrokeA" width="460" height="190"></canvas><div class="code-mini">ctx.fillStyle = "#b9c9dc";
+ctx.fillRect(70, 45, 150, 90);</div><p class="caption">La surface intérieure est peinte.</p></div>
+    <div class="comparatif"><h4>Tracer : <code>strokeRect</code></h4><canvas id="cmpFillStrokeB" width="460" height="190"></canvas><div class="code-mini">ctx.strokeStyle = "#2c5282";
+ctx.lineWidth = 6;
+ctx.strokeRect(70, 45, 150, 90);</div><p class="caption">Le contour est tracé ; <code>lineWidth</code> devient visible.</p></div>
+  </div>
+
+  <table>
+    <tr><th>Méthode</th><th>Effet</th><th>Style principal</th></tr>
+    <tr><td><code>fillRect()</code></td><td>Remplissage immédiat</td><td><code>fillStyle</code></td></tr>
+    <tr><td><code>strokeRect()</code></td><td>Contour immédiat</td><td><code>strokeStyle</code>, <code>lineWidth</code></td></tr>
+    <tr><td><code>clearRect()</code></td><td>Effacement d'une zone</td><td>Aucun style de couleur</td></tr>
+  </table>
+
+  <h3>6.4 Effacer n'est pas peindre en transparent</h3>
+  <pre><code>ctx.clearRect(0, 0, canvas.width, canvas.height);</code></pre>
+
+  <p>
+    <code>clearRect()</code> sert à nettoyer une zone du Canvas. Conceptuellement,
+    ce n'est pas la même opération que dessiner un rectangle avec une couleur
+    « transparente ». Cette distinction devient importante lorsqu'on travaille
+    avec des arrière-plans, de la transparence et des animations.
+  </p>
+
+  <h3>6.5 Cercle et arc : <code>arc()</code></h3>
+  <pre><code>ctx.beginPath();
+ctx.arc(200, 300, 50, 0, Math.PI * 2);
+ctx.fillStyle = "orange";
+ctx.fill();</code></pre>
+
+  <p>
+    Les paramètres sont :
+  </p>
+  <ol>
+    <li><code>200</code> : centre X ;</li>
+    <li><code>300</code> : centre Y ;</li>
+    <li><code>50</code> : rayon ;</li>
+    <li><code>0</code> : angle de départ ;</li>
+    <li><code>Math.PI * 2</code> : angle d'arrivée, soit un tour complet.</li>
+  </ol>
+
+  <div class="important">
+    <strong>Radians :</strong>
+    <p>
+      Canvas attend des angles en radians. Les correspondances utiles sont :
+      <code>0 = 0°</code>, <code>Math.PI / 2 = 90°</code>,
+      <code>Math.PI = 180°</code>, <code>Math.PI * 2 = 360°</code>.
+    </p>
+  </div>
+
+  <h3>6.6 Pourquoi <code>beginPath()</code> avant un cercle ?</h3>
+  <p>
+    <code>arc()</code> construit un chemin. <code>beginPath()</code> permet de repartir
+    sur un nouveau chemin afin que les sous-chemins précédents ne soient pas
+    involontairement réutilisés lors d'un futur <code>fill()</code> ou <code>stroke()</code>.
+  </p>
+
+  <h3>6.7 Segment</h3>
+  <pre><code>ctx.beginPath();
+ctx.moveTo(400, 250);
+ctx.lineTo(650, 350);
+ctx.strokeStyle = "black";
+ctx.lineWidth = 5;
+ctx.stroke();</code></pre>
+
+  <p>
+    Ici, <code>moveTo()</code> place le point courant sans dessiner de segment.
+    <code>lineTo()</code> crée un segment entre le point courant et le nouveau point.
+    Enfin, <code>stroke()</code> rend le contour du chemin visible.
+  </p>
+
+  <h3>6.8 Comparaison visuelle : <code>moveTo()</code> vs <code>lineTo()</code></h3>
+  <div class="comparatif-grid">
+    <div class="comparatif"><h4><code>moveTo</code> : déplacer sans tracer</h4><canvas id="cmpMoveTo" width="460" height="190"></canvas><div class="code-mini">ctx.moveTo(70,130);
+ctx.moveTo(210,55);
+ctx.lineTo(350,130);</div><p class="caption">Le premier déplacement est invisible.</p></div>
+    <div class="comparatif"><h4><code>lineTo</code> : créer un segment</h4><canvas id="cmpLineTo" width="460" height="190"></canvas><div class="code-mini">ctx.moveTo(70,130);
+ctx.lineTo(210,55);
+ctx.lineTo(350,130);</div><p class="caption">Chaque <code>lineTo</code> ajoute un segment au chemin.</p></div>
+  </div>
+
+  <div class="important">
+    <strong>Distinction essentielle :</strong>
+    <p>
+      <code>moveTo()</code> ne trace pas. <code>lineTo()</code> construit le chemin.
+      <code>stroke()</code> rend ce chemin visible sous forme de contour.
+    </p>
+  </div>
+</section>
+
+<section id="chemins">
+  <h2>7. Chemins et polygones</h2>
+
+  <p>
+    Les chemins sont indispensables dès qu'une scène dépasse les rectangles et cercles.
+    Un chemin est une suite de sous-chemins géométriques construits progressivement.
+  </p>
+
+  <h3>7.1 Anatomie d'un chemin</h3>
+  <pre><code>ctx.beginPath();
+ctx.moveTo(100, 100);
+ctx.lineTo(200, 100);
+ctx.lineTo(150, 200);
+ctx.closePath();
+
+ctx.fillStyle = "green";
+ctx.fill();
+
+ctx.strokeStyle = "black";
+ctx.lineWidth = 2;
+ctx.stroke();</code></pre>
+
+  <p>Décomposons chaque instruction :</p>
+  <ol>
+    <li><code>beginPath()</code> : démarre un nouveau chemin ;</li>
+    <li><code>moveTo()</code> : place le point de départ ;</li>
+    <li>les deux <code>lineTo()</code> : ajoutent les côtés ;</li>
+    <li><code>closePath()</code> : referme le chemin vers son point de départ ;</li>
+    <li><code>fill()</code> : remplit la région définie par le chemin ;</li>
+    <li><code>stroke()</code> : trace son contour.</li>
+  </ol>
+
+  <h3>7.2 Comparaison visuelle : <code>fill()</code> vs <code>stroke()</code></h3>
+  <div class="comparatif-grid">
+    <div class="comparatif"><h4><code>fill()</code></h4><canvas id="cmpFillPath" width="460" height="190"></canvas><p class="caption">Le chemin devient une surface remplie.</p></div>
+    <div class="comparatif"><h4><code>stroke()</code></h4><canvas id="cmpStrokePath" width="460" height="190"></canvas><p class="caption">Le même chemin peut servir uniquement à dessiner le contour.</p></div>
+  </div>
+
+  <h3>7.3 Comparaison visuelle : pourquoi <code>beginPath()</code> ?</h3>
+  <div class="comparatif-grid">
+    <div class="comparatif"><h4>Sans nouveau chemin</h4><canvas id="cmpNoBegin" width="460" height="190"></canvas><p class="caption">Le chemin courant conserve ses anciens segments : un nouveau <code>stroke()</code> peut les redessiner.</p></div>
+    <div class="comparatif"><h4>Avec <code>beginPath()</code></h4><canvas id="cmpWithBegin" width="460" height="190"></canvas><p class="caption"><code>beginPath()</code> démarre une nouvelle collection de sous-chemins.</p></div>
+  </div>
+
+  <h3>7.4 <code>closePath()</code> n'est pas obligatoire pour tous les dessins</h3>
+  <p>
+    Un chemin ouvert peut être parfaitement adapté à une ligne ou à une série de
+    segments. En revanche, pour un polygone destiné à être fermé visuellement,
+    <code>closePath()</code> évite d'avoir à ajouter manuellement le dernier segment
+    vers le point initial.
+  </p>
+
+  <h3>7.5 Un même chemin peut être rempli puis contouré</h3>
+  <pre><code>ctx.fillStyle = "green";
+ctx.fill();
+
+ctx.strokeStyle = "black";
+ctx.stroke();</code></pre>
+
+  <p>
+    Le remplissage et le contour sont deux opérations distinctes. On peut donc créer
+    une forme, la remplir avec une couleur, puis tracer son contour avec un autre style.
+  </p>
+
+  <h3>7.6 Construire une maison avec des chemins</h3>
+  <pre><code>// Toit
+ctx.beginPath();
+ctx.moveTo(250, 180);
+ctx.lineTo(400, 70);
+ctx.lineTo(550, 180);
+ctx.closePath();
+
+ctx.fillStyle = "#8b4513";
+ctx.fill();
+ctx.strokeStyle = "#222";
+ctx.stroke();</code></pre>
+
+  <p>
+    La maison est un bon exemple de composition : le toit est un triangle, mais
+    l'objet « maison » est obtenu par l'association de plusieurs formes.
+  </p>
+</section>
+
+<section id="couleurs">
+  <h2>8. Couleurs, transparence et styles</h2>
+
+  <h3>8.1 Plusieurs écritures d'une couleur</h3>
+  <pre><code>ctx.fillStyle = "red";
+ctx.fillStyle = "#ff0000";
+ctx.fillStyle = "rgb(255, 0, 0)";
+ctx.fillStyle = "rgba(255, 0, 0, 0.5)";</code></pre>
+
+  <p>
+    Ces écritures représentent différentes façons de décrire une couleur.
+    Pour <code>rgba()</code>, le quatrième paramètre représente l'alpha, donc
+    le niveau de transparence/opacité selon la convention utilisée par le modèle
+    de couleur.
+  </p>
+
+  <div class="important">
+    <strong>Subtilité de l'état :</strong>
+    <p>
+      <code>fillStyle</code> reste actif pour les futurs remplissages jusqu'à ce
+      que vous lui affectiez une autre valeur ou que vous restauriez un état
+      précédent avec <code>restore()</code>. Il n'est donc pas nécessaire de le
+      redéfinir avant chaque forme si la même couleur doit être conservée.
+    </p>
+  </div>
+
+  <h3>8.2 Remplissage et contour ont des styles différents</h3>
+  <pre><code>ctx.fillStyle = "orange";
+ctx.strokeStyle = "black";
+ctx.lineWidth = 3;</code></pre>
+
+  <p>
+    Une forme peut donc avoir simultanément un intérieur orange et un contour noir.
+  </p>
+
+  <h3>8.3 Dégradé linéaire</h3>
+  <pre><code>const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+
+gradient.addColorStop(0, "#87ceeb");
+gradient.addColorStop(1, "#1e3a8a");
+
+ctx.fillStyle = gradient;
+ctx.fillRect(0, 0, 800, 400);</code></pre>
+
+  <p>
+    Un dégradé linéaire est défini par une ligne de départ et d'arrivée.
+    Les <code>colorStop</code> indiquent quelle couleur apparaît à quelle position
+    relative sur cette ligne.
+  </p>
+
+  <h3>8.4 Dégradé radial</h3>
+  <pre><code>const radial = ctx.createRadialGradient(
+  400, 200, 10,
+  400, 200, 200
+);
+
+radial.addColorStop(0, "yellow");
+radial.addColorStop(1, "orange");
+
+ctx.fillStyle = radial;
+ctx.fillRect(0, 0, 800, 400);</code></pre>
+
+  <p>
+    Le dégradé radial repose sur deux cercles : un cercle de départ et un cercle
+    d'arrivée. Cette notion est particulièrement utile pour des effets de lumière,
+    de soleil ou de volume.
+  </p>
+
+  <h3>8.5 Comparaison visuelle : dégradé linéaire vs radial</h3>
+  <div class="comparatif-grid">
+    <div class="comparatif"><h4><code>createLinearGradient()</code></h4><canvas id="cmpLinear" width="460" height="190"></canvas><p class="caption">La transition suit une direction entre deux points.</p></div>
+    <div class="comparatif"><h4><code>createRadialGradient()</code></h4><canvas id="cmpRadial" width="460" height="190"></canvas><p class="caption">La transition rayonne autour d'un centre.</p></div>
+  </div>
+
+  <h3>8.6 Style du contour</h3>
+  <pre><code>ctx.strokeStyle = "navy";
+ctx.lineWidth = 3;
+ctx.lineCap = "round";
+ctx.lineJoin = "round";</code></pre>
+
+  <table>
+    <tr><th>Propriété</th><th>Question</th><th>Effet</th></tr>
+    <tr><td><code>strokeStyle</code></td><td>De quelle couleur est le contour ?</td><td>Couleur / style du trait.</td></tr>
+    <tr><td><code>lineWidth</code></td><td>Quelle épaisseur ?</td><td>Largeur du trait.</td></tr>
+    <tr><td><code>lineCap</code></td><td>Comment se termine un segment ?</td><td>Extrémité du trait.</td></tr>
+    <tr><td><code>lineJoin</code></td><td>Comment deux segments se rejoignent-ils ?</td><td>Jonction des segments.</td></tr>
+  </table>
+
+  <h3>8.7 Erreur classique : croire qu'un style « appartient » à la forme</h3>
+  <p>
+    Canvas n'attache pas automatiquement une propriété comme un objet graphique
+    possédant son propre style permanent. Le contexte possède un état courant.
+    Il faut donc penser :
+    <strong>« je configure l'état, puis je dessine »</strong>.
+  </p>
+</section>
+
+<section id="texte">
+  <h2>9. Texte : écrire dans le repère graphique</h2>
+
+  <pre><code>ctx.font = "30px Arial";
+ctx.fillStyle = "black";
+ctx.textAlign = "center";
+ctx.textBaseline = "middle";
+
+ctx.fillText("Bonjour Canvas", 400, 200);</code></pre>
+
+  <h3>9.1 Les quatre éléments à distinguer</h3>
+  <table>
+    <tr><th>Propriété / méthode</th><th>Rôle</th></tr>
+    <tr><td><code>font</code></td><td>Définit la police et la taille.</td></tr>
+    <tr><td><code>textAlign</code></td><td>Définit l'alignement horizontal par rapport à X.</td></tr>
+    <tr><td><code>textBaseline</code></td><td>Définit la référence verticale du texte.</td></tr>
+    <tr><td><code>fillText()</code></td><td>Dessine le texte rempli.</td></tr>
+    <tr><td><code>strokeText()</code></td><td>Dessine le contour du texte.</td></tr>
+  </table>
+
+  <h3>9.2 Pourquoi l'alignement est important</h3>
+  <p>
+    Lorsque vous écrivez <code>fillText("Titre", 400, 100)</code>, le point
+    <code>(400,100)</code> n'est pas automatiquement le coin supérieur gauche
+    du texte. Sa signification dépend de <code>textAlign</code> et
+    <code>textBaseline</code>.
+  </p>
+
+  <p>
+    Pour centrer un titre autour d'un point :
+  </p>
+  <pre><code>ctx.textAlign = "center";
+ctx.textBaseline = "middle";
+ctx.fillText("Titre", 400, 100);</code></pre>
+
+  <h3>9.3 Texte avec contour</h3>
+  <pre><code>ctx.font = "48px Georgia";
+ctx.strokeStyle = "navy";
+ctx.lineWidth = 2;
+ctx.strokeText("Titre", 400, 100);</code></pre>
+
+  <div class="important">
+    <strong>À retenir :</strong>
+    <p>
+      Le texte utilise lui aussi le repère graphique. Si le repère est transformé
+      avec <code>translate()</code>, <code>rotate()</code> ou <code>scale()</code>,
+      le texte dessiné ensuite est concerné par ces transformations.
+    </p>
+  </div>
+</section>
+
+<section id="etat">
+  <h2>10. L'état graphique du contexte</h2>
+
+  <p>
+    C'est l'une des notions les plus importantes et les plus souvent mal comprises.
+    Le contexte 2D possède un ensemble de propriétés courantes : couleur de remplissage,
+    couleur de contour, largeur de ligne, police, alignement, transformations, etc.
+  </p>
+
+  <h3>10.1 Penser en « état courant »</h3>
+  <pre><code>ctx.fillStyle = "red";
+ctx.fillRect(10, 10, 50, 50);
+
+ctx.fillRect(80, 10, 50, 50);</code></pre>
+
+  <p>
+    Les deux rectangles sont rouges parce que le deuxième dessin utilise encore
+    le <code>fillStyle</code> courant.
+  </p>
+
+  <h3>10.2 <code>save()</code> et <code>restore()</code></h3>
+  <pre><code>ctx.save();
+
+ctx.fillStyle = "orange";
+ctx.lineWidth = 10;
+ctx.translate(300, 200);
+
+ctx.fillRect(-25, -25, 50, 50);
+
+ctx.restore();
+
+// Le contexte revient à l'état sauvegardé.</code></pre>
+
+  <p>
+    <code>save()</code> empile l'état courant. <code>restore()</code> récupère
+    l'état sauvegardé correspondant. Le mécanisme fonctionne comme une pile :
+    plusieurs sauvegardes peuvent être imbriquées.
+  </p>
+
+  <h3>10.3 Comparaison visuelle : avec et sans isolation</h3>
+  <div class="comparatif-grid">
+    <div class="comparatif"><h4>Sans isolation</h4><canvas id="cmpStateBad" width="460" height="190"></canvas><p class="caption">Le second objet hérite du <code>lineWidth</code> modifié.</p></div>
+    <div class="comparatif"><h4>Avec isolation</h4><canvas id="cmpStateGood" width="460" height="190"></canvas><p class="caption">Après <code>restore()</code>, l'état revient à celui sauvegardé.</p></div>
+  </div>
+
+  <div class="danger">
+    <strong>Erreur fréquente :</strong>
+    <p>
+      Modifier le repère ou les styles sans les restaurer peut produire des effets
+      surprenants plusieurs dizaines de lignes plus tard. Lorsqu'une fonction dessine
+      un objet avec son propre repère ou ses propres styles, <code>save()</code> /
+      <code>restore()</code> rendent cette fonction beaucoup plus sûre.
+    </p>
+  </div>
+</section>
+
+<section id="transformations">
+  <h2>11. Transformations graphiques</h2>
+
+  <p>
+    Une transformation ne « déplace » pas physiquement les pixels déjà dessinés.
+    Elle modifie la manière dont les prochaines coordonnées sont interprétées.
+    C'est donc surtout le <strong>repère de dessin</strong> qui est transformé.
+  </p>
+
+  <h3>11.1 Translation : <code>translate(x, y)</code></h3>
+  <pre><code>ctx.save();
+
+ctx.translate(300, 200);
+ctx.fillRect(0, 0, 100, 60);
+
+ctx.restore();</code></pre>
+
+  <p>
+    Après la translation, le point <code>(0,0)</code> du repère transformé correspond
+    au point situé vers <code>(300,200)</code> dans le repère précédent.
+    Ainsi, dessiner à <code>(0,0)</code> après la translation ne dessine plus
+    dans le coin supérieur gauche de la surface.
+  </p>
+
+  <h3>11.2 Comparaison visuelle : sans et avec <code>translate()</code></h3>
+  <div class="comparatif-grid">
+    <div class="comparatif"><h4>Sans <code>translate()</code></h4><canvas id="cmpTranslateA" width="460" height="190"></canvas><p class="caption">Le rectangle utilise directement le repère initial.</p></div>
+    <div class="comparatif"><h4>Avec <code>translate(170,55)</code></h4><canvas id="cmpTranslateB" width="460" height="190"></canvas><div class="code-mini">ctx.translate(170,55);
+ctx.fillRect(0,0,120,70);</div><p class="caption">Les mêmes coordonnées locales commencent à la nouvelle origine.</p></div>
+  </div>
+
+  <h3>11.3 Rotation : <code>rotate(angle)</code></h3>
+  <pre><code>ctx.save();
+
+ctx.translate(400, 250);
+ctx.rotate(Math.PI / 4);
+
+ctx.fillRect(-50, -30, 100, 60);
+
+ctx.restore();</code></pre>
+
+  <p>
+    <code>rotate()</code> attend des radians. Surtout, la rotation se fait autour
+    de l'origine du repère courant. C'est pourquoi on place souvent l'origine
+    au centre de l'objet avant de le faire tourner.
+  </p>
+
+  <h3>11.4 Démonstration interactive : angle de rotation</h3>
+  <div class="comparatif comparison-wide">
+    <canvas id="cmpInteractiveRotate" width="760" height="260"></canvas>
+    <div class="demo-controls"><label for="angleDemo">Angle : <strong id="angleValue">0°</strong></label><input id="angleDemo" type="range" min="0" max="360" value="0"><button id="resetAngle">Réinitialiser</button></div>
+    <p class="caption">Déplacez le curseur. Le point rouge représente le pivot. Observez que l'objet tourne autour du centre et non autour du coin du Canvas.</p>
+  </div>
+
+  <h3>11.5 Échelle : <code>scale(sx, sy)</code></h3>
+  <pre><code>ctx.save();
+
+ctx.scale(2, 2);
+ctx.fillRect(20, 20, 50, 50);
+
+ctx.restore();</code></pre>
+
+  <p>
+    Une échelle de <code>2,2</code> agrandit les coordonnées et dimensions dessinées
+    dans les deux directions. Des valeurs différentes peuvent déformer l'objet,
+    tandis qu'une valeur négative peut inverser une direction du repère.
+  </p>
+
+  <h3>11.6 Exemple complet</h3>
+  <pre><code>ctx.save();
+
+ctx.translate(300, 200);
+ctx.rotate(Math.PI / 4);
+ctx.scale(2, 2);
+
+ctx.fillStyle = "orange";
+ctx.fillRect(-25, -25, 50, 50);
+
+ctx.restore();</code></pre>
+
+  <p>
+    Lecture étape par étape :
+  </p>
+  <ol>
+    <li>on sauvegarde l'état ;</li>
+    <li>on place l'origine à <code>(300,200)</code> ;</li>
+    <li>on tourne le repère de 45° ;</li>
+    <li>on agrandit le repère par 2 ;</li>
+    <li>on dessine un carré centré sur l'origine transformée ;</li>
+    <li>on restaure l'état précédent.</li>
+  </ol>
+
+  <h3>11.7 Rotation autour du centre d'un objet</h3>
+  <pre><code>function drawRotatedRect(ctx, x, y, w, h, angle) {
+  ctx.save();
+
+  // 1. Déplacer l'origine au centre de l'objet
+  ctx.translate(x, y);
+
+  // 2. Tourner autour de cette nouvelle origine
+  ctx.rotate(angle);
+
+  // 3. Dessiner en plaçant le centre du rectangle sur (0, 0)
+  ctx.fillRect(-w / 2, -h / 2, w, h);
+
+  ctx.restore();
+}</code></pre>
+
+  <p>
+    Cette technique est fondamentale : le rectangle est défini autour de son centre,
+    puis le repère est tourné autour de ce même centre.
+  </p>
+
+  <h3>11.8 Comparaison visuelle : rotation autour de l'origine vs autour du centre</h3>
+  <div class="comparatif-grid">
+    <div class="comparatif"><h4>Rotation autour de (0,0)</h4><canvas id="cmpRotateOrigin" width="460" height="230"></canvas><p class="caption">L'objet tourne autour de l'origine du repère.</p></div>
+    <div class="comparatif"><h4>Rotation autour du centre</h4><canvas id="cmpRotateCenter" width="460" height="230"></canvas><div class="code-mini">ctx.translate(cx,cy);
+ctx.rotate(angle);
+ctx.translate(-cx,-cy);
+// dessiner</div><p class="caption">On place l'origine sur le pivot avant de tourner.</p></div>
+  </div>
+
+  <div class="important">
+    <strong>Piège conceptuel :</strong>
+    <p>
+      Si vous faites simplement <code>rotate(angle)</code> sans déplacer l'origine,
+      vous faites tourner l'objet autour de l'origine actuelle du Canvas, pas
+      nécessairement autour de son propre centre.
+    </p>
+  </div>
+</section>
+
+<section id="ordre">
+  <h2>12. Ordre des opérations et transformations</h2>
+
+  <p>
+    L'ordre des transformations est crucial. Deux opérations qui utilisent les mêmes
+    méthodes mais dans un ordre différent peuvent produire des résultats différents.
+  </p>
+
+  <h3>12.1 Translation puis rotation</h3>
+  <pre><code>ctx.translate(400, 250);
+ctx.rotate(angle);</code></pre>
+
+  <p>
+    Cette organisation est particulièrement pratique pour placer un objet puis le
+    faire tourner autour de la nouvelle origine.
+  </p>
+
+  <h3>12.2 Pourquoi l'ordre change le résultat</h3>
+  <p>
+    Une transformation modifie le repère utilisé par les transformations suivantes.
+    Ainsi, une translation réalisée après une rotation n'est pas interprétée de la
+    même manière qu'une translation réalisée avant la rotation.
+  </p>
+
+  <h3>12.3 Comparaison visuelle : l'ordre des transformations compte</h3>
+  <div class="comparatif-grid">
+    <div class="comparatif"><h4><code>translate()</code> puis <code>rotate()</code></h4><canvas id="cmpOrderTR" width="460" height="220"></canvas><p class="caption">Déplacer puis tourner produit une géométrie spécifique.</p></div>
+    <div class="comparatif"><h4><code>rotate()</code> puis <code>translate()</code></h4><canvas id="cmpOrderRT" width="460" height="220"></canvas><p class="caption">Inverser l'ordre change le résultat : les transformations ne sont généralement pas commutatives.</p></div>
+  </div>
+
+  <div class="important">
+    <strong>Règle de raisonnement :</strong>
+    <p>
+      Ne mémorisez pas seulement « translation + rotation ». Demandez-vous toujours :
+      <strong>« dans quel repère suis-je au moment où j'applique cette instruction ? »</strong>
+    </p>
+  </div>
+
+  <h3>12.4 Pattern de dessin robuste</h3>
+  <pre><code>ctx.save();
+
+// Transformations propres à l'objet
+ctx.translate(x, y);
+ctx.rotate(angle);
+ctx.scale(sx, sy);
+
+// Styles propres à l'objet
+ctx.fillStyle = couleur;
+
+// Dessin local
+ctx.fillRect(-w / 2, -h / 2, w, h);
+
+ctx.restore();</code></pre>
+
+  <p>
+    Ce modèle permet de définir un objet dans un repère local simple puis de l'insérer
+    dans la scène avec position, rotation et échelle.
+  </p>
+
+  <h3>12.5 Repère global vs. repère local</h3>
+  <table>
+    <tr><th>Repère</th><th>Idée</th><th>Exemple</th></tr>
+    <tr><td>Global</td><td>Repère général du Canvas.</td><td>Coin supérieur gauche = (0,0).</td></tr>
+    <tr><td>Local</td><td>Repère pratique d'un objet après transformation.</td><td>Centre de la maison = (0,0).</td></tr>
+  </table>
+
+  <p>
+    Le repère local rend les objets réutilisables : une même fonction peut dessiner
+    un carré à l'origine, puis <code>translate()</code> permet de placer ce carré
+    n'importe où.
+  </p>
+</section>
+
+<section id="debug">
+  <h2>13. Méthode de débogage graphique</h2>
+
+  <p>
+    Lorsqu'un dessin n'apparaît pas comme prévu, évitez de modifier dix lignes au hasard.
+    Utilisez une procédure systématique.
+  </p>
+
+  <h3>13.1 Checklist</h3>
+  <ol>
+    <li>Le Canvas existe-t-il réellement dans le HTML ?</li>
+    <li>L'identifiant utilisé par <code>getElementById()</code> est-il correct ?</li>
+    <li>Le contexte <code>2d</code> a-t-il été récupéré ?</li>
+    <li>Le code JavaScript s'exécute-t-il sans erreur dans la console ?</li>
+    <li>Les coordonnées sont-elles dans une zone visible ?</li>
+    <li>La largeur et la hauteur sont-elles positives et raisonnables ?</li>
+    <li>La couleur est-elle visible sur l'arrière-plan ?</li>
+    <li>Un élément dessiné plus tard recouvre-t-il celui recherché ?</li>
+    <li>Une transformation précédente est-elle toujours active ?</li>
+    <li>Un <code>save()</code> / <code>restore()</code> manque-t-il ?</li>
+    <li>Un chemin précédent est-il involontairement réutilisé parce que <code>beginPath()</code>
+        n'a pas été appelé ?</li>
+  </ol>
+
+  <h3>13.2 Technique : dessiner les repères</h3>
+  <pre><code>ctx.save();
+
+ctx.strokeStyle = "red";
+ctx.beginPath();
+ctx.moveTo(0, 0);
+ctx.lineTo(canvas.width, 0);
+ctx.stroke();
+
+ctx.strokeStyle = "blue";
+ctx.beginPath();
+ctx.moveTo(0, 0);
+ctx.lineTo(0, canvas.height);
+ctx.stroke();
+
+ctx.restore();</code></pre>
+
+  <p>
+    Ajouter temporairement des lignes de repère permet de vérifier l'origine et les axes.
+    C'est particulièrement utile après une transformation.
+  </p>
+
+  <h3>13.3 Erreurs fréquentes à connaître</h3>
+  <table>
+    <tr><th>Symptôme</th><th>Cause possible</th><th>Réflexe</th></tr>
+    <tr><td>Rien ne s'affiche</td><td>Erreur JS ou mauvais Canvas</td><td>Console + vérification du DOM.</td></tr>
+    <tr><td>Objet au mauvais endroit</td><td>Coordonnées ou transformation incorrectes</td><td>Afficher les repères.</td></tr>
+    <tr><td>Objet tourné autour du coin</td><td>Origine de rotation mal choisie</td><td>Translater vers le centre.</td></tr>
+    <tr><td>Les formes suivantes changent</td><td>État ou transformation non restauré</td><td><code>save()</code>/<code>restore()</code>.</td></tr>
+    <tr><td>Contours inattendus</td><td>Chemin précédent encore présent</td><td><code>beginPath()</code>.</td></tr>
+    <tr><td>Texte mal positionné</td><td>Alignement/base non compris</td><td>Configurer <code>textAlign</code>/<code>textBaseline</code>.</td></tr>
+  </table>
+</section>
+
+<section id="tp1">
+  <h2>14. TP 1 — Construire un paysage 2D</h2>
+
+  <div class="exercise">
+    <span class="level easy">Niveau 1 — guidé</span>
+    <h3>Objectif</h3>
+    <p>
+      Construire une scène complète uniquement avec Canvas. Aucun fichier image externe
+      ne doit être nécessaire pour les éléments principaux.
+    </p>
+
+    <h3>14.1 Cahier des charges</h3>
+    <ol>
+      <li>un ciel utilisant un dégradé ;</li>
+      <li>un soleil ;</li>
+      <li>un sol ;</li>
+      <li>une maison ;</li>
+      <li>un toit sous forme de chemin fermé ;</li>
+      <li>au moins deux fenêtres ;</li>
+      <li>une porte ;</li>
+      <li>un arbre composé de plusieurs formes ;</li>
+      <li>un titre ;</li>
+      <li>un contour sur au moins certaines formes.</li>
+    </ol>
+
+    <h3>14.2 Ordre conseillé de construction</h3>
+    <ol>
+      <li>effacer / préparer le Canvas ;</li>
+      <li>dessiner le ciel ;</li>
+      <li>dessiner le soleil ;</li>
+      <li>dessiner le sol ;</li>
+      <li>dessiner la maison ;</li>
+      <li>dessiner le toit ;</li>
+      <li>dessiner fenêtres et porte ;</li>
+      <li>dessiner l'arbre ;</li>
+      <li>ajouter les détails ;</li>
+      <li>ajouter le texte en dernier.</li>
+    </ol>
+
+    <h3>14.3 Extension</h3>
+    <p>
+      Ajouter un nuage composé de plusieurs arcs ou cercles, puis un chemin de terre
+      construit avec un polygone. Ensuite, ajouter une deuxième maison avec des
+      dimensions différentes.
+    </p>
+
+    <h3>14.4 Objectif de compréhension</h3>
+    <p>
+      Vous ne devez pas seulement obtenir « une belle image ». Vous devez être capable
+      de montrer quelle partie du code produit chaque élément et pourquoi l'ordre
+      de dessin est celui que vous avez choisi.
+    </p>
+  </div>
+</section>
+
+<section id="tp2">
+  <h2>15. TP 2 — Rosace / mandala avec transformations</h2>
+
+  <div class="exercise">
+    <span class="level medium">Niveau 2 — raisonnement</span>
+
+    <p>
+      Dessiner une forme simple répétée autour d'un centre afin d'obtenir une rosace,
+      un mandala ou une composition géométrique.
+    </p>
+
+    <h3>15.1 Contraintes</h3>
+    <ul>
+      <li>utiliser <code>translate()</code> ;</li>
+      <li>utiliser <code>rotate()</code> ;</li>
+      <li>utiliser <code>save()</code> / <code>restore()</code> ;</li>
+      <li>répéter la forme au moins 8 fois ;</li>
+      <li>alterner au moins deux couleurs.</li>
+    </ul>
+
+    <h3>15.2 Formule de l'angle</h3>
+    <pre><code>const angle = (2 * Math.PI) / n;</code></pre>
+
+    <p>
+      Pour <code>n</code> répétitions régulièrement réparties sur un tour complet,
+      chaque répétition est séparée par <code>2π / n</code> radians.
+    </p>
+
+    <h3>15.3 Structure de solution</h3>
+    <pre><code>const n = 12;
+const step = (2 * Math.PI) / n;
+
+ctx.save();
+ctx.translate(400, 250);
+
+for (let i = 0; i &lt; n; i++) {
+  ctx.save();
+
+  ctx.rotate(i * step);
+
+  ctx.fillStyle = i % 2 === 0 ? "royalblue" : "orange";
+  ctx.fillRect(80, -15, 100, 30);
+
+  ctx.restore();
+}
+
+ctx.restore();</code></pre>
+
+    <h3>15.4 Analyse du code</h3>
+    <ol>
+      <li>Le grand <code>save()</code> protège le repère général.</li>
+      <li><code>translate(400,250)</code> place le centre de la rosace.</li>
+      <li>La boucle produit <code>n</code> copies.</li>
+      <li>Chaque itération sauvegarde son propre état.</li>
+      <li><code>rotate(i * step)</code> donne à chaque copie une orientation différente.</li>
+      <li>Le rectangle est dessiné à une distance du centre.</li>
+      <li>Le <code>restore()</code> intérieur empêche la rotation d'une copie de s'accumuler
+          de manière incontrôlée sur les suivantes.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="exercices">
+  <h2>16. Exercices progressifs supplémentaires</h2>
+
+  <div class="exercise">
+    <span class="level easy">Exercice 1</span>
+    <h3>Repère</h3>
+    <p>
+      Dessiner une ligne horizontale à <code>y = 100</code> et une ligne verticale à
+      <code>x = 150</code>. Ajouter un texte indiquant l'emplacement approximatif de
+      l'intersection.
+    </p>
+    <p><strong>Compétence :</strong> comprendre X et Y.</p>
+  </div>
+
+  <div class="exercise">
+    <span class="level easy">Exercice 2</span>
+    <h3>Composition de formes</h3>
+    <p>
+      Construire une voiture uniquement avec des rectangles, des cercles et des lignes.
+      La voiture doit posséder deux roues et deux fenêtres.
+    </p>
+    <p><strong>Compétence :</strong> composition de primitives.</p>
+  </div>
+
+  <div class="exercise">
+    <span class="level medium">Exercice 3</span>
+    <h3>Objet paramétrable</h3>
+    <p>
+      Écrire une fonction <code>drawTree(ctx, x, y, scale)</code> qui dessine un arbre
+      à différentes positions et tailles.
+    </p>
+    <p><strong>Compétence :</strong> réutilisation et transformations.</p>
+  </div>
+
+  <div class="exercise">
+    <span class="level medium">Exercice 4</span>
+    <h3>Rotation contrôlée</h3>
+    <p>
+      Écrire une fonction qui reçoit <code>x</code>, <code>y</code>, <code>w</code>,
+      <code>h</code> et <code>angle</code>, puis dessine un rectangle tourné autour
+      de son centre.
+    </p>
+    <p><strong>Compétence :</strong> repère local + centre de rotation.</p>
+  </div>
+
+  <div class="exercise">
+    <span class="level hard">Exercice 5</span>
+    <h3>Composition paramétrique</h3>
+    <p>
+      Construire une rosace dont le nombre de pétales, la distance au centre,
+      la taille des pétales et l'angle de rotation sont des paramètres.
+    </p>
+    <p><strong>Compétence :</strong> transformer un dessin en petit moteur de composition.</p>
+  </div>
+
+  <h3>16.1 Questions de compréhension</h3>
+  <ol>
+    <li>Pourquoi <code>fillRect()</code> n'a-t-il pas besoin de <code>beginPath()</code> ?</li>
+    <li>Pourquoi utilise-t-on <code>beginPath()</code> avant une série de segments ?</li>
+    <li>Quelle est la différence entre <code>fill()</code> et <code>stroke()</code> ?</li>
+    <li>Pourquoi le même <code>fillStyle</code> peut-il affecter plusieurs formes successives ?</li>
+    <li>Pourquoi <code>save()</code> et <code>restore()</code> sont-ils particulièrement utiles
+        avec les transformations ?</li>
+    <li>Autour de quel point <code>rotate()</code> fait-il tourner les dessins ?</li>
+    <li>Pourquoi translate-t-on souvent l'origine avant une rotation ?</li>
+    <li>Que signifie <code>Math.PI / 2</code> pour Canvas ?</li>
+    <li>Que se passe-t-il si une transformation n'est jamais restaurée ?</li>
+    <li>Pourquoi l'ordre de dessin est-il important dans une scène 2D ?</li>
+  </ol>
+</section>
+
+<section id="bilan">
+  <h2>17. Bilan — ce qu'il faut réellement maîtriser</h2>
+
+  <div class="success">
+    <ul>
+      <li><strong>Canvas</strong> est une surface de dessin contrôlée par JavaScript.</li>
+      <li><strong>ctx</strong> est le contexte 2D qui fournit les opérations et possède un état.</li>
+      <li>Le repère par défaut commence en <strong>(0,0) en haut à gauche</strong>.</li>
+      <li>X augmente vers la droite et Y augmente vers le bas.</li>
+      <li><code>fillRect()</code> remplit immédiatement un rectangle.</li>
+      <li><code>strokeRect()</code> trace immédiatement le contour d'un rectangle.</li>
+      <li><code>clearRect()</code> efface une zone.</li>
+      <li><code>arc()</code> permet de construire des arcs et cercles.</li>
+      <li><code>moveTo()</code> déplace le point courant sans tracer ; <code>lineTo()</code>
+          ajoute un segment.</li>
+      <li><code>beginPath()</code> commence un nouveau chemin.</li>
+      <li><code>closePath()</code> ferme un chemin.</li>
+      <li><code>fill()</code> remplit un chemin ; <code>stroke()</code> en dessine le contour.</li>
+      <li><code>fillStyle</code> et <code>strokeStyle</code> appartiennent à l'état courant du contexte.</li>
+      <li>Les dégradés se construisent avec <code>createLinearGradient()</code> ou
+          <code>createRadialGradient()</code>.</li>
+      <li>Le texte se contrôle notamment avec <code>font</code>, <code>textAlign</code>,
+          <code>textBaseline</code>, <code>fillText()</code> et <code>strokeText()</code>.</li>
+      <li><code>translate()</code> modifie l'origine du repère.</li>
+      <li><code>rotate()</code> tourne le repère ; l'angle est en radians.</li>
+      <li><code>scale()</code> modifie l'échelle du repère.</li>
+      <li><code>save()</code>/<code>restore()</code> permettent d'isoler proprement
+          les modifications d'état et de transformation.</li>
+      <li>Le dessin dépend de <strong>l'ordre des opérations</strong>.</li>
+      <li>Un objet complexe est généralement une <strong>composition de primitives</strong>.</li>
+    </ul>
+  </div>
+
+  <h3>17.1 Le schéma mental à retenir</h3>
+  <pre><code>1. Je récupère le Canvas et son contexte.
+2. Je choisis / comprends mon repère.
+3. Je prépare l'état graphique.
+4. Je dessine les éléments dans le bon ordre.
+5. Pour un objet transformé :
+      save()
+      → translate()
+      → rotate()
+      → scale()
+      → dessiner dans le repère local
+      → restore()
+6. Je vérifie visuellement et avec la console.
+7. Je transforme les répétitions en fonctions et boucles.</code></pre>
+
+  <h3>17.2 Travail à remettre</h3>
+  <p>Organiser le projet comme suit :</p>
+  <pre><code>jour1/
+│
+├── index.html
+├── style.css
+└── script.js</code></pre>
+
+  <p>L'application doit comporter au minimum :</p>
+  <ul>
+    <li>une scène graphique complète ;</li>
+    <li>au moins un dégradé ;</li>
+    <li>au moins une forme construite avec un chemin ;</li>
+    <li>du texte ;</li>
+    <li>au moins une transformation ;</li>
+    <li>une utilisation propre de <code>save()</code>/<code>restore()</code> ;</li>
+    <li>un code suffisamment structuré pour identifier facilement les différentes parties
+        de la scène.</li>
+  </ul>
+
+  <div class="important">
+    <strong>Critère de réussite pédagogique :</strong>
+    <p>
+      Une image qui « ressemble à ce qui était demandé » ne suffit pas. L'étudiant doit
+      être capable d'expliquer le rôle des coordonnées, de chaque primitive, de l'état
+      graphique, des chemins et des transformations, et de justifier l'ordre dans lequel
+      les opérations ont été exécutées.
+    </p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p><strong>Programmation Multimédia — Jour 1 — Version approfondie</strong></p>
+  <p>Dessin 2D, repère graphique, styles, chemins, texte et transformations</p>
+  <p>HTML5 · CSS3 · JavaScript</p>
+</footer>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id), A=Math.PI/180;
+  function ctx(id){const c=$(id); return c&&c.getContext('2d')}
+  function axes(c, ox, oy, xEnd, yEnd, math=false){
+    c.save(); c.strokeStyle='#9aa3ad'; c.fillStyle='#4a5568'; c.lineWidth=1;
+    c.beginPath(); c.moveTo(ox,oy); c.lineTo(xEnd,oy); c.moveTo(ox,oy); c.lineTo(ox,yEnd); c.stroke();
+    c.font='12px Arial'; c.fillText('X',xEnd-16,oy-7); c.fillText('Y',ox+8,yEnd+14); c.fillText('(0,0)',ox+5,oy+16); c.restore();
+  }
+  function clear(c){c.clearRect(0,0,c.canvas.width,c.canvas.height)}
+  function pathTriangle(c){c.beginPath();c.moveTo(70,140);c.lineTo(190,45);c.lineTo(310,140);c.closePath()}
+  function draw(){
+    let c=ctx('cmpMath'); clear(c); axes(c,230,175,430,25,true); c.fillStyle='#2c5282'; c.beginPath(); c.arc(330,95,6,0,Math.PI*2); c.fill(); c.font='12px Arial'; c.fillText('(x,+y vers le haut)',275,35);
+    c=ctx('cmpCanvasAxis'); clear(c); axes(c,45,35,430,195); c.fillStyle='#2c5282'; c.beginPath(); c.arc(300,115,6,0,Math.PI*2); c.fill(); c.font='12px Arial'; c.fillText('Y augmente vers le bas',285,188);
+    c=ctx('cmpFillStrokeA'); clear(c); c.fillStyle='#b9c9dc'; c.fillRect(70,45,150,90); c.strokeStyle='#4a5568'; c.strokeRect(70,45,150,90); c.fillStyle='#2a3a55'; c.font='13px Arial'; c.fillText('surface',112,96);
+    c=ctx('cmpFillStrokeB'); clear(c); c.strokeStyle='#2c5282'; c.lineWidth=6; c.strokeRect(70,45,150,90); c.fillStyle='#2a3a55'; c.font='13px Arial'; c.fillText('contour',118,96);
+    c=ctx('cmpMoveTo'); clear(c); c.strokeStyle='#2c5282'; c.lineWidth=3; c.beginPath(); c.moveTo(70,130); c.moveTo(210,55); c.lineTo(350,130); c.stroke(); c.fillStyle='#8b2c2c'; c.beginPath(); c.arc(70,130,4,0,7); c.arc(210,55,4,0,7); c.arc(350,130,4,0,7); c.fill();
+    c=ctx('cmpLineTo'); clear(c); c.strokeStyle='#2c5282'; c.lineWidth=3; c.beginPath(); c.moveTo(70,130); c.lineTo(210,55); c.lineTo(350,130); c.stroke(); c.fillStyle='#8b2c2c'; [70,210,350].forEach((x,i)=>{let y=[130,55,130][i];c.beginPath();c.arc(x,y,4,0,7);c.fill()});
+    c=ctx('cmpFillPath'); clear(c); pathTriangle(c); c.fillStyle='#b9c9dc'; c.fill(); c.strokeStyle='#2c5282'; c.stroke();
+    c=ctx('cmpStrokePath'); clear(c); pathTriangle(c); c.strokeStyle='#2c5282'; c.lineWidth=5; c.stroke();
+    c=ctx('cmpNoBegin'); clear(c); c.strokeStyle='#2c5282'; c.lineWidth=3; c.beginPath(); c.moveTo(60,135); c.lineTo(170,45); c.lineTo(280,135); c.stroke(); c.moveTo(330,135); c.lineTo(390,60); c.stroke(); c.fillStyle='#8b2c2c'; c.font='12px Arial'; c.fillText('ancien + nouveau chemin',220,175);
+    c=ctx('cmpWithBegin'); clear(c); c.strokeStyle='#2c5282'; c.lineWidth=3; c.beginPath(); c.moveTo(60,135); c.lineTo(170,45); c.lineTo(280,135); c.stroke(); c.beginPath(); c.moveTo(330,135); c.lineTo(390,60); c.stroke();
+    c=ctx('cmpTranslateA'); clear(c); c.fillStyle='#b9c9dc'; c.fillRect(70,55,120,70); c.strokeStyle='#2c5282'; c.strokeRect(70,55,120,70); c.fillStyle='#8b2c2c'; c.beginPath(); c.arc(70,55,4,0,7); c.fill(); c.font='12px Arial'; c.fillText('origine',78,50);
+    c=ctx('cmpTranslateB'); clear(c); c.save(); c.translate(170,55); c.fillStyle='#b9c9dc'; c.fillRect(0,0,120,70); c.strokeStyle='#2c5282'; c.strokeRect(0,0,120,70); c.fillStyle='#8b2c2c'; c.beginPath(); c.arc(0,0,4,0,7); c.fill(); c.restore(); c.fillStyle='#2a3a55'; c.font='12px Arial'; c.fillText('nouvelle origine',175,48);
+    c=ctx('cmpRotateOrigin'); clear(c); c.save(); c.translate(55,180); c.rotate(-30*A); c.fillStyle='#b9c9dc'; c.fillRect(70,-95,120,70); c.strokeStyle='#2c5282'; c.strokeRect(70,-95,120,70); c.restore(); c.fillStyle='#8b2c2c'; c.beginPath(); c.arc(55,180,5,0,7); c.fill();
+    c=ctx('cmpRotateCenter'); clear(c); c.save(); c.translate(180,115); c.rotate(-30*A); c.fillStyle='#b9c9dc'; c.fillRect(-60,-35,120,70); c.strokeStyle='#2c5282'; c.strokeRect(-60,-35,120,70); c.restore(); c.fillStyle='#8b2c2c'; c.beginPath(); c.arc(180,115,5,0,7); c.fill();
+    c=ctx('cmpStateBad'); clear(c); c.strokeStyle='#2c5282'; c.lineWidth=10; c.strokeRect(45,45,120,90); c.lineWidth=10; c.strokeRect(250,65,120,50);
+    c=ctx('cmpStateGood'); clear(c); c.strokeStyle='#2c5282'; c.lineWidth=10; c.strokeRect(45,45,120,90); c.lineWidth=2; c.strokeRect(250,65,120,50);
+    c=ctx('cmpOrderTR'); clear(c); c.save(); c.translate(145,110); c.rotate(-25*A); c.fillStyle='#b9c9dc'; c.fillRect(0,-25,120,50); c.restore(); c.fillStyle='#8b2c2c'; c.beginPath(); c.arc(145,110,5,0,7); c.fill();
+    c=ctx('cmpOrderRT'); clear(c); c.save(); c.rotate(-25*A); c.translate(145,110); c.fillStyle='#b9c9dc'; c.fillRect(0,-25,120,50); c.restore(); c.fillStyle='#8b2c2c'; c.beginPath(); c.arc(145,110,5,0,7); c.fill();
+    c=ctx('cmpLinear'); clear(c); let g=c.createLinearGradient(30,0,420,0); g.addColorStop(0,'#b9c9dc'); g.addColorStop(1,'#2c5282'); c.fillStyle=g; c.fillRect(30,50,390,90);
+    c=ctx('cmpRadial'); clear(c); let r=c.createRadialGradient(230,95,10,230,95,150); r.addColorStop(0,'#b9c9dc'); r.addColorStop(1,'#2c5282'); c.fillStyle=r; c.fillRect(30,20,390,150);
+    interactive();
+  }
+  function interactive(){const c=ctx('cmpInteractiveRotate'); if(!c)return; clear(c); const deg=+$('angleDemo').value; $('angleValue').textContent=deg+'°'; c.save(); c.translate(380,130); c.rotate(deg*A); c.fillStyle='#b9c9dc'; c.fillRect(-75,-35,150,70); c.strokeStyle='#2c5282'; c.lineWidth=3; c.strokeRect(-75,-35,150,70); c.restore(); c.strokeStyle='#aaa'; c.setLineDash([5,5]); c.beginPath(); c.arc(380,130,95,0,7); c.stroke(); c.setLineDash([]); c.fillStyle='#8b2c2c'; c.beginPath(); c.arc(380,130,6,0,7); c.fill(); c.fillStyle='#2a3a55'; c.font='13px Arial'; c.fillText('pivot (centre)',390,122); }
+  document.addEventListener('DOMContentLoaded',()=>{draw(); const a=$('angleDemo'); if(a)a.addEventListener('input',interactive); const b=$('resetAngle'); if(b)b.addEventListener('click',()=>{a.value=0;interactive()});});
+})();
+</script>
+</body>
+</html>

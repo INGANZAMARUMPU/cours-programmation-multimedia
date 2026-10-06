@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programmation Multimédia — Jour 4 : Son numérique et Web Audio API</title>
+    <style>
+        :root {
+            --primary: #1a2b4a;
+            --secondary: #4a5568;
+            --accent: #2c5282;
+            --bg: #f7f7f5;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --muted: #4a4a4a;
+            --border: #c8c8c8;
+            --code-bg: #f4f4f0;
+            --code-border: #d0d0c8;
+            --warning-bg: #fdfaf2;
+            --warning-border: #b8860b;
+            --info-bg: #f2f6fa;
+            --info-border: #2c5282;
+            --success-bg: #f2f8f3;
+            --success-border: #2f6b3a;
+            --danger-bg: #faf3f3;
+            --danger-border: #8b2c2c;
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            font-family: "Times New Roman", "Liberation Serif", Georgia, serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 12pt;
+            line-height: 1.5;
+        }
+
+        header {
+            background: var(--primary);
+            color: #ffffff;
+            padding: 45px 25px 35px;
+            border-bottom: 3px solid #0f1a30;
+        }
+
+        .header-content { max-width: 1050px; margin: auto; }
+
+        header h1 {
+            font-size: 1.9rem;
+            margin: 0 0 6px;
+            font-weight: 700;
+        }
+
+        header h2 {
+            color: #d8e0ec;
+            border: none;
+            margin: 0 0 16px;
+            font-weight: 400;
+            font-size: 1.15rem;
+            font-style: italic;
+        }
+
+        header p {
+            font-size: 1rem;
+            max-width: 760px;
+            color: #e8edf4;
+        }
+
+        .badge {
+            display: inline-block;
+            background: transparent;
+            border: 1px solid #8fa3c0;
+            padding: 3px 10px;
+            border-radius: 2px;
+            margin: 3px 6px 3px 0;
+            font-size: 0.75rem;
+            font-family: Arial, Helvetica, sans-serif;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #d8e0ec;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #0f1a30;
+            border-bottom: 1px solid #2a3a55;
+        }
+
+        .nav-content {
+            max-width: 1050px;
+            margin: auto;
+            display: flex;
+            overflow-x: auto;
+            gap: 0;
+            padding: 4px 10px;
+        }
+
+        nav a {
+            color: #c8d4e4;
+            text-decoration: none;
+            padding: 9px 13px;
+            white-space: nowrap;
+            font-size: 0.82rem;
+            font-family: Arial, Helvetica, sans-serif;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.15s, color 0.15s;
+        }
+
+        nav a:hover {
+            color: #ffffff;
+            border-bottom-color: #8fa3c0;
+        }
+
+        main { max-width: 1050px; margin: auto; padding: 35px 20px; }
+
+        section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 28px 32px;
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.35rem;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 0;
+            margin-bottom: 18px;
+        }
+
+        h3 {
+            color: #2a3a55;
+            margin-top: 24px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        h4 {
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+
+        p { margin: 10px 0; }
+        ul, ol { padding-left: 28px; }
+        li { margin: 4px 0; }
+
+        .objectifs {
+            background: var(--info-bg);
+            border-left: 3px solid var(--info-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        .important {
+            background: var(--warning-bg);
+            border-left: 3px solid var(--warning-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        .success {
+            background: var(--success-bg);
+            border-left: 3px solid var(--success-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        .danger {
+            background: var(--danger-bg);
+            border-left: 3px solid var(--danger-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        .info {
+            background: var(--info-bg);
+            border-left: 3px solid var(--info-border);
+            padding: 16px 22px;
+            margin: 15px 0;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #1a1a1a;
+            padding: 16px 20px;
+            border: 1px solid var(--code-border);
+            overflow-x: auto;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 0.85rem;
+            line-height: 1.45;
+            margin: 14px 0;
+        }
+
+        code {
+            font-family: "Consolas", "Courier New", monospace;
+            background: #eeeeea;
+            color: #1a1a1a;
+            padding: 1px 5px;
+            font-size: 0.88em;
+            border: 1px solid #dcdcd6;
+        }
+
+        pre code {
+            background: transparent;
+            border: none;
+            padding: 0;
+            font-size: 0.85rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 9px 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #eef1f5;
+            color: #1a2b4a;
+            font-weight: 700;
+        }
+
+        tr:nth-child(even) { background: #fafaf8; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin: 18px 0;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            padding: 16px;
+            background: #fcfcfa;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--accent);
+            font-size: 1rem;
+        }
+
+        .exercise {
+            border: 1px solid #a0a0a0;
+            border-left: 3px solid var(--primary);
+            background: #fcfcfa;
+            padding: 18px 22px;
+            margin: 20px 0;
+        }
+
+        .level {
+            display: inline-block;
+            padding: 2px 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-family: Arial, Helvetica, sans-serif;
+            border: 1px solid;
+            margin-bottom: 8px;
+        }
+
+        .easy { background: #eef6ee; color: #2f6b3a; border-color: #2f6b3a; }
+        .medium { background: #fdf8ee; color: #8a6508; border-color: #8a6508; }
+        .hard { background: #f8eeee; color: #8b2c2c; border-color: #8b2c2c; }
+
+        .canvas-wrapper {
+            background: #1a1a1a;
+            padding: 14px;
+            border: 1px solid #333333;
+            margin: 18px 0;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            margin: auto;
+            background: #111111;
+            border: 1px solid #444444;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        button {
+            border: 1px solid #1a2b4a;
+            background: #1a2b4a;
+            color: #ffffff;
+            padding: 7px 16px;
+            cursor: pointer;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.85rem;
+            transition: background 0.15s;
+        }
+
+        button:hover { background: #2c5282; }
+        button.secondary { background: #ffffff; color: #1a2b4a; }
+        button.secondary:hover { background: #eef1f5; }
+        button.success { background: #2f6b3a; border-color: #2f6b3a; }
+        button.success:hover { background: #24522e; }
+
+        .key {
+            display: inline-block;
+            background: #ffffff;
+            border: 1px solid #888888;
+            padding: 4px 9px;
+            margin: 2px;
+            min-width: 30px;
+            text-align: center;
+            font-family: "Consolas", monospace;
+            font-size: 0.85rem;
+            box-shadow: 0 1px 0 #888888;
+        }
+
+        /* Piano virtuel */
+        .piano {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 2px;
+            flex-wrap: wrap;
+        }
+
+        .piano .touche {
+            width: 60px;
+            height: 180px;
+            background: #ffffff;
+            border: 1px solid #333333;
+            border-radius: 0 0 4px 4px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10px;
+            cursor: pointer;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.8rem;
+            color: #333333;
+            user-select: none;
+            transition: background 0.05s;
+        }
+
+        .piano .touche:hover {
+            background: #eef1f5;
+        }
+
+        .piano .touche.active {
+            background: #c8d4e4;
+            color: #0f1a30;
+            font-weight: 700;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 0.88rem;
+        }
+
+        .slider-row label {
+            min-width: 130px;
+            color: var(--text);
+        }
+
+        .slider-row input[type="range"] {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .slider-row .value {
+            min-width: 60px;
+            font-family: "Consolas", monospace;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        footer {
+            background: #1a2b4a;
+            color: #c8d4e4;
+            text-align: center;
+            padding: 28px 20px;
+            margin-top: 30px;
+            font-size: 0.85rem;
+            font-family: Arial, Helvetica, sans-serif;
+            border-top: 3px solid #0f1a30;
+        }
+
+        footer p { margin: 4px 0; }
+
+        @media (max-width: 700px) {
+            header h1 { font-size: 1.4rem; }
+            header h2 { font-size: 1rem; }
+            section { padding: 20px 18px; }
+            pre { font-size: 0.78rem; }
+            h2 { font-size: 1.15rem; }
+            .piano .touche { width: 44px; height: 140px; font-size: 0.7rem; }
+        }
+    
+/* ===== Illustrations pédagogiques intégrées ===== */
+.audio-illustration {
+    margin: 20px 0 24px;
+    border: 1px solid #b9c2cf;
+    background: #f8fafc;
+    padding: 16px;
+}
+.audio-illustration h4 { margin-top: 0; }
+.audio-illustration .caption {
+    margin: 8px 0 0;
+    color: #4a5568;
+    font-size: .92rem;
+    text-align: center;
+}
+.audio-illustration canvas {
+    width: 100%;
+    max-width: none;
+    height: auto;
+    background: #101820;
+    border: 1px solid #3c4652;
+}
+.audio-illustration .mini-controls {
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+    margin-top:10px;
+    font-family:Arial, sans-serif;
+    font-size:.88rem;
+}
+.audio-illustration .mini-controls input[type=range] { flex:1; min-width:160px; }
+.audio-illustration .readout {
+    min-width:95px;
+    font-family:Consolas,monospace;
+    color:#2c5282;
+    font-weight:bold;
+}
+.wave-grid {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+}
+.wave-card {
+    border:1px solid #c8c8c8;
+    background:#fff;
+    padding:10px;
+}
+.wave-card strong { display:block; margin-bottom:5px; color:#2a3a55; }
+@media(max-width:700px) {
+    .wave-grid { grid-template-columns:1fr; }
+}
+
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-content">
+        <span class="badge">Programmation Multimédia</span>
+        <span class="badge">Jour 4 / 6</span>
+        <span class="badge">Audio</span>
+        <span class="badge">Web Audio API</span>
+
+        <h1>Jour 4 — Son numérique et Web Audio API</h1>
+        <h2>Nature du son, synthèse et génération de signaux</h2>
+
+        <p>
+            Cette journée introduit la dimension audio du multimédia.
+            Elle couvre la nature physique du son, sa représentation
+            numérique, puis la génération de signaux avec la Web Audio API.
+        </p>
+
+        <p>
+            <strong>Durée :</strong> 5 heures &nbsp;|&nbsp;
+            <strong>Prérequis :</strong> Jours 1 à 3 (Canvas, animation, interaction)
+        </p>
+    </div>
+</header>
+
+
+<nav>
+    <div class="nav-content">
+        <a href="#objectifs">Objectifs</a>
+        <a href="#nature">Nature du son</a>
+        <a href="#numerisation">Numérisation</a>
+        <a href="#formats">Formats et compression</a>
+        <a href="#audio-html">Élément audio</a>
+        <a href="#webaudio">Web Audio API</a>
+        <a href="#graphe">Graphe audio</a>
+        <a href="#oscillateurs">Oscillateurs</a>
+        <a href="#enveloppe">Enveloppe</a>
+        <a href="#filtres">Filtres</a>
+        <a href="#tp1">TP1 — Piano virtuel</a>
+        <a href="#tp2">TP2 — Synthétiseur</a>
+        <a href="#demo">Démonstration</a>
+        <a href="#bilan">Bilan</a>
+    </div>
+</nav>
+
+
+<main>
+
+<!-- OBJECTIFS -->
+
+<section id="objectifs">
+    <h2>1. Objectifs pédagogiques</h2>
+
+    <div class="objectifs">
+        <p>
+            À l'issue de cette quatrième journée, l'étudiant doit être capable de :
+        </p>
+        <ul>
+            <li>décrire la nature physique du son (onde, fréquence, amplitude) ;</li>
+            <li>expliquer la numérisation (échantillonnage, quantification) ;</li>
+            <li>distinguer les principaux formats audio et leurs usages ;</li>
+            <li>utiliser l'élément <code>&lt;audio&gt;</code> pour une lecture simple ;</li>
+            <li>créer un contexte audio avec <code>AudioContext</code> ;</li>
+            <li>générer un son avec un <code>OscillatorNode</code> ;</li>
+            <li>contrôler le volume avec un <code>GainNode</code> ;</li>
+            <li>façonner une enveloppe sonore (attack, decay, sustain, release) ;</li>
+            <li>filtrer un signal avec un <code>BiquadFilterNode</code>.</li>
+        </ul>
+    </div>
+
+    <h3>Organisation de la journée</h3>
+    <table>
+        <tr><th>Activité</th><th>Durée</th></tr>
+        <tr><td>Cours — Nature du son et numérisation</td><td>1 h 00</td></tr>
+        <tr><td>Cours — Web Audio API et graphe audio</td><td>1 h 00</td></tr>
+        <tr><td>TP guidé — Piano virtuel</td><td>1 h 15</td></tr>
+        <tr><td>Cours — Enveloppe et filtres</td><td>0 h 45</td></tr>
+        <tr><td>TP — Synthétiseur paramétrable</td><td>0 h 45</td></tr>
+        <tr><td>Synthèse et questions</td><td>0 h 15</td></tr>
+    </table>
+</section>
+
+
+<!-- NATURE DU SON -->
+
+<section id="nature">
+    <h2>2. Nature physique du son</h2>
+
+    <p>
+        Le son est une <strong>onde de pression</strong> qui se propage
+        dans un milieu matériel (air, eau, solide). Un haut-parleur
+        produit cette onde en faisant vibrer une membrane ; notre oreille
+        la perçoit comme un son.
+    </p>
+
+<div class="audio-illustration">
+    <h4>Visualisation — le son est une onde de pression</h4>
+    <canvas id="soundPropagation" width="900" height="230"></canvas>
+    <div class="mini-controls">
+        <button id="propToggle">Pause</button>
+        <label>Fréquence de vibration
+            <input id="propFreq" type="range" min="0.5" max="2.5" step="0.1" value="1">
+        </label>
+        <span class="readout" id="propFreqVal">1.0×</span>
+    </div>
+    <p class="caption">
+        Les points représentent des particules du milieu. Les zones où elles se rapprochent
+        correspondent aux compressions ; les zones où elles s'écartent correspondent aux raréfactions.
+        L'onde se propage alors que les particules oscillent localement.
+    </p>
+</div>
+
+
+    <h3>Caractéristiques d'un son</h3>
+
+    <table>
+        <tr>
+            <th>Grandeur</th>
+            <th>Unité</th>
+            <th>Signification perceptive</th>
+        </tr>
+        <tr>
+            <td>Fréquence</td>
+            <td>Hertz (Hz)</td>
+            <td>Hauteur du son (grave / aigu)</td>
+        </tr>
+        <tr>
+            <td>Amplitude</td>
+            <td>Décibel (dB)</td>
+            <td>Volume (fort / faible)</td>
+        </tr>
+        <tr>
+            <td>Timbre</td>
+            <td>—</td>
+            <td>Forme de l'onde (piano / violon / voix)</td>
+        </tr>
+        <tr>
+            <td>Durée</td>
+            <td>Seconde (s)</td>
+            <td>Longueur du son</td>
+        </tr>
+    </table>
+
+    <h3>Domaine audible</h3>
+
+    <p>
+        L'oreille humaine perçoit les fréquences comprises entre environ
+        <strong>20 Hz</strong> et <strong>20 000 Hz</strong>. En dessous,
+        ce sont des infrasons ; au-dessus, des ultrasons.
+    </p>
+
+    <div class="info">
+        <strong>Repères pratiques :</strong>
+        <ul>
+            <li>La note <em>La</em> du diapason : <strong>440 Hz</strong>.</li>
+            <li>Le <em>Do</em> médian du piano : environ <strong>261,6 Hz</strong>.</li>
+            <li>Une octave correspond à un doublement de fréquence :
+                <code>440 Hz × 2 = 880 Hz</code>.</li>
+        </ul>
+    </div>
+
+
+<div class="audio-illustration">
+    <h4>Visualisation — fréquence et amplitude</h4>
+    <canvas id="freqAmpCanvas" width="900" height="250"></canvas>
+    <div class="mini-controls">
+        <label>Fréquence
+            <input id="faFreq" type="range" min="100" max="1000" step="10" value="440">
+        </label>
+        <span class="readout" id="faFreqVal">440 Hz</span>
+        <label>Amplitude
+            <input id="faAmp" type="range" min="0.15" max="1" step="0.05" value="0.65">
+        </label>
+        <span class="readout" id="faAmpVal">0.65</span>
+    </div>
+    <p class="caption">
+        Augmenter la fréquence rapproche les oscillations : le son devient plus aigu.
+        Augmenter l'amplitude augmente l'écart vertical de la représentation : le signal est plus intense.
+    </p>
+</div>
+
+    <h3>Forme d'onde</h3>
+
+    <p>
+        Un son pur est une <strong>sinusoïde</strong>. Les sons réels
+        sont composés d'une fréquence fondamentale et d'harmoniques.
+        La forme de l'onde détermine le timbre.
+    </p>
+
+    <table>
+        <tr><th>Forme d'onde</th><th>Caractère sonore</th></tr>
+        <tr><td>Sinusoïdale (sine)</td><td>Son pur, doux</td></tr>
+        <tr><td>Carrée (square)</td><td>Son creux, électronique</td></tr>
+        <tr><td>Triangulaire (triangle)</td><td>Son doux, proche du sine mais plus brillant</td></tr>
+        <tr><td>Dent de scie (sawtooth)</td><td>Son riche, brillant, cuivré</td></tr>
+    </table>
+
+
+<div class="audio-illustration">
+    <h4>Visualisation — la forme d'onde et le timbre</h4>
+    <div class="wave-grid">
+        <div class="wave-card"><strong>Sinusoïde — son pur</strong><canvas id="waveSine" width="420" height="130"></canvas></div>
+        <div class="wave-card"><strong>Carrée — riche en harmoniques</strong><canvas id="waveSquare" width="420" height="130"></canvas></div>
+        <div class="wave-card"><strong>Triangulaire</strong><canvas id="waveTriangle" width="420" height="130"></canvas></div>
+        <div class="wave-card"><strong>Dent de scie</strong><canvas id="waveSaw" width="420" height="130"></canvas></div>
+    </div>
+    <p class="caption">
+        Les quatre signaux ont la même période, mais pas la même forme.
+        C'est notamment cette composition harmonique différente qui contribue au timbre.
+    </p>
+</div>
+
+</section>
+
+
+<!-- NUMERISATION -->
+
+<section id="numerisation">
+    <h2>3. Numérisation du son</h2>
+
+    <p>
+        Un ordinateur ne peut pas stocker une onde continue. Il faut
+        la <strong>numériser</strong>, c'est-à-dire la transformer en
+        une suite de nombres.
+    </p>
+
+    <h3>Échantillonnage</h3>
+
+    <p>
+        On mesure l'amplitude de l'onde à intervalles réguliers.
+        Le nombre de mesures par seconde est la <strong>fréquence
+        d'échantillonnage</strong>.
+    </p>
+
+    <table>
+        <tr><th>Fréquence d'échantillonnage</th><th>Usage typique</th></tr>
+        <tr><td>8 000 Hz</td><td>Téléphone</td></tr>
+        <tr><td>22 050 Hz</td><td>Qualité radio</td></tr>
+        <tr><td>44 100 Hz</td><td>CD audio</td></tr>
+        <tr><td>48 000 Hz</td><td>Vidéo, cinéma</td></tr>
+        <tr><td>96 000 Hz</td><td>Studio haute résolution</td></tr>
+    </table>
+
+
+<div class="audio-illustration">
+    <h4>Visualisation — échantillonnage</h4>
+    <canvas id="samplingCanvas" width="900" height="280"></canvas>
+    <div class="mini-controls">
+        <label>Fréquence d'échantillonnage relative
+            <input id="sampleRate" type="range" min="8" max="60" step="1" value="28">
+        </label>
+        <span class="readout" id="sampleRateVal">28 points</span>
+    </div>
+    <p class="caption">
+        La courbe continue représente le signal analogique ; les points représentent
+        les mesures prises par l'ordinateur. Avec moins d'échantillons, la représentation
+        devient plus grossière.
+    </p>
+</div>
+
+    <h3>Théorème de Nyquist-Shannon</h3>
+
+    <p>
+        Pour restituer correctement un son de fréquence <code>f</code>,
+        il faut échantillonner à une fréquence au moins égale à
+        <code>2f</code>. C'est pourquoi le CD utilise 44 100 Hz : il permet
+        de reproduire des sons jusqu'à 22 050 Hz, soit la limite de
+        l'audition humaine.
+    </p>
+
+    <h3>Quantification</h3>
+
+    <p>
+        Chaque échantillon est arrondi à une valeur entière. Le nombre
+        de bits détermine la <strong>résolution</strong> :
+    </p>
+
+    <ul>
+        <li>8 bits : 256 niveaux (qualité faible) ;</li>
+        <li>16 bits : 65 536 niveaux (qualité CD) ;</li>
+        <li>24 bits : 16,7 millions de niveaux (studio).</li>
+    </ul>
+
+
+<div class="audio-illustration">
+    <h4>Visualisation — quantification</h4>
+    <canvas id="quantCanvas" width="900" height="280"></canvas>
+    <div class="mini-controls">
+        <label>Résolution
+            <input id="quantBits" type="range" min="2" max="8" step="1" value="4">
+        </label>
+        <span class="readout" id="quantBitsVal">4 bits — 16 niveaux</span>
+    </div>
+    <p class="caption">
+        Après l'échantillonnage, chaque mesure est arrondie vers un niveau disponible.
+        Plus le nombre de bits est élevé, plus les niveaux sont nombreux et fins.
+    </p>
+</div>
+
+
+    <div class="important">
+        <strong>Compromis fondamental :</strong>
+        <p>
+            Plus la fréquence d'échantillonnage et la résolution sont
+            élevées, plus la qualité est bonne — mais plus le fichier
+            est volumineux.
+        </p>
+    </div>
+
+    <h3>Calcul de taille</h3>
+
+    <p>
+        Taille d'un fichier audio non compressé :
+    </p>
+
+<pre><code>taille (octets) =
+    fréquence × bits/8 × canaux × durée</code></pre>
+
+    <p>Exemple pour 1 minute en qualité CD stéréo :</p>
+
+<pre><code>44 100 × 2 × 2 × 60 = 10 584 000 octets ≈ 10,1 Mo</code></pre>
+</section>
+
+
+<!-- FORMATS -->
+
+<section id="formats">
+    <h2>4. Formats et compression</h2>
+
+    <p>
+        Pour réduire la taille des fichiers, on utilise des
+        <strong>codecs</strong>. On distingue deux familles :
+    </p>
+
+    <h3>Compression sans perte</h3>
+
+    <p>
+        Le son est reconstruit à l'identique. Le gain de taille est
+        modéré (30 à 50 %).
+    </p>
+
+    <ul>
+        <li>FLAC</li>
+        <li>ALAC</li>
+        <li>WAV (non compressé, mais souvent cité comme référence)</li>
+    </ul>
+
+    <h3>Compression avec perte</h3>
+
+    <p>
+        On supprime les informations peu perceptibles par l'oreille
+        (modèle psychoacoustique). Le gain est important (facteur 5 à 10),
+        mais la qualité est dégradée.
+    </p>
+
+    <ul>
+        <li>MP3</li>
+        <li>AAC (utilisé par les plateformes de streaming)</li>
+        <li>OGG Vorbis</li>
+        <li>Opus (moderne, très efficace)</li>
+    </ul>
+
+    <table>
+        <tr><th>Format</th><th>Type</th><th>Usage</th></tr>
+        <tr><td>WAV</td><td>Non compressé</td><td>Édition, masterisation</td></tr>
+        <tr><td>FLAC</td><td>Sans perte</td><td>Archivage, audiophiles</td></tr>
+        <tr><td>MP3</td><td>Avec perte</td><td>Diffusion générale</td></tr>
+        <tr><td>AAC</td><td>Avec perte</td><td>Streaming, mobile</td></tr>
+        <tr><td>Opus</td><td>Avec perte</td><td>Web moderne, visioconférence</td></tr>
+    </table>
+</section>
+
+
+<!-- AUDIO HTML -->
+
+<section id="audio-html">
+    <h2>5. Lecture simple avec l'élément audio</h2>
+
+    <p>
+        HTML5 fournit un élément natif pour lire un fichier audio :
+    </p>
+
+<pre><code>&lt;audio id="lecteur" controls&gt;
+    &lt;source src="musique.mp3" type="audio/mpeg"&gt;
+    Votre navigateur ne supporte pas l'audio HTML5.
+&lt;/audio&gt;</code></pre>
+
+    <p>
+        On peut aussi le contrôler entièrement en JavaScript :
+    </p>
+
+<pre><code>const lecteur = document.getElementById("lecteur");
+
+lecteur.play();
+lecteur.pause();
+lecteur.currentTime = 10;   // aller à 10 secondes
+lecteur.volume = 0.5;       // 50 %
+lecteur.loop = true;</code></pre>
+
+    <h3>Limites de l'élément audio</h3>
+
+    <ul>
+        <li>pas d'accès direct au signal ;</li>
+        <li>pas de filtrage ni d'effets ;</li>
+        <li>pas de synchronisation précise avec une animation.</li>
+    </ul>
+
+    <div class="info">
+        <strong>Pour aller plus loin :</strong>
+        <p>
+            La <strong>Web Audio API</strong> donne un accès bas niveau
+            au signal et permet la génération, le filtrage et l'analyse
+            en temps réel. C'est l'objet de la suite de cette journée.
+        </p>
+    </div>
+</section>
+
+
+<!-- WEB AUDIO -->
+
+<section id="webaudio">
+    <h2>6. Introduction à la Web Audio API</h2>
+
+    <p>
+        La Web Audio API modélise le traitement audio comme un
+        <strong>graphe de nœuds</strong>. Chaque nœud produit, transforme
+        ou consomme un signal audio.
+    </p>
+
+    <h3>Le contexte audio</h3>
+
+<pre><code>const audioCtx = new AudioContext();</code></pre>
+
+    <p>
+        Le contexte est le point d'entrée de toute opération audio.
+        Il gère l'horloge, la fréquence d'échantillonnage et le graphe.
+    </p>
+
+    <div class="important">
+        <strong>Politique des navigateurs :</strong>
+        <p>
+            Pour des raisons d'expérience utilisateur, un contexte audio
+            ne peut démarrer qu'après une <strong>action de l'utilisateur</strong>
+            (clic, appui sur une touche). Il faut donc souvent appeler
+            <code>audioCtx.resume()</code> après un clic.
+        </p>
+    </div>
+
+    <h3>État du contexte</h3>
+
+<pre><code>if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+}</code></pre>
+
+    <h3>Destination</h3>
+
+    <p>
+        Tout signal doit finir par atteindre la sortie audio :
+    </p>
+
+<pre><code>audioCtx.destination</code></pre>
+</section>
+
+
+<!-- GRAPHE -->
+
+<section id="graphe">
+    <h2>7. Graphe audio</h2>
+
+    <p>
+        Un graphe audio est un ensemble de nœuds connectés. On branche
+        la sortie d'un nœud sur l'entrée d'un autre avec
+        <code>connect()</code>.
+    </p>
+
+    <h3>Structure de base</h3>
+
+<pre><code>source → traitement → destination</code></pre>
+
+
+<div class="audio-illustration">
+    <h4>Visualisation — le graphe audio</h4>
+    <canvas id="audioGraphCanvas" width="900" height="230"></canvas>
+    <p class="caption">
+        Un graphe typique fait circuler le signal de gauche à droite :
+        source → traitement → sortie. Chaque bloc correspond à un nœud de la Web Audio API.
+    </p>
+</div>
+
+
+    <h3>Exemple minimal</h3>
+
+<pre><code>const audioCtx = new AudioContext();
+
+const oscillateur = audioCtx.createOscillator();
+const gain = audioCtx.createGain();
+
+oscillateur.connect(gain);
+gain.connect(audioCtx.destination);
+
+oscillateur.start();</code></pre>
+
+    <p>
+        Ce code produit un son continu. Pour l'arrêter :
+    </p>
+
+<pre><code>oscillateur.stop();</code></pre>
+
+    <h3>Types de nœuds courants</h3>
+
+    <table>
+        <tr><th>Nœud</th><th>Rôle</th></tr>
+        <tr><td><code>OscillatorNode</code></td><td>Génère un signal périodique</td></tr>
+        <tr><td><code>GainNode</code></td><td>Contrôle le volume</td></tr>
+        <tr><td><code>BiquadFilterNode</code></td><td>Filtre fréquentiel</td></tr>
+        <tr><td><code>DelayNode</code></td><td>Retard (écho)</td></tr>
+        <tr><td><code>ConvolverNode</code></td><td>Réverbération</td></tr>
+        <tr><td><code>AnalyserNode</code></td><td>Analyse temps réel (FFT)</td></tr>
+        <tr><td><code>AudioBufferSourceNode</code></td><td>Lecture d'un buffer</td></tr>
+        <tr><td><code>MediaElementSourceNode</code></td><td>Source depuis un élément audio/vidéo</td></tr>
+    </table>
+</section>
+
+
+<!-- OSCILLATEURS -->
+
+<section id="oscillateurs">
+    <h2>8. Générer un son : les oscillateurs</h2>
+
+    <p>
+        Un <code>OscillatorNode</code> produit un signal périodique
+        à une fréquence donnée.
+    </p>
+
+    <h3>Paramètres principaux</h3>
+
+    <table>
+        <tr><th>Paramètre</th><th>Type</th><th>Valeurs</th></tr>
+        <tr>
+            <td><code>type</code></td>
+            <td>chaîne</td>
+            <td><code>"sine"</code>, <code>"square"</code>,
+                <code>"triangle"</code>, <code>"sawtooth"</code></td>
+        </tr>
+        <tr>
+            <td><code>frequency</code></td>
+            <td>AudioParam</td>
+            <td>fréquence en Hz</td>
+        </tr>
+    </table>
+
+    <h3>Exemple</h3>
+
+
+<div class="audio-illustration">
+    <h4>Visualisation interactive — OscillatorNode</h4>
+    <canvas id="oscCanvas" width="900" height="250"></canvas>
+    <div class="mini-controls">
+        <label>Forme
+            <select id="oscShape">
+                <option value="sine">Sinusoïdale</option>
+                <option value="square">Carrée</option>
+                <option value="triangle">Triangulaire</option>
+                <option value="sawtooth">Dent de scie</option>
+            </select>
+        </label>
+        <label>Fréquence
+            <input id="oscFreq" type="range" min="100" max="1000" step="10" value="440">
+        </label>
+        <span class="readout" id="oscFreqVal">440 Hz</span>
+    </div>
+    <p class="caption">
+        Ici on ne joue pas seulement le son : on voit directement le signal produit par l'oscillateur.
+        La fréquence modifie la période ; la forme modifie le timbre.
+    </p>
+</div>
+
+
+<pre><code>const osc = audioCtx.createOscillator();
+
+osc.type = "sine";
+osc.frequency.value = 440;   // La 440 Hz
+
+osc.connect(audioCtx.destination);
+osc.start();
+
+// Arrêt après 1 seconde
+setTimeout(() => osc.stop(), 1000);</code></pre>
+
+    <h3>Table des fréquences (gamme tempérée)</h3>
+
+    <table>
+        <tr>
+            <th>Note</th><th>Fréquence (Hz)</th>
+            <th>Note</th><th>Fréquence (Hz)</th>
+        </tr>
+        <tr><td>Do4</td><td>261,63</td><td>Sol4</td><td>392,00</td></tr>
+        <tr><td>Ré4</td><td>293,66</td><td>La4</td><td>440,00</td></tr>
+        <tr><td>Mi4</td><td>329,63</td><td>Si4</td><td>493,88</td></tr>
+        <tr><td>Fa4</td><td>349,23</td><td>Do5</td><td>523,25</td></tr>
+    </table>
+
+    <div class="info">
+        <strong>Formule de calcul :</strong>
+        <p>
+            Pour une note située <code>n</code> demi-tons au-dessus du
+            La 440 :
+        </p>
+<pre><code>fréquence = 440 × 2^(n / 12)</code></pre>
+    </div>
+</section>
+
+
+<!-- ENVELOPPE -->
+
+<section id="enveloppe">
+    <h2>9. Façonner le son : enveloppe</h2>
+
+    <p>
+        Un son brut qui commence et s'arrête brutalement produit un
+        clic désagréable. On façonne son amplitude avec une
+        <strong>enveloppe ADSR</strong> :
+    </p>
+
+    <table>
+        <tr><th>Phase</th><th>Signification</th></tr>
+        <tr><td>Attack</td><td>Temps pour atteindre le volume maximal</td></tr>
+        <tr><td>Decay</td><td>Temps pour redescendre au volume de maintien</td></tr>
+        <tr><td>Sustain</td><td>Volume maintenu tant que la note est tenue</td></tr>
+        <tr><td>Release</td><td>Temps pour revenir à zéro après relâchement</td></tr>
+    </table>
+
+
+<div class="audio-illustration">
+    <h4>Visualisation — enveloppe ADSR</h4>
+    <canvas id="adsrCanvas" width="900" height="270"></canvas>
+    <div class="mini-controls">
+        <label>Attack <input id="adsrA" type="range" min="0.05" max="1.2" step="0.05" value="0.2"></label>
+        <label>Decay <input id="adsrD" type="range" min="0.05" max="1" step="0.05" value="0.35"></label>
+        <label>Sustain <input id="adsrS" type="range" min="0.15" max="1" step="0.05" value="0.55"></label>
+        <label>Release <input id="adsrR" type="range" min="0.1" max="1.5" step="0.05" value="0.5"></label>
+    </div>
+    <p class="caption">
+        L'enveloppe décrit l'évolution du volume dans le temps : montée (Attack),
+        descente vers le niveau de maintien (Decay), maintien (Sustain), puis extinction (Release).
+    </p>
+</div>
+
+
+    <h3>Implémentation avec un GainNode</h3>
+
+<pre><code>const gain = audioCtx.createGain();
+gain.gain.value = 0;
+
+const maintenant = audioCtx.currentTime;
+
+// Attaque
+gain.gain.linearRampToValueAtTime(0.5, maintenant + 0.05);
+
+// Decay
+gain.gain.linearRampToValueAtTime(0.3, maintenant + 0.2);
+
+// Sustain (maintien)
+gain.gain.setValueAtTime(0.3, maintenant + 0.2);</code></pre>
+
+    <p>Puis, au relâchement de la touche :</p>
+
+<pre><code>const maintenant = audioCtx.currentTime;
+gain.gain.cancelScheduledValues(maintenant);
+gain.gain.setValueAtTime(gain.gain.value, maintenant);
+gain.gain.linearRampToValueAtTime(0, maintenant + 0.3);</code></pre>
+
+    <h3>Méthodes de programmation</h3>
+
+    <table>
+        <tr><th>Méthode</th><th>Effet</th></tr>
+        <tr><td><code>setValueAtTime(v, t)</code></td><td>Valeur fixe à un instant</td></tr>
+        <tr><td><code>linearRampToValueAtTime(v, t)</code></td><td>Ramp linéaire</td></tr>
+        <tr><td><code>exponentialRampToValueAtTime(v, t)</code></td><td>Ramp exponentielle</td></tr>
+        <tr><td><code>cancelScheduledValues(t)</code></td><td>Annuler les événements programmés</td></tr>
+    </table>
+</section>
+
+
+<!-- FILTRES -->
+
+<section id="filtres">
+    <h2>10. Filtres fréquentiels</h2>
+
+    <p>
+        Un <code>BiquadFilterNode</code> atténue ou amplifie certaines
+        fréquences du signal.
+    </p>
+
+    <h3>Types de filtres</h3>
+
+    <table>
+        <tr><th>Type</th><th>Effet</th></tr>
+        <tr><td><code>lowpass</code></td><td>Conserve les basses, atténue les aiguës</td></tr>
+        <tr><td><code>highpass</code></td><td>Conserve les aiguës, atténue les basses</td></tr>
+        <tr><td><code>bandpass</code></td><td>Conserve une bande de fréquences</td></tr>
+        <tr><td><code>notch</code></td><td>Supprime une bande étroite</td></tr>
+        <tr><td><code>lowshelf</code></td><td>Amplifie ou atténue les basses</td></tr>
+        <tr><td><code>highshelf</code></td><td>Amplifie ou atténue les aiguës</td></tr>
+        <tr><td><code>peaking</code></td><td>Amplifie ou atténue une bande centrale</td></tr>
+    </table>
+
+
+<div class="audio-illustration">
+    <h4>Visualisation — filtre passe-bas</h4>
+    <canvas id="filterCanvas" width="900" height="280"></canvas>
+    <div class="mini-controls">
+        <label>Fréquence de coupure
+            <input id="filterCut" type="range" min="200" max="8000" step="50" value="1200">
+        </label>
+        <span class="readout" id="filterCutVal">1200 Hz</span>
+    </div>
+    <p class="caption">
+        Un passe-bas laisse davantage passer les basses fréquences et atténue progressivement
+        les fréquences situées au-dessus de la coupure.
+    </p>
+</div>
+
+
+    <h3>Paramètres</h3>
+
+    <table>
+        <tr><th>Paramètre</th><th>Rôle</th></tr>
+        <tr><td><code>frequency</code></td><td>Fréquence de coupure (Hz)</td></tr>
+        <tr><td><code>Q</code></td><td>Largeur de la bande (facteur de qualité)</td></tr>
+        <tr><td><code>gain</code></td><td>Amplification (pour shelf et peaking)</td></tr>
+    </table>
+
+    <h3>Exemple : filtre passe-bas</h3>
+
+<pre><code>const filtre = audioCtx.createBiquadFilter();
+
+filtre.type = "lowpass";
+filtre.frequency.value = 800;
+filtre.Q.value = 1;
+
+oscillateur.connect(filtre);
+filtre.connect(audioCtx.destination);</code></pre>
+</section>
+
+
+<!-- TP1 -->
+
+<section id="tp1">
+    <h2>11. TP 1 — Piano virtuel</h2>
+
+    <div class="exercise">
+        <span class="level medium">Moyen</span>
+
+        <h3>Objectif</h3>
+        <p>
+            Construire un piano virtuel de 8 touches (Do4 à Do5)
+            jouable au clavier et à la souris.
+        </p>
+
+        <h3>Étapes</h3>
+        <ol>
+            <li>Créer un <code>AudioContext</code> au premier clic.</li>
+            <li>Associer chaque touche à une fréquence.</li>
+            <li>Au <code>keydown</code>, créer un oscillateur
+                et un gain, puis appliquer une enveloppe d'attaque.</li>
+            <li>Au <code>keyup</code>, déclencher la phase de release
+                et arrêter l'oscillateur après la rampe.</li>
+            <li>Idem pour les clics souris.</li>
+        </ol>
+
+        <h3>Indice</h3>
+        <p>
+            Conservez une référence à l'oscillateur actif par touche
+            pour pouvoir l'arrêter au bon moment.
+        </p>
+    </div>
+</section>
+
+
+<!-- TP2 -->
+
+<section id="tp2">
+    <h2>12. TP 2 — Synthétiseur paramétrable</h2>
+
+    <div class="exercise">
+        <span class="level hard">Difficile</span>
+
+        <h3>Objectif</h3>
+        <p>
+            Ajouter des contrôles à l'instrument : forme d'onde,
+            fréquence de coupure, résonance, volume.
+        </p>
+
+        <h3>Contraintes</h3>
+        <ul>
+            <li>Un sélecteur pour le type d'oscillateur ;</li>
+            <li>Un curseur pour la fréquence du filtre passe-bas ;</li>
+            <li>Un curseur pour le Q du filtre ;</li>
+            <li>Un curseur pour le volume général ;</li>
+            <li>Les modifications s'appliquent en temps réel
+                (sur les notes suivantes et/ou sur la note en cours).</li>
+        </ul>
+
+        <h3>Extension</h3>
+        <p>
+            Ajouter un second oscillateur désaccordé (detune)
+            pour un son plus riche.
+        </p>
+    </div>
+</section>
+
+
+<!-- DEMO -->
+
+<section id="demo">
+    <h2>13. Démonstration interactive</h2>
+
+    <p>
+        Cliquez sur une touche du piano (ou utilisez votre clavier)
+        pour jouer une note. Cliquez d'abord sur « Activer l'audio »
+        pour satisfaire la politique des navigateurs.
+    </p>
+
+    <div class="controls">
+        <button id="btnActiver">Activer l'audio</button>
+    </div>
+
+    <div class="piano" id="piano">
+        <div class="touche" data-freq="261.63" data-note="Do4">Do4</div>
+        <div class="touche" data-freq="293.66" data-note="Ré4">Ré4</div>
+        <div class="touche" data-freq="329.63" data-note="Mi4">Mi4</div>
+        <div class="touche" data-freq="349.23" data-note="Fa4">Fa4</div>
+        <div class="touche" data-freq="392.00" data-note="Sol4">Sol4</div>
+        <div class="touche" data-freq="440.00" data-note="La4">La4</div>
+        <div class="touche" data-freq="493.88" data-note="Si4">Si4</div>
+        <div class="touche" data-freq="523.25" data-note="Do5">Do5</div>
+    </div>
+
+    <div style="max-width: 800px; margin: 15px auto 0;">
+        <div class="slider-row">
+            <label for="typeOsc">Forme d'onde</label>
+            <select id="typeOsc" style="font-family: Arial; padding: 4px;">
+                <option value="sine">Sinusoïdale</option>
+                <option value="square">Carrée</option>
+                <option value="triangle">Triangulaire</option>
+                <option value="sawtooth">Dent de scie</option>
+            </select>
+        </div>
+        <div class="slider-row">
+            <label for="cutoff">Filtre passe-bas</label>
+            <input type="range" id="cutoff" min="200" max="8000" step="50" value="8000">
+            <span class="value" id="cutoffVal">8000 Hz</span>
+        </div>
+        <div class="slider-row">
+            <label for="volume">Volume</label>
+            <input type="range" id="volume" min="0" max="1" step="0.05" value="0.3">
+            <span class="value" id="volumeVal">0.30</span>
+        </div>
+    </div>
+
+    <div class="info">
+        <strong>À observer :</strong>
+        <ul>
+            <li>La forme d'onde change le timbre.</li>
+            <li>Le filtre passe-bas adoucit le son en coupant les aigus.</li>
+            <li>Le volume agit sur le gain général.</li>
+        </ul>
+    </div>
+</section>
+
+
+<!-- BILAN -->
+
+<section id="bilan">
+    <h2>14. À retenir — Jour 4</h2>
+
+    <div class="success">
+        <ul>
+            <li>Le son est une onde de pression caractérisée par sa fréquence,
+                son amplitude et son timbre.</li>
+            <li>La numérisation repose sur l'échantillonnage et la quantification.</li>
+            <li>Le théorème de Nyquist-Shannon impose une fréquence
+                d'échantillonnage au moins double de la fréquence maximale.</li>
+            <li>Les formats audio se divisent en compression sans perte
+                (FLAC) et avec perte (MP3, AAC, Opus).</li>
+            <li>La Web Audio API modélise le traitement audio comme un
+                graphe de nœuds.</li>
+            <li>Un oscillateur génère un signal périodique ; un gain
+                contrôle le volume ; un filtre atténue certaines fréquences.</li>
+            <li>L'enveloppe ADSR façonne l'amplitude dans le temps.</li>
+        </ul>
+    </div>
+
+    <h3>Travail à remettre pour le Jour 4</h3>
+
+    <p>Chaque étudiant remet un instrument audio organisé comme suit :</p>
+
+<pre><code>jour4/
+│
+├── index.html
+├── style.css
+└── script.js</code></pre>
+
+    <p>L'application doit comporter :</p>
+    <ul>
+        <li>au moins 5 notes jouables ;</li>
+        <li>une enveloppe ADSR ;</li>
+        <li>un contrôle de forme d'onde ;</li>
+        <li>un filtre passe-bas réglable ;</li>
+        <li>un contrôle de volume.</li>
+    </ul>
+</section>
+
+
+</main>
+
+
+<footer>
+    <p><strong>Programmation Multimédia — Jour 4</strong></p>
+    <p>Son numérique et Web Audio API</p>
+    <p>HTML5 · CSS3 · JavaScript</p>
+</footer>
+
+
+<!-- =====================================================
+     JAVASCRIPT DE LA DEMONSTRATION
+====================================================== -->
+
+<script>
+    let audioCtx = null;
+    let filtreGlobal = null;
+    let gainGlobal = null;
+
+    const notesActives = {};   // index → { osc, gain }
+
+    /* ==============================
+       INITIALISATION
+    =============================== */
+
+    function initialiserAudio() {
+        if (audioCtx) return;
+
+        audioCtx = new AudioContext();
+
+        filtreGlobal = audioCtx.createBiquadFilter();
+        filtreGlobal.type = "lowpass";
+        filtreGlobal.frequency.value = 8000;
+        filtreGlobal.Q.value = 1;
+
+        gainGlobal = audioCtx.createGain();
+        gainGlobal.gain.value = 0.3;
+
+        filtreGlobal.connect(gainGlobal);
+        gainGlobal.connect(audioCtx.destination);
+    }
+
+    document.getElementById("btnActiver").addEventListener("click", () => {
+        initialiserAudio();
+        if (audioCtx.state === "suspended") {
+            audioCtx.resume();
+        }
+        document.getElementById("btnActiver").textContent = "Audio actif";
+        document.getElementById("btnActiver").classList.add("success");
+    });
+
+    /* ==============================
+       JOUER UNE NOTE
+    =============================== */
+
+    function jouerNote(frequence, id) {
+        if (!audioCtx) return;
+        if (notesActives[id]) return;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = document.getElementById("typeOsc").value;
+        osc.frequency.value = frequence;
+
+        const maintenant = audioCtx.currentTime;
+
+        gain.gain.setValueAtTime(0, maintenant);
+        gain.gain.linearRampToValueAtTime(0.5, maintenant + 0.02);
+        gain.gain.linearRampToValueAtTime(0.3, maintenant + 0.1);
+
+        osc.connect(gain);
+        gain.connect(filtreGlobal);
+
+        osc.start();
+
+        notesActives[id] = { osc, gain };
+    }
+
+    /* ==============================
+       ARRÊTER UNE NOTE
+    =============================== */
+
+    function arreterNote(id) {
+        const note = notesActives[id];
+        if (!note) return;
+
+        const maintenant = audioCtx.currentTime;
+
+        note.gain.gain.cancelScheduledValues(maintenant);
+        note.gain.gain.setValueAtTime(note.gain.gain.value, maintenant);
+        note.gain.gain.linearRampToValueAtTime(0, maintenant + 0.25);
+
+        note.osc.stop(maintenant + 0.3);
+
+        delete notesActives[id];
+    }
+
+    /* ==============================
+       PIANO — SOURIS
+    =============================== */
+
+    document.querySelectorAll(".piano .touche").forEach(touche => {
+        const freq = parseFloat(touche.dataset.freq);
+        const id = touche.dataset.note;
+
+        touche.addEventListener("mousedown", () => {
+            initialiserAudio();
+            if (audioCtx.state === "suspended") audioCtx.resume();
+            jouerNote(freq, id);
+            touche.classList.add("active");
+        });
+
+        touche.addEventListener("mouseup", () => {
+            arreterNote(id);
+            touche.classList.remove("active");
+        });
+
+        touche.addEventListener("mouseleave", () => {
+            arreterNote(id);
+            touche.classList.remove("active");
+        });
+    });
+
+    /* ==============================
+       PIANO — CLAVIER
+    =============================== */
+
+    const correspondanceClavier = {
+        "a": { freq: 261.63, id: "Do4" },
+        "z": { freq: 293.66, id: "Ré4" },
+        "e": { freq: 329.63, id: "Mi4" },
+        "r": { freq: 349.23, id: "Fa4" },
+        "t": { freq: 392.00, id: "Sol4" },
+        "y": { freq: 440.00, id: "La4" },
+        "u": { freq: 493.88, id: "Si4" },
+        "i": { freq: 523.25, id: "Do5" }
+    };
+
+    document.addEventListener("keydown", e => {
+        const touche = correspondanceClavier[e.key.toLowerCase()];
+        if (!touche) return;
+        if (e.repeat) return;
+
+        initialiserAudio();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+
+        jouerNote(touche.freq, touche.id);
+
+        const el = document.querySelector(`[data-note="${touche.id}"]`);
+        if (el) el.classList.add("active");
+    });
+
+    document.addEventListener("keyup", e => {
+        const touche = correspondanceClavier[e.key.toLowerCase()];
+        if (!touche) return;
+
+        arreterNote(touche.id);
+
+        const el = document.querySelector(`[data-note="${touche.id}"]`);
+        if (el) el.classList.remove("active");
+    });
+
+    /* ==============================
+       CONTRÔLES
+    =============================== */
+
+    document.getElementById("cutoff").addEventListener("input", e => {
+        const v = parseFloat(e.target.value);
+        document.getElementById("cutoffVal").textContent = v + " Hz";
+        if (filtreGlobal) filtreGlobal.frequency.value = v;
+    });
+
+    document.getElementById("volume").addEventListener("input", e => {
+        const v = parseFloat(e.target.value);
+        document.getElementById("volumeVal").textContent = v.toFixed(2);
+        if (gainGlobal) gainGlobal.gain.value = v;
+    });
+</script>
+
+
+<script>
+(function () {
+    const $ = id => document.getElementById(id);
+
+    function setupCanvas(id) {
+        const c = $(id);
+        if (!c) return null;
+        const ctx = c.getContext("2d");
+        return {c, ctx, w:c.width, h:c.height};
+    }
+
+    function clear(ctx,w,h) {
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle = "#101820";
+        ctx.fillRect(0,0,w,h);
+    }
+
+    function axes(ctx,w,h, midY=h/2) {
+        ctx.strokeStyle = "#607080";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(35,midY); ctx.lineTo(w-20,midY);
+        ctx.stroke();
+    }
+
+    // 1. Propagation physique
+    const p = setupCanvas("soundPropagation");
+    if (p) {
+        let phase = 0, running = true;
+        function drawPropagation() {
+            clear(p.ctx,p.w,p.h);
+            const ctx=p.ctx, n=42, spacing=19, base=85, speed=parseFloat($("propFreq").value);
+            ctx.fillStyle="#d8e0ec";
+            ctx.font="13px Arial";
+            ctx.fillText("compression",20,25);
+            ctx.fillText("raréfaction",20,205);
+            for(let i=0;i<n;i++){
+                const x=65+i*spacing;
+                const displacement=8*Math.sin(i*0.52-phase);
+                const y=base+displacement;
+                const density=(Math.cos(i*0.52-phase)+1)/2;
+                ctx.globalAlpha=0.45+0.55*density;
+                ctx.beginPath(); ctx.arc(x,y,4.5,0,Math.PI*2); ctx.fill();
+                ctx.globalAlpha=1;
+            }
+            ctx.strokeStyle="#7fa7c9";
+            ctx.beginPath();
+            for(let x=45;x<p.w-20;x+=3){
+                const y=160 + 28*Math.sin((x-45)*0.045-phase);
+                if(x===45) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+            }
+            ctx.stroke();
+            if(running) phase += 0.035*speed;
+            requestAnimationFrame(drawPropagation);
+        }
+        $("propToggle").onclick=()=>{running=!running; $("propToggle").textContent=running?"Pause":"Reprendre";};
+        $("propFreq").oninput=e=>$("propFreqVal").textContent=parseFloat(e.target.value).toFixed(1)+"×";
+        drawPropagation();
+    }
+
+    // 2. Fréquence / amplitude
+    const fa=setupCanvas("freqAmpCanvas");
+    if(fa){
+        function drawFA(){
+            clear(fa.ctx,fa.w,fa.h); axes(fa.ctx,fa.w,fa.h,125);
+            const f=+$("faFreq").value, a=+$("faAmp").value;
+            fa.ctx.strokeStyle="#9bc3e3"; fa.ctx.lineWidth=2;
+            fa.ctx.beginPath();
+            for(let x=35;x<fa.w-20;x+=2){
+                const y=125-Math.sin((x-35)*f/180)*92*a;
+                if(x===35) fa.ctx.moveTo(x,y); else fa.ctx.lineTo(x,y);
+            }
+            fa.ctx.stroke();
+            fa.ctx.fillStyle="#d8e0ec"; fa.ctx.font="14px Arial";
+            fa.ctx.fillText("fréquence = "+f+" Hz",45,25);
+            fa.ctx.fillText("amplitude = "+a.toFixed(2),45,48);
+        }
+        $("faFreq").oninput=e=>{$("faFreqVal").textContent=e.target.value+" Hz";drawFA();};
+        $("faAmp").oninput=e=>{$("faAmpVal").textContent=(+e.target.value).toFixed(2);drawFA();};
+        drawFA();
+    }
+
+    // 3. Formes d'onde
+    function drawWave(id,type){
+        const x=setupCanvas(id); if(!x)return;
+        clear(x.ctx,x.w,x.h); axes(x.ctx,x.w,x.h,65);
+        x.ctx.strokeStyle="#9bc3e3"; x.ctx.lineWidth=2;
+        x.ctx.beginPath();
+        for(let px=20;px<x.w-15;px++){
+            const t=(px-20)/70, s=t-Math.floor(t);
+            let y;
+            if(type==="sine") y=Math.sin(t*Math.PI*2);
+            if(type==="square") y=s<0.5?1:-1;
+            if(type==="triangle") y=1-4*Math.abs(s-0.5);
+            if(type==="saw") y=2*s-1;
+            const py=65-y*45;
+            if(px===20)x.ctx.moveTo(px,py);else x.ctx.lineTo(px,py);
+        }
+        x.ctx.stroke();
+    }
+    drawWave("waveSine","sine"); drawWave("waveSquare","square");
+    drawWave("waveTriangle","triangle"); drawWave("waveSaw","saw");
+
+    // 4. Sampling
+    const sm=setupCanvas("samplingCanvas");
+    if(sm){
+        function drawSampling(){
+            clear(sm.ctx,sm.w,sm.h);
+            const n=+$("sampleRate").value, left=35, right=875;
+            sm.ctx.strokeStyle="#718096"; sm.ctx.beginPath(); sm.ctx.moveTo(left,140); sm.ctx.lineTo(right,140); sm.ctx.stroke();
+            sm.ctx.strokeStyle="#9bc3e3"; sm.ctx.lineWidth=2; sm.ctx.beginPath();
+            for(let x=left;x<=right;x+=2){
+                const y=140-75*Math.sin((x-left)/85);
+                if(x===left)sm.ctx.moveTo(x,y);else sm.ctx.lineTo(x,y);
+            }
+            sm.ctx.stroke();
+            sm.ctx.fillStyle="#e5eef7";
+            for(let i=0;i<n;i++){
+                const x=left+i*(right-left)/(n-1), y=140-75*Math.sin((x-left)/85);
+                sm.ctx.beginPath();sm.ctx.arc(x,y,4,0,Math.PI*2);sm.ctx.fill();
+            }
+        }
+        $("sampleRate").oninput=e=>{$("sampleRateVal").textContent=e.target.value+" points";drawSampling();};
+        drawSampling();
+    }
+
+    // 5. Quantification
+    const q=setupCanvas("quantCanvas");
+    if(q){
+        function drawQuant(){
+            clear(q.ctx,q.w,q.h);
+            const bits=+$("quantBits").value, levels=2**bits;
+            $("quantBitsVal").textContent=bits+" bits — "+levels+" niveaux";
+            for(let i=0;i<levels;i++){
+                const y=35+i*(210/(levels-1));
+                q.ctx.strokeStyle="#34495e"; q.ctx.globalAlpha=.45;
+                q.ctx.beginPath();q.ctx.moveTo(35,y);q.ctx.lineTo(875,y);q.ctx.stroke();
+                q.ctx.globalAlpha=1;
+            }
+            q.ctx.strokeStyle="#9bc3e3";q.ctx.lineWidth=2;q.ctx.beginPath();
+            for(let x=35;x<875;x+=2){
+                const raw=35+105*(1-Math.sin((x-35)/85))/2;
+                const step=210/(levels-1);
+                const quant=35+Math.round((raw-35)/step)*step;
+                if(x===35)q.ctx.moveTo(x,quant);else q.ctx.lineTo(x,quant);
+            }
+            q.ctx.stroke();
+        }
+        $("quantBits").oninput=drawQuant; drawQuant();
+    }
+
+    // 6. Graphe audio
+    const g=setupCanvas("audioGraphCanvas");
+    if(g){
+        clear(g.ctx,g.w,g.h);
+        const boxes=[["OscillatorNode",70],["GainNode",350],["BiquadFilterNode",600],["destination",790]];
+        g.ctx.font="14px Arial";
+        boxes.forEach(([label,x],i)=>{
+            g.ctx.fillStyle="#eef1f5";g.ctx.strokeStyle="#718096";g.ctx.lineWidth=1;
+            g.ctx.fillRect(x,85,120,60);g.ctx.strokeRect(x,85,120,60);
+            g.ctx.fillStyle="#1a2b4a";g.ctx.textAlign="center";g.ctx.fillText(label,x+60,120);
+            if(i<boxes.length-1){
+                g.ctx.strokeStyle="#9bc3e3";g.ctx.lineWidth=3;
+                g.ctx.beginPath();g.ctx.moveTo(x+120,115);g.ctx.lineTo(boxes[i+1][1],115);g.ctx.stroke();
+                g.ctx.fillStyle="#9bc3e3";g.ctx.beginPath();
+                g.ctx.moveTo(boxes[i+1][1]-8,108);g.ctx.lineTo(boxes[i+1][1],115);g.ctx.lineTo(boxes[i+1][1]-8,122);g.ctx.fill();
+            }
+        });
+        g.ctx.textAlign="left";
+    }
+
+    // 7. Oscillator
+    const oc=setupCanvas("oscCanvas");
+    if(oc){
+        function wave(t,type){
+            const s=t-Math.floor(t);
+            if(type==="sine")return Math.sin(2*Math.PI*t);
+            if(type==="square")return s<.5?1:-1;
+            if(type==="triangle")return 1-4*Math.abs(s-.5);
+            return 2*s-1;
+        }
+        function drawOsc(){
+            clear(oc.ctx,oc.w,oc.h); axes(oc.ctx,oc.w,oc.h,125);
+            const f=+$("oscFreq").value, type=$("oscShape").value;
+            oc.ctx.strokeStyle="#9bc3e3";oc.ctx.lineWidth=2;oc.ctx.beginPath();
+            for(let x=35;x<875;x++){
+                const y=125-85*wave((x-35)*f/10000,type);
+                if(x===35)oc.ctx.moveTo(x,y);else oc.ctx.lineTo(x,y);
+            }
+            oc.ctx.stroke();
+            oc.ctx.fillStyle="#d8e0ec";oc.ctx.font="14px Arial";
+            oc.ctx.fillText(type+" — "+f+" Hz",45,25);
+        }
+        $("oscShape").onchange=drawOsc;
+        $("oscFreq").oninput=e=>{$("oscFreqVal").textContent=e.target.value+" Hz";drawOsc();};
+        drawOsc();
+    }
+
+    // 8. ADSR
+    const ad=setupCanvas("adsrCanvas");
+    if(ad){
+        function drawADSR(){
+            clear(ad.ctx,ad.w,ad.h);
+            const A=+$("adsrA").value,D=+$("adsrD").value,S=+$("adsrS").value,R=+$("adsrR").value;
+            const total=A+D+1+R, L=55, Rg=870, base=220, top=35;
+            const scale=(Rg-L)/total;
+            const pts=[
+                [L,base],[L+A*scale,top],[L+(A+D)*scale,base-(base-top)*S],
+                [L+(A+D+1)*scale,base-(base-top)*S],[Rg,base]
+            ];
+            ad.ctx.strokeStyle="#9bc3e3";ad.ctx.lineWidth=3;ad.ctx.beginPath();
+            pts.forEach((p,i)=>i?ad.ctx.lineTo(...p):ad.ctx.moveTo(...p));ad.ctx.stroke();
+            ad.ctx.fillStyle="#d8e0ec";ad.ctx.font="13px Arial";
+            ["Attack","Decay","Sustain","Release"].forEach((t,i)=>{
+                const x=[L+20,L+(A+.15)*scale,L+(A+D+.3)*scale,Rg-80][i];
+                ad.ctx.fillText(t,x,20);
+            });
+        }
+        ["adsrA","adsrD","adsrS","adsrR"].forEach(id=>$(id).oninput=drawADSR);
+        drawADSR();
+    }
+
+    // 9. Filtre
+    const fi=setupCanvas("filterCanvas");
+    if(fi){
+        function drawFilter(){
+            clear(fi.ctx,fi.w,fi.h);
+            const cut=+$("filterCut").value;
+            $("filterCutVal").textContent=cut+" Hz";
+            fi.ctx.strokeStyle="#607080";fi.ctx.lineWidth=1;
+            fi.ctx.beginPath();fi.ctx.moveTo(45,230);fi.ctx.lineTo(870,230);fi.ctx.moveTo(45,25);fi.ctx.lineTo(45,230);fi.ctx.stroke();
+            fi.ctx.strokeStyle="#9bc3e3";fi.ctx.lineWidth=3;fi.ctx.beginPath();
+            for(let x=45;x<=870;x++){
+                const freq=100+((x-45)/(825))*10000;
+                const gain=1/Math.sqrt(1+Math.pow(freq/cut,4));
+                const y=230-gain*185;
+                if(x===45)fi.ctx.moveTo(x,y);else fi.ctx.lineTo(x,y);
+            }
+            fi.ctx.stroke();
+            fi.ctx.setLineDash([5,5]);fi.ctx.strokeStyle="#d8e0ec";
+            const cx=45+((cut-100)/9900)*825;
+            fi.ctx.beginPath();fi.ctx.moveTo(cx,30);fi.ctx.lineTo(cx,230);fi.ctx.stroke();fi.ctx.setLineDash([]);
+            fi.ctx.fillStyle="#d8e0ec";fi.ctx.font="13px Arial";fi.ctx.fillText("fréquence de coupure",cx+8,45);
+        }
+        $("filterCut").oninput=drawFilter;drawFilter();
+    }
+})();
+</script>
+
+</body>
+</html>
