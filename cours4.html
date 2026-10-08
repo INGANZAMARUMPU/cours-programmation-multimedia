@@ -1,1825 +1,1694 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Programmation Multimédia — Jour 4 : Son numérique et Web Audio API</title>
-    <style>
-        :root {
-            --primary: #1a2b4a;
-            --secondary: #4a5568;
-            --accent: #2c5282;
-            --bg: #f7f7f5;
-            --card: #ffffff;
-            --text: #1a1a1a;
-            --muted: #4a4a4a;
-            --border: #c8c8c8;
-            --code-bg: #f4f4f0;
-            --code-border: #d0d0c8;
-            --warning-bg: #fdfaf2;
-            --warning-border: #b8860b;
-            --info-bg: #f2f6fa;
-            --info-border: #2c5282;
-            --success-bg: #f2f8f3;
-            --success-border: #2f6b3a;
-            --danger-bg: #faf3f3;
-            --danger-border: #8b2c2c;
-        }
-
-        * { box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-
-        body {
-            margin: 0;
-            font-family: "Times New Roman", "Liberation Serif", Georgia, serif;
-            background: var(--bg);
-            color: var(--text);
-            font-size: 12pt;
-            line-height: 1.5;
-        }
-
-        header {
-            background: var(--primary);
-            color: #ffffff;
-            padding: 45px 25px 35px;
-            border-bottom: 3px solid #0f1a30;
-        }
-
-        .header-content { max-width: 1050px; margin: auto; }
-
-        header h1 {
-            font-size: 1.9rem;
-            margin: 0 0 6px;
-            font-weight: 700;
-        }
-
-        header h2 {
-            color: #d8e0ec;
-            border: none;
-            margin: 0 0 16px;
-            font-weight: 400;
-            font-size: 1.15rem;
-            font-style: italic;
-        }
-
-        header p {
-            font-size: 1rem;
-            max-width: 760px;
-            color: #e8edf4;
-        }
-
-        .badge {
-            display: inline-block;
-            background: transparent;
-            border: 1px solid #8fa3c0;
-            padding: 3px 10px;
-            border-radius: 2px;
-            margin: 3px 6px 3px 0;
-            font-size: 0.75rem;
-            font-family: Arial, Helvetica, sans-serif;
-            letter-spacing: 0.6px;
-            text-transform: uppercase;
-            color: #d8e0ec;
-        }
-
-        nav {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: #0f1a30;
-            border-bottom: 1px solid #2a3a55;
-        }
-
-        .nav-content {
-            max-width: 1050px;
-            margin: auto;
-            display: flex;
-            overflow-x: auto;
-            gap: 0;
-            padding: 4px 10px;
-        }
-
-        nav a {
-            color: #c8d4e4;
-            text-decoration: none;
-            padding: 9px 13px;
-            white-space: nowrap;
-            font-size: 0.82rem;
-            font-family: Arial, Helvetica, sans-serif;
-            border-bottom: 2px solid transparent;
-            transition: border-color 0.15s, color 0.15s;
-        }
-
-        nav a:hover {
-            color: #ffffff;
-            border-bottom-color: #8fa3c0;
-        }
-
-        main { max-width: 1050px; margin: auto; padding: 35px 20px; }
-
-        section {
-            background: var(--card);
-            border: 1px solid var(--border);
-            padding: 28px 32px;
-            margin-bottom: 24px;
-        }
-
-        h2 {
-            color: var(--primary);
-            font-size: 1.35rem;
-            font-weight: 700;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 8px;
-            margin-top: 0;
-            margin-bottom: 18px;
-        }
-
-        h3 {
-            color: #2a3a55;
-            margin-top: 24px;
-            margin-bottom: 8px;
-            font-weight: 700;
-            font-size: 1.05rem;
-        }
-
-        h4 {
-            color: var(--accent);
-            font-weight: 700;
-            margin-bottom: 6px;
-            font-size: 1rem;
-        }
-
-        p { margin: 10px 0; }
-        ul, ol { padding-left: 28px; }
-        li { margin: 4px 0; }
-
-        .objectifs {
-            background: var(--info-bg);
-            border-left: 3px solid var(--info-border);
-            padding: 16px 22px;
-            margin: 15px 0;
-        }
-
-        .important {
-            background: var(--warning-bg);
-            border-left: 3px solid var(--warning-border);
-            padding: 16px 22px;
-            margin: 15px 0;
-        }
-
-        .success {
-            background: var(--success-bg);
-            border-left: 3px solid var(--success-border);
-            padding: 16px 22px;
-            margin: 15px 0;
-        }
-
-        .danger {
-            background: var(--danger-bg);
-            border-left: 3px solid var(--danger-border);
-            padding: 16px 22px;
-            margin: 15px 0;
-        }
-
-        .info {
-            background: var(--info-bg);
-            border-left: 3px solid var(--info-border);
-            padding: 16px 22px;
-            margin: 15px 0;
-        }
-
-        pre {
-            background: var(--code-bg);
-            color: #1a1a1a;
-            padding: 16px 20px;
-            border: 1px solid var(--code-border);
-            overflow-x: auto;
-            font-family: "Consolas", "Courier New", monospace;
-            font-size: 0.85rem;
-            line-height: 1.45;
-            margin: 14px 0;
-        }
-
-        code {
-            font-family: "Consolas", "Courier New", monospace;
-            background: #eeeeea;
-            color: #1a1a1a;
-            padding: 1px 5px;
-            font-size: 0.88em;
-            border: 1px solid #dcdcd6;
-        }
-
-        pre code {
-            background: transparent;
-            border: none;
-            padding: 0;
-            font-size: 0.85rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 18px 0;
-            font-size: 0.95rem;
-        }
-
-        th, td {
-            border: 1px solid var(--border);
-            padding: 9px 12px;
-            text-align: left;
-            vertical-align: top;
-        }
-
-        th {
-            background: #eef1f5;
-            color: #1a2b4a;
-            font-weight: 700;
-        }
-
-        tr:nth-child(even) { background: #fafaf8; }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 14px;
-            margin: 18px 0;
-        }
-
-        .card {
-            border: 1px solid var(--border);
-            padding: 16px;
-            background: #fcfcfa;
-        }
-
-        .card h3 {
-            margin-top: 0;
-            color: var(--accent);
-            font-size: 1rem;
-        }
-
-        .exercise {
-            border: 1px solid #a0a0a0;
-            border-left: 3px solid var(--primary);
-            background: #fcfcfa;
-            padding: 18px 22px;
-            margin: 20px 0;
-        }
-
-        .level {
-            display: inline-block;
-            padding: 2px 10px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            font-family: Arial, Helvetica, sans-serif;
-            border: 1px solid;
-            margin-bottom: 8px;
-        }
-
-        .easy { background: #eef6ee; color: #2f6b3a; border-color: #2f6b3a; }
-        .medium { background: #fdf8ee; color: #8a6508; border-color: #8a6508; }
-        .hard { background: #f8eeee; color: #8b2c2c; border-color: #8b2c2c; }
-
-        .canvas-wrapper {
-            background: #1a1a1a;
-            padding: 14px;
-            border: 1px solid #333333;
-            margin: 18px 0;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            max-width: 800px;
-            height: auto;
-            margin: auto;
-            background: #111111;
-            border: 1px solid #444444;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 14px;
-        }
-
-        button {
-            border: 1px solid #1a2b4a;
-            background: #1a2b4a;
-            color: #ffffff;
-            padding: 7px 16px;
-            cursor: pointer;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 0.85rem;
-            transition: background 0.15s;
-        }
-
-        button:hover { background: #2c5282; }
-        button.secondary { background: #ffffff; color: #1a2b4a; }
-        button.secondary:hover { background: #eef1f5; }
-        button.success { background: #2f6b3a; border-color: #2f6b3a; }
-        button.success:hover { background: #24522e; }
-
-        .key {
-            display: inline-block;
-            background: #ffffff;
-            border: 1px solid #888888;
-            padding: 4px 9px;
-            margin: 2px;
-            min-width: 30px;
-            text-align: center;
-            font-family: "Consolas", monospace;
-            font-size: 0.85rem;
-            box-shadow: 0 1px 0 #888888;
-        }
-
-        /* Piano virtuel */
-        .piano {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-            gap: 2px;
-            flex-wrap: wrap;
-        }
-
-        .piano .touche {
-            width: 60px;
-            height: 180px;
-            background: #ffffff;
-            border: 1px solid #333333;
-            border-radius: 0 0 4px 4px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            padding-bottom: 10px;
-            cursor: pointer;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 0.8rem;
-            color: #333333;
-            user-select: none;
-            transition: background 0.05s;
-        }
-
-        .piano .touche:hover {
-            background: #eef1f5;
-        }
-
-        .piano .touche.active {
-            background: #c8d4e4;
-            color: #0f1a30;
-            font-weight: 700;
-        }
-
-        .slider-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 8px 0;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 0.88rem;
-        }
-
-        .slider-row label {
-            min-width: 130px;
-            color: var(--text);
-        }
-
-        .slider-row input[type="range"] {
-            flex: 1;
-            max-width: 300px;
-        }
-
-        .slider-row .value {
-            min-width: 60px;
-            font-family: "Consolas", monospace;
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        footer {
-            background: #1a2b4a;
-            color: #c8d4e4;
-            text-align: center;
-            padding: 28px 20px;
-            margin-top: 30px;
-            font-size: 0.85rem;
-            font-family: Arial, Helvetica, sans-serif;
-            border-top: 3px solid #0f1a30;
-        }
-
-        footer p { margin: 4px 0; }
-
-        @media (max-width: 700px) {
-            header h1 { font-size: 1.4rem; }
-            header h2 { font-size: 1rem; }
-            section { padding: 20px 18px; }
-            pre { font-size: 0.78rem; }
-            h2 { font-size: 1.15rem; }
-            .piano .touche { width: 44px; height: 140px; font-size: 0.7rem; }
-        }
-    
-/* ===== Illustrations pédagogiques intégrées ===== */
-.audio-illustration {
-    margin: 20px 0 24px;
-    border: 1px solid #b9c2cf;
-    background: #f8fafc;
-    padding: 16px;
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Programmation Multimédia — Manipulation d’images dans Canvas — Cours détaillé</title>
+<style>
+:root{
+ --primary:#18324b;--secondary:#315a78;--accent:#b45f2a;--bg:#f4f1eb;--card:#fff;
+ --text:#202020;--muted:#5d6268;--border:#c9c5bd;--code:#f0eee8;
+ --info:#eef5fa;--info-border:#39739a;--warn:#fbf5e7;--warn-border:#a47721;
+ --success:#eef7ef;--success-border:#3f7547;--danger:#faf0ef;--danger-border:#9a3d34;
 }
-.audio-illustration h4 { margin-top: 0; }
-.audio-illustration .caption {
-    margin: 8px 0 0;
-    color: #4a5568;
-    font-size: .92rem;
-    text-align: center;
-}
-.audio-illustration canvas {
-    width: 100%;
-    max-width: none;
-    height: auto;
-    background: #101820;
-    border: 1px solid #3c4652;
-}
-.audio-illustration .mini-controls {
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    gap:10px;
-    margin-top:10px;
-    font-family:Arial, sans-serif;
-    font-size:.88rem;
-}
-.audio-illustration .mini-controls input[type=range] { flex:1; min-width:160px; }
-.audio-illustration .readout {
-    min-width:95px;
-    font-family:Consolas,monospace;
-    color:#2c5282;
-    font-weight:bold;
-}
-.wave-grid {
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:12px;
-}
-.wave-card {
-    border:1px solid #c8c8c8;
-    background:#fff;
-    padding:10px;
-}
-.wave-card strong { display:block; margin-bottom:5px; color:#2a3a55; }
-@media(max-width:700px) {
-    .wave-grid { grid-template-columns:1fr; }
-}
-
-    </style>
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Times New Roman",Georgia,serif;font-size:12pt;line-height:1.55}
+header{background:var(--primary);color:#fff;padding:46px 24px 38px;border-bottom:4px solid #0e2132}
+.header-content,main,footer .inner{max-width:1080px;margin:auto}
+header h1{font-size:2rem;margin:0 0 8px}
+header h2{font-size:1.15rem;font-weight:400;font-style:italic;color:#dce7ef;border:0;margin:0 0 16px}
+header p{max-width:850px;color:#edf3f7}
+.badge{display:inline-block;border:1px solid #9db1c0;padding:3px 10px;margin:4px 6px 4px 0;font:12px Arial,sans-serif;color:#dce7ef}
+nav{position:sticky;top:0;z-index:20;background:#102638;border-bottom:1px solid #365166}
+.nav{max-width:1080px;margin:auto;display:flex;overflow:auto}
+nav a{color:#d7e1e8;text-decoration:none;padding:9px 12px;white-space:nowrap;font:12px Arial,sans-serif}
+nav a:hover{background:#1b3b54;color:white}
+main{padding:32px 20px}
+section{background:var(--card);border:1px solid var(--border);padding:28px 32px;margin-bottom:24px}
+h2{color:var(--primary);font-size:1.4rem;border-bottom:1px solid var(--border);padding-bottom:8px;margin:0 0 18px}
+h3{color:var(--secondary);margin-top:25px}
+h4{color:var(--accent)}
+p{margin:10px 0}li{margin:5px 0}
+code{font-family:Consolas,"Courier New",monospace;background:#e9e7e0;border:1px solid #d8d4ca;padding:1px 5px;font-size:.88em}
+pre{background:var(--code);border:1px solid #d4d0c6;padding:17px 19px;overflow:auto;font:13px/1.5 Consolas,"Courier New",monospace}
+pre code{background:none;border:0;padding:0}
+.info,.important,.success,.danger{padding:15px 20px;margin:16px 0;border-left:4px solid}
+.info{background:var(--info);border-color:var(--info-border)}
+.important{background:var(--warn);border-color:var(--warn-border)}
+.success{background:var(--success);border-color:var(--success-border)}
+.danger{background:var(--danger);border-color:var(--danger-border)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{border:1px solid var(--border);padding:17px;background:#fff}
+.card h3{margin-top:0}
+table{width:100%;border-collapse:collapse;margin:15px 0}
+th,td{border:1px solid var(--border);padding:9px 11px;text-align:left;vertical-align:top}
+th{background:#eae7df;color:var(--primary)}
+.flow{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:20px 0}
+.flow span{border:1px solid var(--secondary);padding:10px 14px;background:#f8fafb}
+.arrow{border:0!important;background:transparent!important;font-size:20px;color:var(--accent)}
+canvas{display:block;max-width:100%;background:#101820;border:1px solid #283844;margin:12px auto}
+.controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap;border:1px solid var(--border);padding:13px;background:#f8f6f1;margin:12px 0}
+.controls label{font:13px Arial,sans-serif}
+.controls input[type=range]{width:150px}
+button{font:14px Arial,sans-serif;border:1px solid var(--secondary);background:#fff;padding:8px 13px;cursor:pointer}
+button:hover{background:#edf3f6}
+button.active{background:var(--secondary);color:#fff}
+.exercise{border-left:4px solid var(--accent);background:#fbf7f2;padding:18px 22px;margin:18px 0}
+.exercise strong:first-child{color:var(--accent)}
+details{border:1px solid var(--border);padding:10px 14px;margin:12px 0;background:#faf9f6}
+summary{cursor:pointer;font-weight:bold;color:var(--secondary)}
+.small{font-size:.9rem;color:var(--muted)}
+.center{text-align:center}
+.kbd{font-family:Arial,sans-serif;border:1px solid #aaa;border-bottom-width:2px;padding:2px 6px;background:#fafafa;border-radius:3px}
+footer{background:var(--primary);color:#dce7ef;padding:28px 20px}
+footer p{margin:4px 0}
+.canvas-row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.canvas-row canvas{flex:0 0 auto;margin:0}
+input[type=file]{font:13px Arial,sans-serif;padding:6px;border:1px solid var(--border);background:#fff}
+input[type=color]{width:50px;height:30px;border:1px solid var(--border);padding:0;cursor:pointer}
+@media(max-width:760px){.grid,.grid3{grid-template-columns:1fr}section{padding:21px 18px}header h1{font-size:1.55rem}}
+</style>
 </head>
-
 <body>
-
 <header>
-    <div class="header-content">
-        <span class="badge">Programmation Multimédia</span>
-        <span class="badge">Jour 4 / 6</span>
-        <span class="badge">Audio</span>
-        <span class="badge">Web Audio API</span>
-
-        <h1>Jour 4 — Son numérique et Web Audio API</h1>
-        <h2>Nature du son, synthèse et génération de signaux</h2>
-
-        <p>
-            Cette journée introduit la dimension audio du multimédia.
-            Elle couvre la nature physique du son, sa représentation
-            numérique, puis la génération de signaux avec la Web Audio API.
-        </p>
-
-        <p>
-            <strong>Durée :</strong> 5 heures &nbsp;|&nbsp;
-            <strong>Prérequis :</strong> Jours 1 à 3 (Canvas, animation, interaction)
-        </p>
-    </div>
+<div class="header-content">
+<div>
+<span class="badge">Programmation Multimédia</span>
+<span class="badge">Jour 4</span>
+<span class="badge">JavaScript</span>
+<span class="badge">Canvas 2D</span>
+<span class="badge">Images</span>
+</div>
+<h1>Manipulation d'images dans Canvas</h1>
+<h2>Charger, redimensionner, rogner, filtrer : agrandissement, miniaturisation, couleurs et effets</h2>
+<p>Un canvas n'est pas seulement un espace de dessin vectoriel. C'est aussi un <strong>tableau de pixels</strong> que nous pouvons lire, modifier et réécrire. Ce cours explore cette dimension : comment transformer une image, pixel par pixel, pour produire des effets visuels.</p>
+<p style="font-weight:700; margin-top:12px;">Progression : Comprendre → Charger → Afficher → Exporter → Redimensionner → Rogner → Pixels → Couleurs → Filtres → Effets → Composer → Exporter le résultat</p>
+<p><strong>Durée indicative :</strong> 6 à 8 heures | <strong>Prérequis :</strong> Canvas 2D, JavaScript, boucles, tableaux, fonctions</p>
+<div class="info"><strong>Objectif général :</strong> être capable de construire une petite chaîne complète de traitement d’image : charger une image, la contrôler, la redimensionner, la rogner, modifier ses pixels, lui appliquer des effets, la composer avec d’autres éléments et <strong>exporter le résultat</strong> sous forme d’image.</div>
+</div>
 </header>
-
-
-<nav>
-    <div class="nav-content">
-        <a href="#objectifs">Objectifs</a>
-        <a href="#nature">Nature du son</a>
-        <a href="#numerisation">Numérisation</a>
-        <a href="#formats">Formats et compression</a>
-        <a href="#audio-html">Élément audio</a>
-        <a href="#webaudio">Web Audio API</a>
-        <a href="#graphe">Graphe audio</a>
-        <a href="#oscillateurs">Oscillateurs</a>
-        <a href="#enveloppe">Enveloppe</a>
-        <a href="#filtres">Filtres</a>
-        <a href="#tp1">TP1 — Piano virtuel</a>
-        <a href="#tp2">TP2 — Synthétiseur</a>
-        <a href="#demo">Démonstration</a>
-        <a href="#bilan">Bilan</a>
-    </div>
-</nav>
-
-
+<nav><div class="nav">
+<a href="#intro">Introduction</a>
+<a href="#charger">Charger</a>
+<a href="#exporter">Exporter</a>
+<a href="#redim">Redimensionner</a>
+<a href="#rogner">Rogner</a>
+<a href="#pixels">Pixels</a>
+<a href="#workflow">Pipeline</a>
+<a href="#couleurs">Couleurs</a>
+<a href="#filtres">Filtres natifs</a>
+<a href="#avances">Effets avancés</a>
+<a href="#composer">Composition</a>
+<a href="#demo">Démonstration</a>
+<a href="#exercices">Exercices</a>
+<a href="#bilan">Bilan</a>
+</div></nav>
 <main>
 
-<!-- OBJECTIFS -->
-
-<section id="objectifs">
-    <h2>1. Objectifs pédagogiques</h2>
-
-    <div class="objectifs">
-        <p>
-            À l'issue de cette quatrième journée, l'étudiant doit être capable de :
-        </p>
-        <ul>
-            <li>décrire la nature physique du son (onde, fréquence, amplitude) ;</li>
-            <li>expliquer la numérisation (échantillonnage, quantification) ;</li>
-            <li>distinguer les principaux formats audio et leurs usages ;</li>
-            <li>utiliser l'élément <code>&lt;audio&gt;</code> pour une lecture simple ;</li>
-            <li>créer un contexte audio avec <code>AudioContext</code> ;</li>
-            <li>générer un son avec un <code>OscillatorNode</code> ;</li>
-            <li>contrôler le volume avec un <code>GainNode</code> ;</li>
-            <li>façonner une enveloppe sonore (attack, decay, sustain, release) ;</li>
-            <li>filtrer un signal avec un <code>BiquadFilterNode</code>.</li>
-        </ul>
-    </div>
-
-    <h3>Organisation de la journée</h3>
-    <table>
-        <tr><th>Activité</th><th>Durée</th></tr>
-        <tr><td>Cours — Nature du son et numérisation</td><td>1 h 00</td></tr>
-        <tr><td>Cours — Web Audio API et graphe audio</td><td>1 h 00</td></tr>
-        <tr><td>TP guidé — Piano virtuel</td><td>1 h 15</td></tr>
-        <tr><td>Cours — Enveloppe et filtres</td><td>0 h 45</td></tr>
-        <tr><td>TP — Synthétiseur paramétrable</td><td>0 h 45</td></tr>
-        <tr><td>Synthèse et questions</td><td>0 h 15</td></tr>
-    </table>
-</section>
-
-
-<!-- NATURE DU SON -->
-
-<section id="nature">
-    <h2>2. Nature physique du son</h2>
-
-    <p>
-        Le son est une <strong>onde de pression</strong> qui se propage
-        dans un milieu matériel (air, eau, solide). Un haut-parleur
-        produit cette onde en faisant vibrer une membrane ; notre oreille
-        la perçoit comme un son.
-    </p>
-
-<div class="audio-illustration">
-    <h4>Visualisation — le son est une onde de pression</h4>
-    <canvas id="soundPropagation" width="900" height="230"></canvas>
-    <div class="mini-controls">
-        <button id="propToggle">Pause</button>
-        <label>Fréquence de vibration
-            <input id="propFreq" type="range" min="0.5" max="2.5" step="0.1" value="1">
-        </label>
-        <span class="readout" id="propFreqVal">1.0×</span>
-    </div>
-    <p class="caption">
-        Les points représentent des particules du milieu. Les zones où elles se rapprochent
-        correspondent aux compressions ; les zones où elles s'écartent correspondent aux raréfactions.
-        L'onde se propage alors que les particules oscillent localement.
-    </p>
+<section id="intro">
+<h2>1. Introduction : de la forme au pixel</h2>
+<p>Jusqu'ici, nous dessinions avec des formes vectorielles :</p>
+<pre><code>ctx.fillRect(100, 80, 20, 20);
+ctx.arc(200, 150, 40, 0, Math.PI * 2);
+ctx.lineTo(300, 200);</code></pre>
+<p>Avec les images, nous changeons complètement de nature. Une image dans Canvas est une <strong>grille de pixels</strong>.</p>
+<div class="grid">
+<div class="card">
+<h3>Forme vectorielle</h3>
+<p>Décrite par des coordonnées et des équations. Redimensionnable sans perte.</p>
+<pre><code>cercle = (centre, rayon)</code></pre>
+</div>
+<div class="card">
+<h3>Image bitmap</h3>
+<p>Décrite par une grille de pixels colorés. Chaque pixel a une couleur fixe.</p>
+<pre><code>pixel = (R, G, B, A)</code></pre>
+</div>
+</div>
+<h3>Anatomie d'un pixel</h3>
+<p>Chaque pixel est composé de <strong>quatre canaux</strong> :</p>
+<table>
+<tr><th>Canal</th><th>Signification</th><th>Valeurs</th></tr>
+<tr><td>R</td><td>Rouge</td><td>0 à 255</td></tr>
+<tr><td>G</td><td>Vert</td><td>0 à 255</td></tr>
+<tr><td>B</td><td>Bleu</td><td>0 à 255</td></tr>
+<tr><td>A</td><td>Alpha (transparence)</td><td>0 (transparent) à 255 (opaque)</td></tr>
+</table>
+<p>Pour une image de 300×200 pixels, cela fait :</p>
+<pre><code>300 × 200 × 4 = 240 000 valeurs</code></pre>
+<p>Toutes ces valeurs sont stockées dans un tableau plat de type <code>Uint8ClampedArray</code>. C'est cette structure que nous allons lire et modifier.</p>
+<div class="info"><strong>À retenir :</strong> dans ce tableau, les quatre valeurs d'un pixel se suivent. Le pixel 0 occupe les indices 0,1,2,3 ; le pixel 1 occupe les indices 4,5,6,7 ; et ainsi de suite. C'est pourquoi on parcourt souvent ce tableau avec un pas de 4.</div>
+<h3>1.1 Les trois niveaux de travail avec une image</h3>
+<div class="grid3">
+<div class="card">
+<h3>Niveau 1 — Image source</h3>
+<p>On travaille avec un objet tel que <code>HTMLImageElement</code>, un fichier choisi par l'utilisateur ou une image générée par un autre canvas.</p>
+<p>À ce niveau, on s'intéresse surtout à la taille, à l'origine de l'image et à son chargement.</p>
+</div>
+<div class="card">
+<h3>Niveau 2 — Canvas</h3>
+<p>On dessine l'image dans un canvas. Le canvas devient une surface de composition : images, texte, formes, transparence et filtres peuvent y être combinés.</p>
+</div>
+<div class="card">
+<h3>Niveau 3 — Pixels</h3>
+<p>Avec <code>getImageData()</code>, on descend jusqu'aux valeurs <code>R,G,B,A</code>. C'est le niveau nécessaire pour créer des filtres personnalisés.</p>
+</div>
 </div>
 
+<h3>1.2 Une distinction essentielle : fichier image, objet image et canvas</h3>
+<table>
+<tr><th>Élément</th><th>Rôle</th><th>Exemple</th></tr>
+<tr><td>Fichier</td><td>Donnée stockée sur le disque ou fournie par l'utilisateur</td><td><code>photo.jpg</code></td></tr>
+<tr><td>Image JavaScript</td><td>Objet chargé en mémoire et utilisable par Canvas</td><td><code>const img = new Image()</code></td></tr>
+<tr><td>Canvas</td><td>Surface de dessin et de composition</td><td><code>canvas.getContext('2d')</code></td></tr>
+<tr><td>ImageData</td><td>Représentation brute des pixels</td><td><code>ctx.getImageData(...)</code></td></tr>
+</table>
 
-    <h3>Caractéristiques d'un son</h3>
-
-    <table>
-        <tr>
-            <th>Grandeur</th>
-            <th>Unité</th>
-            <th>Signification perceptive</th>
-        </tr>
-        <tr>
-            <td>Fréquence</td>
-            <td>Hertz (Hz)</td>
-            <td>Hauteur du son (grave / aigu)</td>
-        </tr>
-        <tr>
-            <td>Amplitude</td>
-            <td>Décibel (dB)</td>
-            <td>Volume (fort / faible)</td>
-        </tr>
-        <tr>
-            <td>Timbre</td>
-            <td>—</td>
-            <td>Forme de l'onde (piano / violon / voix)</td>
-        </tr>
-        <tr>
-            <td>Durée</td>
-            <td>Seconde (s)</td>
-            <td>Longueur du son</td>
-        </tr>
-    </table>
-
-    <h3>Domaine audible</h3>
-
-    <p>
-        L'oreille humaine perçoit les fréquences comprises entre environ
-        <strong>20 Hz</strong> et <strong>20 000 Hz</strong>. En dessous,
-        ce sont des infrasons ; au-dessus, des ultrasons.
-    </p>
-
-    <div class="info">
-        <strong>Repères pratiques :</strong>
-        <ul>
-            <li>La note <em>La</em> du diapason : <strong>440 Hz</strong>.</li>
-            <li>Le <em>Do</em> médian du piano : environ <strong>261,6 Hz</strong>.</li>
-            <li>Une octave correspond à un doublement de fréquence :
-                <code>440 Hz × 2 = 880 Hz</code>.</li>
-        </ul>
-    </div>
-
-
-<div class="audio-illustration">
-    <h4>Visualisation — fréquence et amplitude</h4>
-    <canvas id="freqAmpCanvas" width="900" height="250"></canvas>
-    <div class="mini-controls">
-        <label>Fréquence
-            <input id="faFreq" type="range" min="100" max="1000" step="10" value="440">
-        </label>
-        <span class="readout" id="faFreqVal">440 Hz</span>
-        <label>Amplitude
-            <input id="faAmp" type="range" min="0.15" max="1" step="0.05" value="0.65">
-        </label>
-        <span class="readout" id="faAmpVal">0.65</span>
-    </div>
-    <p class="caption">
-        Augmenter la fréquence rapproche les oscillations : le son devient plus aigu.
-        Augmenter l'amplitude augmente l'écart vertical de la représentation : le signal est plus intense.
-    </p>
+<h3>1.3 La chaîne de traitement que nous allons construire</h3>
+<div class="flow">
+<span>Fichier</span><span class="arrow">→</span>
+<span>Chargement</span><span class="arrow">→</span>
+<span>Canvas</span><span class="arrow">→</span>
+<span>Transformation</span><span class="arrow">→</span>
+<span>Export</span>
 </div>
-
-    <h3>Forme d'onde</h3>
-
-    <p>
-        Un son pur est une <strong>sinusoïde</strong>. Les sons réels
-        sont composés d'une fréquence fondamentale et d'harmoniques.
-        La forme de l'onde détermine le timbre.
-    </p>
-
-    <table>
-        <tr><th>Forme d'onde</th><th>Caractère sonore</th></tr>
-        <tr><td>Sinusoïdale (sine)</td><td>Son pur, doux</td></tr>
-        <tr><td>Carrée (square)</td><td>Son creux, électronique</td></tr>
-        <tr><td>Triangulaire (triangle)</td><td>Son doux, proche du sine mais plus brillant</td></tr>
-        <tr><td>Dent de scie (sawtooth)</td><td>Son riche, brillant, cuivré</td></tr>
-    </table>
-
-
-<div class="audio-illustration">
-    <h4>Visualisation — la forme d'onde et le timbre</h4>
-    <div class="wave-grid">
-        <div class="wave-card"><strong>Sinusoïde — son pur</strong><canvas id="waveSine" width="420" height="130"></canvas></div>
-        <div class="wave-card"><strong>Carrée — riche en harmoniques</strong><canvas id="waveSquare" width="420" height="130"></canvas></div>
-        <div class="wave-card"><strong>Triangulaire</strong><canvas id="waveTriangle" width="420" height="130"></canvas></div>
-        <div class="wave-card"><strong>Dent de scie</strong><canvas id="waveSaw" width="420" height="130"></canvas></div>
-    </div>
-    <p class="caption">
-        Les quatre signaux ont la même période, mais pas la même forme.
-        C'est notamment cette composition harmonique différente qui contribue au timbre.
-    </p>
-</div>
+<p>Cette architecture est importante : <strong>le canvas n'est pas forcément le fichier final</strong>. Il constitue souvent une étape intermédiaire. On peut charger une photo, la modifier dans le canvas, puis transformer le contenu du canvas en image exportable.</p>
 
 </section>
 
+<section id="charger">
+<h2>2. Charger et afficher une image</h2>
+<h3>2.1 Le chargement asynchrone</h3>
+<p>Une image se charge de façon <strong>asynchrone</strong>. On ne peut pas la dessiner avant qu'elle soit prête. Il faut attendre l'événement <code>onload</code>.</p>
+<pre><code>const canvas = document.getElementById('cv');
+const ctx = canvas.getContext('2d');
 
-<!-- NUMERISATION -->
+const img = new Image();
+img.src = 'photo.jpg';
 
-<section id="numerisation">
-    <h2>3. Numérisation du son</h2>
+img.onload = () => {
+    ctx.drawImage(img, 0, 0);
+};
 
-    <p>
-        Un ordinateur ne peut pas stocker une onde continue. Il faut
-        la <strong>numériser</strong>, c'est-à-dire la transformer en
-        une suite de nombres.
-    </p>
+img.onerror = () => {
+    console.error("Impossible de charger l'image");
+};</code></pre>
+<div class="important"><strong>Piège classique :</strong> si vous appelez <code>drawImage</code> juste après avoir défini <code>img.src</code>, l'image n'est pas encore chargée. Canvas ne dessine rien, sans erreur. Toujours attendre <code>onload</code>.</div>
 
-    <h3>Échantillonnage</h3>
+<h3>2.2 Les trois signatures de drawImage</h3>
+<p><code>drawImage</code> possède trois formes, de la plus simple à la plus complète.</p>
+<table>
+<tr><th>Forme</th><th>Signature</th><th>Usage</th></tr>
+<tr><td>Simple</td><td><code>drawImage(img, x, y)</code></td><td>Afficher à taille originale</td></tr>
+<tr><td>Avec taille</td><td><code>drawImage(img, x, y, w, h)</code></td><td>Redimensionner</td></tr>
+<tr><td>Complète</td><td><code>drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)</code></td><td>Rogner + redimensionner</td></tr>
+</table>
+<p>La forme complète est la plus puissante : elle permet d'extraire une zone de l'image source (<code>sx, sy, sw, sh</code>) et de la placer ailleurs, à une autre taille (<code>dx, dy, dw, dh</code>).</p>
+<h3>2.4 Lire correctement les coordonnées</h3>
+<p>Les coordonnées de la source et de la destination ne jouent pas le même rôle.</p>
+<div class="flow">
+<span>Source : sx, sy, sw, sh</span>
+<span class="arrow">→</span>
+<span>Destination : dx, dy, dw, dh</span>
+</div>
+<p>Imaginez deux rectangles :</p>
+<ul>
+<li><strong>rectangle source :</strong> « quelle partie de l'image dois-je prendre ? »</li>
+<li><strong>rectangle destination :</strong> « où et à quelle taille dois-je la dessiner ? »</li>
+</ul>
+<pre><code>ctx.drawImage(
+    img,
+    100, 50, 200, 150,   // source
+    20, 30, 400, 300     // destination
+);</code></pre>
+<p>Le même morceau de 200×150 pixels est ici affiché en 400×300 pixels : il est donc agrandi 2 fois.</p>
 
-    <p>
-        On mesure l'amplitude de l'onde à intervalles réguliers.
-        Le nombre de mesures par seconde est la <strong>fréquence
-        d'échantillonnage</strong>.
-    </p>
-
-    <table>
-        <tr><th>Fréquence d'échantillonnage</th><th>Usage typique</th></tr>
-        <tr><td>8 000 Hz</td><td>Téléphone</td></tr>
-        <tr><td>22 050 Hz</td><td>Qualité radio</td></tr>
-        <tr><td>44 100 Hz</td><td>CD audio</td></tr>
-        <tr><td>48 000 Hz</td><td>Vidéo, cinéma</td></tr>
-        <tr><td>96 000 Hz</td><td>Studio haute résolution</td></tr>
-    </table>
+<h3>2.5 Pourquoi séparer source et destination ?</h3>
+<p>Cette séparation permet de réaliser plusieurs opérations avec une seule instruction :</p>
+<table>
+<tr><th>Opération</th><th>Rectangle source</th><th>Rectangle destination</th></tr>
+<tr><td>Copie</td><td>Même taille</td><td>Même taille</td></tr>
+<tr><td>Miniature</td><td>Image entière</td><td>Plus petite</td></tr>
+<tr><td>Zoom</td><td>Petite zone</td><td>Grande zone</td></tr>
+<tr><td>Recadrage</td><td>Zone choisie</td><td>Nouvelle position</td></tr>
+<tr><td>Déformation volontaire</td><td>Une zone</td><td>Rapport largeur/hauteur différent</td></tr>
+</table>
 
 
-<div class="audio-illustration">
-    <h4>Visualisation — échantillonnage</h4>
-    <canvas id="samplingCanvas" width="900" height="280"></canvas>
-    <div class="mini-controls">
-        <label>Fréquence d'échantillonnage relative
-            <input id="sampleRate" type="range" min="8" max="60" step="1" value="28">
-        </label>
-        <span class="readout" id="sampleRateVal">28 points</span>
-    </div>
-    <p class="caption">
-        La courbe continue représente le signal analogique ; les points représentent
-        les mesures prises par l'ordinateur. Avec moins d'échantillons, la représentation
-        devient plus grossière.
-    </p>
+<h3>2.3 Exemple interactif : chargement d'image</h3>
+<div class="controls">
+<label>Charger une image : <input type="file" id="fileInput" accept="image/*"/></label>
+<button id="btnDemoImage">Utiliser une image de démonstration</button>
+</div>
+<canvas height="360" id="cvCharger" width="640"></canvas>
+
+<p class="small center">Chargez une image de votre choix ou utilisez l'image de démonstration.</p>
+</section>
+
+<section id="exporter">
+<h2>3. Exporter le contenu du Canvas</h2>
+
+<div class="success">
+<strong>Idée fondamentale :</strong> dès qu'une image est dessinée dans un canvas, le canvas peut devenir une image à son tour.
+On peut donc construire une image avec JavaScript puis récupérer son contenu sous forme de donnée exportable.
 </div>
 
-    <h3>Théorème de Nyquist-Shannon</h3>
+<h3>3.1 Pourquoi exporter ?</h3>
+<p>L'exportation permet de transformer le résultat obtenu dans Canvas en un fichier ou en une donnée utilisable par une autre partie de l'application.</p>
+<ul>
+<li>enregistrer une image modifiée par l'utilisateur ;</li>
+<li>créer une miniature ;</li>
+<li>générer une signature ou un dessin ;</li>
+<li>produire une capture d'une composition ;</li>
+<li>télécharger une image après application d'un filtre ;</li>
+<li>envoyer ensuite le résultat vers un serveur.</li>
+</ul>
 
-    <p>
-        Pour restituer correctement un son de fréquence <code>f</code>,
-        il faut échantillonner à une fréquence au moins égale à
-        <code>2f</code>. C'est pourquoi le CD utilise 44 100 Hz : il permet
-        de reproduire des sons jusqu'à 22 050 Hz, soit la limite de
-        l'audition humaine.
-    </p>
+<h3>3.2 Première méthode : <code>toDataURL()</code></h3>
+<p>La méthode <code>toDataURL()</code> transforme le contenu du canvas en <strong>Data URL</strong>. Il s'agit d'une chaîne de caractères qui contient les données de l'image encodées.</p>
+<pre><code>const dataURL = canvas.toDataURL();
+console.log(dataURL);</code></pre>
+<p>Par défaut, le navigateur produit généralement une image PNG.</p>
 
-    <h3>Quantification</h3>
+<h3>3.3 Choisir le format</h3>
+<pre><code>const png = canvas.toDataURL('image/png');
+const jpeg = canvas.toDataURL('image/jpeg');
+const webp = canvas.toDataURL('image/webp');</code></pre>
+<table>
+<tr><th>Format</th><th>Caractéristique</th><th>Usage courant</th></tr>
+<tr><td>PNG</td><td>Compression sans perte, transparence possible</td><td>logos, captures, dessins, images avec transparence</td></tr>
+<tr><td>JPEG</td><td>Compression avec perte, généralement plus léger</td><td>photographies</td></tr>
+<tr><td>WebP</td><td>Format moderne, compression efficace</td><td>images web lorsque le contexte le permet</td></tr>
+</table>
 
-    <p>
-        Chaque échantillon est arrondi à une valeur entière. Le nombre
-        de bits détermine la <strong>résolution</strong> :
-    </p>
+<h3>3.4 Qualité JPEG et WebP</h3>
+<p>Pour les formats qui acceptent un paramètre de qualité, on peut fournir une valeur comprise entre <code>0</code> et <code>1</code>.</p>
+<pre><code>const resultat = canvas.toDataURL('image/jpeg', 0.8);</code></pre>
+<p>Une valeur proche de <code>1</code> privilégie la qualité. Une valeur plus faible produit généralement un fichier plus petit, mais avec davantage de pertes.</p>
+<div class="important"><strong>Attention :</strong> le paramètre de qualité ne signifie pas « agrandir la résolution ». Il agit principalement sur la compression du format choisi.</div>
 
-    <ul>
-        <li>8 bits : 256 niveaux (qualité faible) ;</li>
-        <li>16 bits : 65 536 niveaux (qualité CD) ;</li>
-        <li>24 bits : 16,7 millions de niveaux (studio).</li>
-    </ul>
+<h3>3.5 Télécharger directement le résultat</h3>
+<p>Une Data URL peut être utilisée comme destination d'un lien de téléchargement.</p>
+<pre><code>function telechargerCanvas(canvas, nom = 'image.png') {
+    const lien = document.createElement('a');
 
+    lien.download = nom;
+    lien.href = canvas.toDataURL('image/png');
 
-<div class="audio-illustration">
-    <h4>Visualisation — quantification</h4>
-    <canvas id="quantCanvas" width="900" height="280"></canvas>
-    <div class="mini-controls">
-        <label>Résolution
-            <input id="quantBits" type="range" min="2" max="8" step="1" value="4">
-        </label>
-        <span class="readout" id="quantBitsVal">4 bits — 16 niveaux</span>
-    </div>
-    <p class="caption">
-        Après l'échantillonnage, chaque mesure est arrondie vers un niveau disponible.
-        Plus le nombre de bits est élevé, plus les niveaux sont nombreux et fins.
-    </p>
+    lien.click();
+}
+
+telechargerCanvas(canvas, 'mon-image.png');</code></pre>
+
+<h3>3.6 Méthode recommandée pour des images plus importantes : <code>toBlob()</code></h3>
+<p><code>toDataURL()</code> fabrique une longue chaîne de caractères. Pour des images volumineuses, <code>toBlob()</code> est souvent plus adaptée car elle produit un objet <code>Blob</code>.</p>
+<pre><code>canvas.toBlob((blob) =&gt; {
+    if (!blob) return;
+
+    const url = URL.createObjectURL(blob);
+
+    const lien = document.createElement('a');
+    lien.href = url;
+    lien.download = 'image.jpg';
+    lien.click();
+
+    URL.revokeObjectURL(url);
+}, 'image/jpeg', 0.85);</code></pre>
+
+<h3>3.7 Comprendre le rôle du Blob</h3>
+<p>Un <code>Blob</code> représente une quantité de données binaires. Dans notre cas, il représente l'image encodée dans le format choisi.</p>
+<div class="grid">
+<div class="card">
+<h3><code>toDataURL()</code></h3>
+<p>Retourne une chaîne.</p>
+<p>Très simple pour les petits exemples et les démonstrations.</p>
+</div>
+<div class="card">
+<h3><code>toBlob()</code></h3>
+<p>Retourne un objet binaire via un callback.</p>
+<p>Plus approprié pour des fichiers et des traitements plus importants.</p>
+</div>
 </div>
 
+<h3>3.8 Exporter après une transformation</h3>
+<p>L'exportation se fait <strong>après</strong> le dessin ou la transformation. Par exemple :</p>
+<pre><code>// 1. Dessiner l'image
+ctx.drawImage(img, 0, 0);
 
-    <div class="important">
-        <strong>Compromis fondamental :</strong>
-        <p>
-            Plus la fréquence d'échantillonnage et la résolution sont
-            élevées, plus la qualité est bonne — mais plus le fichier
-            est volumineux.
-        </p>
-    </div>
+// 2. Transformer le canvas
+const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+// ... modification des pixels ...
+ctx.putImageData(imageData, 0, 0);
 
-    <h3>Calcul de taille</h3>
+// 3. Exporter le résultat
+canvas.toBlob(blob =&gt; {
+    // blob contient l'image finale
+}, 'image/png');</code></pre>
 
-    <p>
-        Taille d'un fichier audio non compressé :
-    </p>
+<h3>3.9 Exporter avec une taille précise</h3>
+<p>Le format du fichier exporté dépend directement de la taille interne du canvas.</p>
+<pre><code>canvas.width = 1200;
+canvas.height = 800;
 
-<pre><code>taille (octets) =
-    fréquence × bits/8 × canaux × durée</code></pre>
+ctx.drawImage(img, 0, 0, 1200, 800);
 
-    <p>Exemple pour 1 minute en qualité CD stéréo :</p>
+canvas.toBlob(blob =&gt; {
+    // image finale : 1200 × 800
+}, 'image/jpeg', 0.9);</code></pre>
+<div class="info"><strong>Important :</strong> les dimensions CSS affichées à l'écran et les dimensions internes du canvas sont deux notions différentes. Pour obtenir un fichier de 1200×800 pixels, le canvas doit avoir <code>width="1200"</code> et <code>height="800"</code> au niveau de sa résolution interne.</div>
 
-<pre><code>44 100 × 2 × 2 × 60 = 10 584 000 octets ≈ 10,1 Mo</code></pre>
+<h3>3.10 Transparence et export</h3>
+<p>Un PNG peut conserver les informations alpha. Un JPEG ne possède pas de canal alpha : une zone transparente doit donc être remplacée par une couleur lors de la composition/exportation.</p>
+<pre><code>// Fond blanc avant export JPEG
+ctx.save();
+ctx.globalCompositeOperation = 'destination-over';
+ctx.fillStyle = '#ffffff';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+ctx.restore();
+
+canvas.toBlob(blob =&gt; {
+    // JPEG avec fond blanc
+}, 'image/jpeg', 0.9);</code></pre>
+
+<h3>3.11 Exporter uniquement une partie de l'image</h3>
+<p>On peut créer un second canvas temporaire correspondant à la zone que l'on souhaite exporter.</p>
+<pre><code>function exporterZone(source, sx, sy, sw, sh) {
+    const temp = document.createElement('canvas');
+    temp.width = sw;
+    temp.height = sh;
+
+    const tctx = temp.getContext('2d');
+
+    tctx.drawImage(
+        source,
+        sx, sy, sw, sh,
+        0, 0, sw, sh
+    );
+
+    return temp;
+}
+
+const zone = exporterZone(canvas, 100, 50, 300, 200);
+zone.toBlob(blob =&gt; {
+    // export de la zone seulement
+}, 'image/png');</code></pre>
+
+<h3>3.12 Vérification : l'image exportée doit être l'image finale</h3>
+<p>Un piège fréquent consiste à exporter un canvas qui n'est pas celui qui contient le résultat final. Dans une application avec plusieurs canvas, il faut toujours identifier clairement :</p>
+<ol>
+<li>le canvas source ;</li>
+<li>le canvas de travail ;</li>
+<li>le canvas de prévisualisation éventuel ;</li>
+<li>le canvas destiné à l'export.</li>
+</ol>
+
+<div class="exercise">
+<strong>Exercice 0 — Premier export</strong>
+<p>Chargez une image, affichez-la dans un canvas, ajoutez un texte par-dessus, puis créez deux boutons :
+<strong>« Télécharger PNG »</strong> et <strong>« Télécharger JPEG »</strong>.
+Ajoutez ensuite un troisième bouton qui exporte seulement un carré central de l'image.</p>
+</div>
 </section>
 
+<section id="redim">
+<h2>4. Agrandir et miniaturiser</h2>
+<h3>3.1 Redimension simple</h3>
+<pre><code>// Afficher l'image à 50% de sa taille
+ctx.drawImage(img, 0, 0, img.width * 0.5, img.height * 0.5);
 
-<!-- FORMATS -->
+// Afficher l'image à 200%
+ctx.drawImage(img, 0, 0, img.width * 2, img.height * 2);</code></pre>
 
-<section id="formats">
-    <h2>4. Formats et compression</h2>
+<h3>3.2 Conserver les proportions</h3>
+<p>Pour éviter la déformation, on calcule un ratio qui respecte les proportions :</p>
+<pre><code>function drawFit(ctx, img, x, y, maxW, maxH) {
+    const ratio = Math.min(maxW / img.width, maxH / img.height);
+    const w = img.width * ratio;
+    const h = img.height * ratio;
+    ctx.drawImage(img, x, y, w, h);
+}</code></pre>
+<p>Cette fonction place l'image dans une « boîte » sans la déformer. Si l'image est plus large que haute, elle sera limitée par la largeur ; sinon, par la hauteur.</p>
+<h3>4.3 Comprendre le ratio d'aspect</h3>
+<p>Le ratio d'aspect décrit la relation entre largeur et hauteur :</p>
+<pre><code>ratio = largeur / hauteur</code></pre>
+<p>Une image de 1600×900 possède un ratio de <code>1600 / 900 ≈ 1,78</code>. Si on la force dans un rectangle 500×500 en donnant directement ces deux dimensions à <code>drawImage</code>, elle sera déformée.</p>
+<p>Il faut donc distinguer trois stratégies :</p>
+<div class="grid3">
+<div class="card"><h3>Contain / Fit</h3><p>L'image entière est visible. Il peut rester des marges.</p></div>
+<div class="card"><h3>Cover</h3><p>La zone est remplie. Une partie de l'image peut être coupée.</p></div>
+<div class="card"><h3>Stretch</h3><p>On impose largeur et hauteur. L'image peut être déformée.</p></div>
+</div>
+<pre><code>// FIT : image entière dans la boîte
+const ratio = Math.min(maxW / img.width, maxH / img.height);
 
-    <p>
-        Pour réduire la taille des fichiers, on utilise des
-        <strong>codecs</strong>. On distingue deux familles :
-    </p>
+// COVER : remplir toute la boîte
+const ratio = Math.max(maxW / img.width, maxH / img.height);</code></pre>
 
-    <h3>Compression sans perte</h3>
+<h3>4.4 Canvas interne et taille CSS</h3>
+<p>Il ne faut pas confondre :</p>
+<pre><code>&lt;canvas width="1200" height="800"&gt;&lt;/canvas&gt;</code></pre>
+<p>avec une simple réduction visuelle en CSS :</p>
+<pre><code>canvas {
+    width: 600px;
+    height: 400px;
+}</code></pre>
+<p>Dans le second cas, le canvas peut toujours contenir 1200×800 pixels internes, même s'il est affiché sur 600×400 CSS pixels.</p>
 
-    <p>
-        Le son est reconstruit à l'identique. Le gain de taille est
-        modéré (30 à 50 %).
-    </p>
+<h3>4.5 Redimensionner une image pour l'export</h3>
+<pre><code>function redimensionnerPourExport(img, largeur) {
+    const ratio = largeur / img.width;
+    const hauteur = Math.round(img.height * ratio);
 
-    <ul>
-        <li>FLAC</li>
-        <li>ALAC</li>
-        <li>WAV (non compressé, mais souvent cité comme référence)</li>
-    </ul>
+    const c = document.createElement('canvas');
+    c.width = largeur;
+    c.height = hauteur;
 
-    <h3>Compression avec perte</h3>
+    const ctx = c.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, largeur, hauteur);
 
-    <p>
-        On supprime les informations peu perceptibles par l'oreille
-        (modèle psychoacoustique). Le gain est important (facteur 5 à 10),
-        mais la qualité est dégradée.
-    </p>
-
-    <ul>
-        <li>MP3</li>
-        <li>AAC (utilisé par les plateformes de streaming)</li>
-        <li>OGG Vorbis</li>
-        <li>Opus (moderne, très efficace)</li>
-    </ul>
-
-    <table>
-        <tr><th>Format</th><th>Type</th><th>Usage</th></tr>
-        <tr><td>WAV</td><td>Non compressé</td><td>Édition, masterisation</td></tr>
-        <tr><td>FLAC</td><td>Sans perte</td><td>Archivage, audiophiles</td></tr>
-        <tr><td>MP3</td><td>Avec perte</td><td>Diffusion générale</td></tr>
-        <tr><td>AAC</td><td>Avec perte</td><td>Streaming, mobile</td></tr>
-        <tr><td>Opus</td><td>Avec perte</td><td>Web moderne, visioconférence</td></tr>
-    </table>
-</section>
-
-
-<!-- AUDIO HTML -->
-
-<section id="audio-html">
-    <h2>5. Lecture simple avec l'élément audio</h2>
-
-    <p>
-        HTML5 fournit un élément natif pour lire un fichier audio :
-    </p>
-
-<pre><code>&lt;audio id="lecteur" controls&gt;
-    &lt;source src="musique.mp3" type="audio/mpeg"&gt;
-    Votre navigateur ne supporte pas l'audio HTML5.
-&lt;/audio&gt;</code></pre>
-
-    <p>
-        On peut aussi le contrôler entièrement en JavaScript :
-    </p>
-
-<pre><code>const lecteur = document.getElementById("lecteur");
-
-lecteur.play();
-lecteur.pause();
-lecteur.currentTime = 10;   // aller à 10 secondes
-lecteur.volume = 0.5;       // 50 %
-lecteur.loop = true;</code></pre>
-
-    <h3>Limites de l'élément audio</h3>
-
-    <ul>
-        <li>pas d'accès direct au signal ;</li>
-        <li>pas de filtrage ni d'effets ;</li>
-        <li>pas de synchronisation précise avec une animation.</li>
-    </ul>
-
-    <div class="info">
-        <strong>Pour aller plus loin :</strong>
-        <p>
-            La <strong>Web Audio API</strong> donne un accès bas niveau
-            au signal et permet la génération, le filtrage et l'analyse
-            en temps réel. C'est l'objet de la suite de cette journée.
-        </p>
-    </div>
-</section>
+    return c;
+}</code></pre>
+<p>Cette technique est particulièrement utile pour générer automatiquement des vignettes, des aperçus ou plusieurs tailles d'une même image.</p>
 
 
-<!-- WEB AUDIO -->
+<h3>3.3 Qualité du redimensionnement</h3>
+<p>Canvas propose deux propriétés pour contrôler la qualité :</p>
+<pre><code>ctx.imageSmoothingEnabled = true;   // lissage activé (par défaut)
+ctx.imageSmoothingQuality = 'high'; // 'low' | 'medium' | 'high'</code></pre>
+<div class="info"><strong>Agrandissement :</strong> une image agrandie devient floue ou pixelisée. Le lissage adoucit les bords mais ne crée pas de détail. Une image ne contient que l'information qu'elle possède : on ne peut pas inventer des pixels.</div>
 
-<section id="webaudio">
-    <h2>6. Introduction à la Web Audio API</h2>
+<h3>3.4 Miniaturisation de qualité : le downscaling progressif</h3>
+<p>Réduire une image d'un coup (par exemple de 4000px à 200px) donne souvent un résultat médiocre. Une meilleure approche consiste à réduire <strong>par étapes</strong>, de moitié en moitié.</p>
+<pre><code>function downscale(img, facteurCible) {
+    let courant = img;
+    let w = img.width, h = img.height;
+    let facteur = 1;
 
-    <p>
-        La Web Audio API modélise le traitement audio comme un
-        <strong>graphe de nœuds</strong>. Chaque nœud produit, transforme
-        ou consomme un signal audio.
-    </p>
+    while (facteur * 0.5 >= facteurCible) {
+        const tmp = document.createElement('canvas');
+        tmp.width = Math.max(1, Math.floor(w / 2));
+        tmp.height = Math.max(1, Math.floor(h / 2));
+        tmp.getContext('2d').drawImage(courant, 0, 0, tmp.width, tmp.height);
+        courant = tmp;
+        w = tmp.width;
+        h = tmp.height;
+        facteur *= 0.5;
+    }
 
-    <h3>Le contexte audio</h3>
-
-<pre><code>const audioCtx = new AudioContext();</code></pre>
-
-    <p>
-        Le contexte est le point d'entrée de toute opération audio.
-        Il gère l'horloge, la fréquence d'échantillonnage et le graphe.
-    </p>
-
-    <div class="important">
-        <strong>Politique des navigateurs :</strong>
-        <p>
-            Pour des raisons d'expérience utilisateur, un contexte audio
-            ne peut démarrer qu'après une <strong>action de l'utilisateur</strong>
-            (clic, appui sur une touche). Il faut donc souvent appeler
-            <code>audioCtx.resume()</code> après un clic.
-        </p>
-    </div>
-
-    <h3>État du contexte</h3>
-
-<pre><code>if (audioCtx.state === "suspended") {
-    audioCtx.resume();
+    return courant;
 }</code></pre>
 
-    <h3>Destination</h3>
-
-    <p>
-        Tout signal doit finir par atteindre la sortie audio :
-    </p>
-
-<pre><code>audioCtx.destination</code></pre>
-</section>
-
-
-<!-- GRAPHE -->
-
-<section id="graphe">
-    <h2>7. Graphe audio</h2>
-
-    <p>
-        Un graphe audio est un ensemble de nœuds connectés. On branche
-        la sortie d'un nœud sur l'entrée d'un autre avec
-        <code>connect()</code>.
-    </p>
-
-    <h3>Structure de base</h3>
-
-<pre><code>source → traitement → destination</code></pre>
-
-
-<div class="audio-illustration">
-    <h4>Visualisation — le graphe audio</h4>
-    <canvas id="audioGraphCanvas" width="900" height="230"></canvas>
-    <p class="caption">
-        Un graphe typique fait circuler le signal de gauche à droite :
-        source → traitement → sortie. Chaque bloc correspond à un nœud de la Web Audio API.
-    </p>
+<h3>3.5 Exemple interactif : agrandir et réduire</h3>
+<div class="controls">
+<label>Échelle : <input id="echelle" max="300" min="10" type="range" value="100"/> <span id="echelleVal">100%</span></label>
+<label><input id="smooth" type="checkbox" checked/> Lissage</label>
 </div>
-
-
-    <h3>Exemple minimal</h3>
-
-<pre><code>const audioCtx = new AudioContext();
-
-const oscillateur = audioCtx.createOscillator();
-const gain = audioCtx.createGain();
-
-oscillateur.connect(gain);
-gain.connect(audioCtx.destination);
-
-oscillateur.start();</code></pre>
-
-    <p>
-        Ce code produit un son continu. Pour l'arrêter :
-    </p>
-
-<pre><code>oscillateur.stop();</code></pre>
-
-    <h3>Types de nœuds courants</h3>
-
-    <table>
-        <tr><th>Nœud</th><th>Rôle</th></tr>
-        <tr><td><code>OscillatorNode</code></td><td>Génère un signal périodique</td></tr>
-        <tr><td><code>GainNode</code></td><td>Contrôle le volume</td></tr>
-        <tr><td><code>BiquadFilterNode</code></td><td>Filtre fréquentiel</td></tr>
-        <tr><td><code>DelayNode</code></td><td>Retard (écho)</td></tr>
-        <tr><td><code>ConvolverNode</code></td><td>Réverbération</td></tr>
-        <tr><td><code>AnalyserNode</code></td><td>Analyse temps réel (FFT)</td></tr>
-        <tr><td><code>AudioBufferSourceNode</code></td><td>Lecture d'un buffer</td></tr>
-        <tr><td><code>MediaElementSourceNode</code></td><td>Source depuis un élément audio/vidéo</td></tr>
-    </table>
+<canvas height="360" id="cvRedim" width="640"></canvas>
+<p class="small center">Observez la différence entre l'agrandissement lissé et non lissé.</p>
 </section>
 
+<section id="rogner">
+<h2>5. Rogner une image</h2>
+<h3>4.1 Rogner avec drawImage</h3>
+<p>Le rognage consiste à n'afficher qu'une <strong>partie</strong> de l'image source.</p>
+<pre><code>// Extraire la zone (100,50) de taille 200×150,
+// et l'afficher en (0,0) à la même taille
+ctx.drawImage(img, 100, 50, 200, 150, 0, 0, 200, 150);</code></pre>
+<table>
+<tr><th>Paramètre</th><th>Signification</th></tr>
+<tr><td><code>sx, sy</code></td><td>Coin supérieur gauche de la zone à extraire (source)</td></tr>
+<tr><td><code>sw, sh</code></td><td>Largeur et hauteur de la zone à extraire</td></tr>
+<tr><td><code>dx, dy</code></td><td>Où placer le résultat (destination)</td></tr>
+<tr><td><code>dw, dh</code></td><td>Largeur et hauteur du résultat affiché</td></tr>
+</table>
 
-<!-- OSCILLATEURS -->
+<h3>4.2 Rogner et agrandir en même temps</h3>
+<pre><code>// Rogner une zone 100×100 puis l'afficher en 300×300
+ctx.drawImage(img, 50, 50, 100, 100, 0, 0, 300, 300);</code></pre>
+<p>C'est cette technique qui permet de faire un « zoom » sur une partie de l'image.</p>
 
-<section id="oscillateurs">
-    <h2>8. Générer un son : les oscillateurs</h2>
+<h3>4.3 Rogner en cercle</h3>
+<p>Pour un avatar rond par exemple, on utilise <code>clip()</code> :</p>
+<pre><code>ctx.save();
+ctx.beginPath();
+ctx.arc(150, 150, 120, 0, Math.PI * 2);
+ctx.clip();
+ctx.drawImage(img, 0, 0, img.width, img.height, 30, 30, 240, 240);
+ctx.restore();</code></pre>
+<p><code>ctx.clip()</code> définit une zone de dessin. Tout ce qui dépasse est ignoré. Le <code>save()</code> et <code>restore()</code> permettent de restaurer le contexte après.</p>
 
-    <p>
-        Un <code>OscillatorNode</code> produit un signal périodique
-        à une fréquence donnée.
-    </p>
-
-    <h3>Paramètres principaux</h3>
-
-    <table>
-        <tr><th>Paramètre</th><th>Type</th><th>Valeurs</th></tr>
-        <tr>
-            <td><code>type</code></td>
-            <td>chaîne</td>
-            <td><code>"sine"</code>, <code>"square"</code>,
-                <code>"triangle"</code>, <code>"sawtooth"</code></td>
-        </tr>
-        <tr>
-            <td><code>frequency</code></td>
-            <td>AudioParam</td>
-            <td>fréquence en Hz</td>
-        </tr>
-    </table>
-
-    <h3>Exemple</h3>
-
-
-<div class="audio-illustration">
-    <h4>Visualisation interactive — OscillatorNode</h4>
-    <canvas id="oscCanvas" width="900" height="250"></canvas>
-    <div class="mini-controls">
-        <label>Forme
-            <select id="oscShape">
-                <option value="sine">Sinusoïdale</option>
-                <option value="square">Carrée</option>
-                <option value="triangle">Triangulaire</option>
-                <option value="sawtooth">Dent de scie</option>
-            </select>
-        </label>
-        <label>Fréquence
-            <input id="oscFreq" type="range" min="100" max="1000" step="10" value="440">
-        </label>
-        <span class="readout" id="oscFreqVal">440 Hz</span>
-    </div>
-    <p class="caption">
-        Ici on ne joue pas seulement le son : on voit directement le signal produit par l'oscillateur.
-        La fréquence modifie la période ; la forme modifie le timbre.
-    </p>
+<h3>4.4 Exemple interactif : rognage</h3>
+<div class="controls">
+<label>Source X : <input id="sx" max="400" min="0" type="range" value="100"/> <span id="sxv">100</span></label>
+<label>Source Y : <input id="sy" max="300" min="0" type="range" value="50"/> <span id="syv">50</span></label>
+<label>Largeur : <input id="sw" max="400" min="20" type="range" value="200"/> <span id="swv">200</span></label>
+<label>Hauteur : <input id="sh" max="300" min="20" type="range" value="150"/> <span id="shv">150</span></label>
+<label><input id="cercle" type="checkbox"/> Rogner en cercle</label>
 </div>
+<canvas height="360" id="cvRogner" width="640"></canvas>
+<p class="small center">Déplacez les curseurs pour rogner l'image de démonstration.</p>
+</section>
+
+<section id="pixels">
+<h2>6. Accéder aux pixels : getImageData et putImageData</h2>
+<h3>5.1 Lire les pixels</h3>
+<pre><code>const imageData = ctx.getImageData(x, y, largeur, hauteur);</code></pre>
+<p>On obtient un objet avec trois propriétés :</p>
+<table>
+<tr><th>Propriété</th><th>Description</th></tr>
+<tr><td><code>imageData.width</code></td><td>Largeur de la zone lue</td></tr>
+<tr><td><code>imageData.height</code></td><td>Hauteur de la zone lue</td></tr>
+<tr><td><code>imageData.data</code></td><td><code>Uint8ClampedArray</code> de taille <code>width × height × 4</code></td></tr>
+</table>
+
+<h3>5.2 Parcourir les pixels</h3>
+<pre><code>const d = imageData.data;
+
+for (let i = 0; i < d.length; i += 4) {
+    const r = d[i];
+    const g = d[i + 1];
+    const b = d[i + 2];
+    const a = d[i + 3];
+
+    // modifier r, g, b, a si besoin
+    d[i]     = r;
+    d[i + 1] = g;
+    d[i + 2] = b;
+    d[i + 3] = a;
+}</code></pre>
+<div class="important"><strong>L'incrément de 4 est essentiel.</strong> Chaque pixel occupe quatre cases consécutives. Si on incrémente de 1, on lit les canaux séparément, ce qui n'a pas de sens.</div>
+<h3>6.3 Retrouver l'index d'un pixel à partir de (x, y)</h3>
+<p>Quand on connaît les coordonnées d'un pixel, son index dans le tableau peut être calculé avec :</p>
+<pre><code>const index = (y * imageData.width + x) * 4;</code></pre>
+<p>Par exemple, pour le pixel situé en <code>x=10</code> et <code>y=5</code> :</p>
+<pre><code>const i = (5 * imageData.width + 10) * 4;
+
+const r = d[i];
+const g = d[i + 1];
+const b = d[i + 2];
+const a = d[i + 3];</code></pre>
+
+<h3>6.4 Pourquoi un tableau plat ?</h3>
+<p>Conceptuellement, nous imaginons une grille :</p>
+<pre><code>[ pixel ][ pixel ][ pixel ]
+[ pixel ][ pixel ][ pixel ]
+[ pixel ][ pixel ][ pixel ]</code></pre>
+<p>Mais en mémoire, les données sont rangées les unes à la suite des autres :</p>
+<pre><code>R G B A | R G B A | R G B A | ...</code></pre>
+<p>Cette organisation est efficace, mais elle oblige le programmeur à convertir entre coordonnées 2D et index 1D.</p>
+
+<h3>6.5 Préserver l'alpha</h3>
+<pre><code>const a = d[i + 3];
+
+// modifier R, G, B
+// ...
+
+d[i + 3] = a;</code></pre>
+<p>Si votre filtre ne doit pas toucher à la transparence, laissez simplement le canal alpha inchangé.</p>
 
 
-<pre><code>const osc = audioCtx.createOscillator();
+<h3>5.3 Écrire les pixels modifiés</h3>
+<pre><code>ctx.putImageData(imageData, x, y);</code></pre>
+<p>Cette méthode écrase la zone avec les nouvelles valeurs. Elle ne se combine pas avec ce qui était déjà dessiné : elle remplace.</p>
 
-osc.type = "sine";
-osc.frequency.value = 440;   // La 440 Hz
+<h3>5.4 Attention à la sécurité (CORS)</h3>
+<p>Si l'image vient d'un autre domaine, <code>getImageData</code> est bloqué pour des raisons de sécurité. Le navigateur considère le canvas comme « contaminé ».</p>
+<div class="danger"><strong>Sécurité :</strong> pour lire les pixels d'une image externe, il faut soit la servir depuis le même domaine, soit l'charger avec <code>img.crossOrigin = 'anonymous'</code>, et que le serveur envoie l'en-tête <code>Access-Control-Allow-Origin</code>.</div>
+<pre><code>img.crossOrigin = 'anonymous';
+img.src = 'https://autre-domaine.com/photo.jpg';</code></pre>
+</section>
 
-osc.connect(audioCtx.destination);
-osc.start();
+<section id="couleurs">
+<h2>7. Manipulations de couleurs</h2>
+<p>Nous allons maintenant appliquer des transformations classiques sur chaque pixel. Toutes ces fonctions prennent un <code>imageData</code> et le modifient en place.</p>
 
-// Arrêt après 1 seconde
-setTimeout(() => osc.stop(), 1000);</code></pre>
+<h3>6.1 Renforcer un canal (par exemple le rouge)</h3>
+<pre><code>function renforcerCanal(imageData, canal, facteur) {
+    const d = imageData.data;
+    const offset = { r: 0, g: 1, b: 2 }[canal];
 
-    <h3>Table des fréquences (gamme tempérée)</h3>
+    for (let i = offset; i < d.length; i += 4) {
+        d[i] = Math.min(255, d[i] * facteur);
+    }
+}
 
-    <table>
-        <tr>
-            <th>Note</th><th>Fréquence (Hz)</th>
-            <th>Note</th><th>Fréquence (Hz)</th>
-        </tr>
-        <tr><td>Do4</td><td>261,63</td><td>Sol4</td><td>392,00</td></tr>
-        <tr><td>Ré4</td><td>293,66</td><td>La4</td><td>440,00</td></tr>
-        <tr><td>Mi4</td><td>329,63</td><td>Si4</td><td>493,88</td></tr>
-        <tr><td>Fa4</td><td>349,23</td><td>Do5</td><td>523,25</td></tr>
-    </table>
+renforcerCanal(imageData, 'r', 1.5); // rouge renforcé</code></pre>
 
-    <div class="info">
-        <strong>Formule de calcul :</strong>
-        <p>
-            Pour une note située <code>n</code> demi-tons au-dessus du
-            La 440 :
-        </p>
-<pre><code>fréquence = 440 × 2^(n / 12)</code></pre>
-    </div>
+<h3>6.2 Désaturer (niveaux de gris)</h3>
+<p>La formule la plus courante utilise la <strong>luminance perçue</strong> :</p>
+<pre><code>for (let i = 0; i < d.length; i += 4) {
+    const gris = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    d[i]     = gris;
+    d[i + 1] = gris;
+    d[i + 2] = gris;
+}</code></pre>
+<p>Ces coefficients reflètent la sensibilité de l'œil : nous percevons mieux le vert que le bleu. Une simple moyenne donnerait un résultat moins naturel.</p>
+
+<h3>6.3 Désaturation partielle</h3>
+<p>Pour doser l'effet entre 0 (inchangé) et 1 (gris total) :</p>
+<pre><code>function desaturer(imageData, taux) {
+    const d = imageData.data;
+
+    for (let i = 0; i < d.length; i += 4) {
+        const gris = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        d[i]     = d[i]     + (gris - d[i])     * taux;
+        d[i + 1] = d[i + 1] + (gris - d[i + 1]) * taux;
+        d[i + 2] = d[i + 2] + (gris - d[i + 2]) * taux;
+    }
+}</code></pre>
+
+<h3>6.4 Inverser les couleurs (négatif)</h3>
+<pre><code>for (let i = 0; i < d.length; i += 4) {
+    d[i]     = 255 - d[i];
+    d[i + 1] = 255 - d[i + 1];
+    d[i + 2] = 255 - d[i + 2];
+}</code></pre>
+<p>L'alpha n'est pas modifié : la transparence est préservée.</p>
+
+<h3>6.5 Monochrome (teinte unique)</h3>
+<p>Transformer l'image en une seule teinte, par exemple bleu :</p>
+<pre><code>for (let i = 0; i < d.length; i += 4) {
+    const gris = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    d[i]     = gris * 0.2; // peu de rouge
+    d[i + 1] = gris * 0.4; // un peu de vert
+    d[i + 2] = gris;       // bleu dominant
+}</code></pre>
+<p>Version plus souple avec une couleur cible :</p>
+<pre><code>function monochrome(imageData, couleur) {
+    const d = imageData.data;
+    const { r, g, b } = couleur;
+
+    for (let i = 0; i < d.length; i += 4) {
+        const gris = (0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]) / 255;
+        d[i]     = r * gris;
+        d[i + 1] = g * gris;
+        d[i + 2] = b * gris;
+    }
+}
+
+monochrome(imageData, { r: 200, g: 100, b: 50 }); // teinte sépia</code></pre>
+
+<h3>6.6 Luminosité et contraste</h3>
+<pre><code>function luminosite(imageData, delta) {
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+        d[i]     = Math.min(255, Math.max(0, d[i]     + delta));
+        d[i + 1] = Math.min(255, Math.max(0, d[i + 1] + delta));
+        d[i + 2] = Math.min(255, Math.max(0, d[i + 2] + delta));
+    }
+}
+
+function contraste(imageData, facteur) {
+    // facteur > 1 → plus de contraste, < 1 → moins
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+        d[i]     = Math.min(255, Math.max(0, (d[i]     - 128) * facteur + 128));
+        d[i + 1] = Math.min(255, Math.max(0, (d[i + 1] - 128) * facteur + 128));
+        d[i + 2] = Math.min(255, Math.max(0, (d[i + 2] - 128) * facteur + 128));
+    }
+}</code></pre>
+
+<h3>6.7 Sépia</h3>
+<pre><code>for (let i = 0; i < d.length; i += 4) {
+    const r = d[i], g = d[i + 1], b = d[i + 2];
+    d[i]     = Math.min(255, 0.393 * r + 0.769 * g + 0.189 * b);
+    d[i + 1] = Math.min(255, 0.349 * r + 0.686 * g + 0.168 * b);
+    d[i + 2] = Math.min(255, 0.272 * r + 0.534 * g + 0.131 * b);
+}</code></pre>
+
+<h3>6.8 Seuil (noir et blanc pur)</h3>
+<pre><code>const seuil = 128;
+for (let i = 0; i < d.length; i += 4) {
+    const gris = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    const v = gris > seuil ? 255 : 0;
+    d[i] = d[i + 1] = d[i + 2] = v;
+}</code></pre>
+
+<h3>6.9 Tableau récapitulatif</h3>
+<table>
+<tr><th>Effet</th><th>Principe</th></tr>
+<tr><td>Renforcer une couleur</td><td>Multiplier un canal par un facteur > 1</td></tr>
+<tr><td>Désaturer</td><td>Remplacer R, G, B par la luminance perçue</td></tr>
+<tr><td>Inverser</td><td>Remplacer chaque canal par 255 − valeur</td></tr>
+<tr><td>Monochrome</td><td>Multiplier la luminance par une couleur cible</td></tr>
+<tr><td>Sépia</td><td>Combinaison linéaire des canaux avec des coefficients fixes</td></tr>
+<tr><td>Seuil</td><td>Comparer la luminance à une valeur, forcer 0 ou 255</td></tr>
+<tr><td>Luminosité</td><td>Ajouter une constante à chaque canal</td></tr>
+<tr><td>Contraste</td><td>Étirer les valeurs autour de 128</td></tr>
+</table>
 </section>
 
 
-<!-- ENVELOPPE -->
+<section id="workflow">
+<h2>8. Avant les filtres : construire un pipeline propre</h2>
+<p>À mesure que les traitements deviennent nombreux, il est important de ne pas modifier définitivement l'image originale à chaque clic.</p>
 
-<section id="enveloppe">
-    <h2>9. Façonner le son : enveloppe</h2>
+<h3>8.1 Garder une source intacte</h3>
+<pre><code>const imageOriginale = img;
 
-    <p>
-        Un son brut qui commence et s'arrête brutalement produit un
-        clic désagréable. On façonne son amplitude avec une
-        <strong>enveloppe ADSR</strong> :
-    </p>
+// Pour chaque nouveau filtre :
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+ctx.drawImage(imageOriginale, 0, 0);
 
-    <table>
-        <tr><th>Phase</th><th>Signification</th></tr>
-        <tr><td>Attack</td><td>Temps pour atteindre le volume maximal</td></tr>
-        <tr><td>Decay</td><td>Temps pour redescendre au volume de maintien</td></tr>
-        <tr><td>Sustain</td><td>Volume maintenu tant que la note est tenue</td></tr>
-        <tr><td>Release</td><td>Temps pour revenir à zéro après relâchement</td></tr>
-    </table>
+// puis appliquer le traitement</code></pre>
+<p>Cette méthode permet de revenir instantanément à l'original et d'éviter l'accumulation d'erreurs de compression ou de transformations.</p>
 
+<h3>8.2 Deux architectures possibles</h3>
+<table>
+<tr><th>Architecture</th><th>Principe</th><th>Avantage</th></tr>
+<tr><td>Canvas unique</td><td>On travaille directement sur le même canvas</td><td>Simple pour les petits exercices</td></tr>
+<tr><td>Source + résultat</td><td>On conserve une source et on redessine le résultat à chaque modification</td><td>Plus propre pour une application interactive</td></tr>
+</table>
 
-<div class="audio-illustration">
-    <h4>Visualisation — enveloppe ADSR</h4>
-    <canvas id="adsrCanvas" width="900" height="270"></canvas>
-    <div class="mini-controls">
-        <label>Attack <input id="adsrA" type="range" min="0.05" max="1.2" step="0.05" value="0.2"></label>
-        <label>Decay <input id="adsrD" type="range" min="0.05" max="1" step="0.05" value="0.35"></label>
-        <label>Sustain <input id="adsrS" type="range" min="0.15" max="1" step="0.05" value="0.55"></label>
-        <label>Release <input id="adsrR" type="range" min="0.1" max="1.5" step="0.05" value="0.5"></label>
-    </div>
-    <p class="caption">
-        L'enveloppe décrit l'évolution du volume dans le temps : montée (Attack),
-        descente vers le niveau de maintien (Decay), maintien (Sustain), puis extinction (Release).
-    </p>
-</div>
+<h3>8.3 Fonction générale de traitement</h3>
+<pre><code>function traiterImage(img, traitement) {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
 
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
 
-    <h3>Implémentation avec un GainNode</h3>
+    const imageData = ctx.getImageData(
+        0, 0,
+        canvas.width,
+        canvas.height
+    );
 
-<pre><code>const gain = audioCtx.createGain();
-gain.gain.value = 0;
+    traitement(imageData);
 
-const maintenant = audioCtx.currentTime;
+    ctx.putImageData(imageData, 0, 0);
 
-// Attaque
-gain.gain.linearRampToValueAtTime(0.5, maintenant + 0.05);
+    return canvas;
+}</code></pre>
 
-// Decay
-gain.gain.linearRampToValueAtTime(0.3, maintenant + 0.2);
+<h3>8.4 Et ensuite ?</h3>
+<p>Une fois le canvas retourné, la même fonction peut servir à :</p>
+<ul>
+<li>l'afficher dans la page ;</li>
+<li>l'afficher dans un autre canvas ;</li>
+<li>le redimensionner ;</li>
+<li>l'exporter avec <code>toBlob()</code> ou <code>toDataURL()</code>.</li>
+</ul>
 
-// Sustain (maintien)
-gain.gain.setValueAtTime(0.3, maintenant + 0.2);</code></pre>
-
-    <p>Puis, au relâchement de la touche :</p>
-
-<pre><code>const maintenant = audioCtx.currentTime;
-gain.gain.cancelScheduledValues(maintenant);
-gain.gain.setValueAtTime(gain.gain.value, maintenant);
-gain.gain.linearRampToValueAtTime(0, maintenant + 0.3);</code></pre>
-
-    <h3>Méthodes de programmation</h3>
-
-    <table>
-        <tr><th>Méthode</th><th>Effet</th></tr>
-        <tr><td><code>setValueAtTime(v, t)</code></td><td>Valeur fixe à un instant</td></tr>
-        <tr><td><code>linearRampToValueAtTime(v, t)</code></td><td>Ramp linéaire</td></tr>
-        <tr><td><code>exponentialRampToValueAtTime(v, t)</code></td><td>Ramp exponentielle</td></tr>
-        <tr><td><code>cancelScheduledValues(t)</code></td><td>Annuler les événements programmés</td></tr>
-    </table>
+<div class="success"><strong>Idée clé :</strong> séparer « charger », « transformer », « afficher » et « exporter » rend le programme beaucoup plus facile à comprendre et à maintenir.</div>
 </section>
-
-
-<!-- FILTRES -->
 
 <section id="filtres">
-    <h2>10. Filtres fréquentiels</h2>
+<h2>8. Filtres natifs de Canvas</h2>
+<p>Canvas propose une propriété <code>ctx.filter</code> qui applique un filtre au prochain dessin. C'est beaucoup plus rapide que de manipuler les pixels, mais on n'a pas accès aux valeurs individuelles.</p>
+<pre><code>ctx.filter = 'grayscale(100%)';
+ctx.drawImage(img, 0, 0);
 
-    <p>
-        Un <code>BiquadFilterNode</code> atténue ou amplifie certaines
-        fréquences du signal.
-    </p>
+ctx.filter = 'blur(5px)';
+ctx.drawImage(img, 0, 0);
 
-    <h3>Types de filtres</h3>
+ctx.filter = 'sepia(80%) brightness(1.2) contrast(1.1)';
+ctx.drawImage(img, 0, 0);
 
-    <table>
-        <tr><th>Type</th><th>Effet</th></tr>
-        <tr><td><code>lowpass</code></td><td>Conserve les basses, atténue les aiguës</td></tr>
-        <tr><td><code>highpass</code></td><td>Conserve les aiguës, atténue les basses</td></tr>
-        <tr><td><code>bandpass</code></td><td>Conserve une bande de fréquences</td></tr>
-        <tr><td><code>notch</code></td><td>Supprime une bande étroite</td></tr>
-        <tr><td><code>lowshelf</code></td><td>Amplifie ou atténue les basses</td></tr>
-        <tr><td><code>highshelf</code></td><td>Amplifie ou atténue les aiguës</td></tr>
-        <tr><td><code>peaking</code></td><td>Amplifie ou atténue une bande centrale</td></tr>
-    </table>
+// Réinitialiser
+ctx.filter = 'none';</code></pre>
+<h3>Filtres disponibles</h3>
+<table>
+<tr><th>Filtre</th><th>Effet</th></tr>
+<tr><td><code>blur(px)</code></td><td>Flou gaussien</td></tr>
+<tr><td><code>brightness(%)</code></td><td>Luminosité</td></tr>
+<tr><td><code>contrast(%)</code></td><td>Contraste</td></tr>
+<tr><td><code>drop-shadow()</code></td><td>Ombre portée</td></tr>
+<tr><td><code>grayscale(%)</code></td><td>Niveaux de gris</td></tr>
+<tr><td><code>hue-rotate(deg)</code></td><td>Rotation de teinte</td></tr>
+<tr><td><code>invert(%)</code></td><td>Négatif</td></tr>
+<tr><td><code>opacity(%)</code></td><td>Transparence</td></tr>
+<tr><td><code>saturate(%)</code></td><td>Saturation</td></tr>
+<tr><td><code>sepia(%)</code></td><td>Sépia</td></tr>
+</table>
+<p>On peut combiner plusieurs filtres en les séparant par des espaces.</p>
+<div class="info"><strong>Avantage :</strong> les filtres natifs sont très rapides car implémentés en code natif. <strong>Inconvénient :</strong> ils ne permettent pas de logique personnalisée pixel par pixel (par exemple, un seuil conditionnel ou une transformation non linéaire).</div>
+</section>
 
+<section id="avances">
+<h2>9. Effets avancés</h2>
+<h3>8.1 Flou par convolution (moyenne)</h3>
+<p>Un flou simple consiste à remplacer chaque pixel par la moyenne de ses voisins. On parcourt donc chaque pixel et on calcule la moyenne d'un voisinage (par exemple 3×3).</p>
+<pre><code>function flouMoyenne(imageData, taille) {
+    const { width, height, data } = imageData;
+    const copie = new Uint8ClampedArray(data);
+    const r = Math.floor(taille / 2);
 
-<div class="audio-illustration">
-    <h4>Visualisation — filtre passe-bas</h4>
-    <canvas id="filterCanvas" width="900" height="280"></canvas>
-    <div class="mini-controls">
-        <label>Fréquence de coupure
-            <input id="filterCut" type="range" min="200" max="8000" step="50" value="1200">
-        </label>
-        <span class="readout" id="filterCutVal">1200 Hz</span>
-    </div>
-    <p class="caption">
-        Un passe-bas laisse davantage passer les basses fréquences et atténue progressivement
-        les fréquences situées au-dessus de la coupure.
-    </p>
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            let sr = 0, sg = 0, sb = 0, n = 0;
+
+            for (let dy = -r; dy <= r; dy++) {
+                for (let dx = -r; dx <= r; dx++) {
+                    const nx = x + dx, ny = y + dy;
+                    if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+                    const i = (ny * width + nx) * 4;
+                    sr += copie[i];
+                    sg += copie[i + 1];
+                    sb += copie[i + 2];
+                    n++;
+                }
+            }
+
+            const i = (y * width + x) * 4;
+            data[i]     = sr / n;
+            data[i + 1] = sg / n;
+            data[i + 2] = sb / n;
+        }
+    }
+}</code></pre>
+<div class="important"><strong>Attention :</strong> il faut travailler sur une <strong>copie</strong> des données, sinon les pixels déjà modifiés influencent les suivants. C'est une source classique de bug.</div>
+
+<h3>8.2 Détection de contours (Sobel simplifié)</h3>
+<p>Un contour apparaît là où la luminosité change brutalement. On compare chaque pixel à ses voisins.</p>
+<pre><code>function contours(imageData, seuil) {
+    const { width, height, data } = imageData;
+    const copie = new Uint8ClampedArray(data);
+
+    for (let y = 1; y < height - 1; y++) {
+        for (let x = 1; x < width - 1; x++) {
+            const i = (y * width + x) * 4;
+            const gx =
+                -1 * copie[((y-1)*width + (x-1))*4] +
+                 1 * copie[((y-1)*width + (x+1))*4] +
+                -2 * copie[( y   *width + (x-1))*4] +
+                 2 * copie[( y   *width + (x+1))*4] +
+                -1 * copie[((y+1)*width + (x-1))*4] +
+                 1 * copie[((y+1)*width + (x+1))*4];
+
+            const gy =
+                -1 * copie[((y-1)*width + (x-1))*4] +
+                -2 * copie[((y-1)*width +  x   )*4] +
+                -1 * copie[((y-1)*width + (x+1))*4] +
+                 1 * copie[((y+1)*width + (x-1))*4] +
+                 2 * copie[((y+1)*width +  x   )*4] +
+                 1 * copie[((y+1)*width + (x+1))*4];
+
+            const magnitude = Math.sqrt(gx * gx + gy * gy);
+            const v = magnitude > seuil ? 255 : 0;
+            data[i] = data[i + 1] = data[i + 2] = v;
+        }
+    }
+}</code></pre>
+
+<h3>8.3 Pixelisation (mosaïque)</h3>
+<p>On regroupe les pixels par blocs et on leur donne une couleur unique.</p>
+<pre><code>function pixeliser(imageData, tailleBloc) {
+    const { width, height, data } = imageData;
+
+    for (let by = 0; by < height; by += tailleBloc) {
+        for (let bx = 0; bx < width; bx += tailleBloc) {
+            let sr = 0, sg = 0, sb = 0, n = 0;
+
+            for (let y = by; y < Math.min(by + tailleBloc, height); y++) {
+                for (let x = bx; x < Math.min(bx + tailleBloc, width); x++) {
+                    const i = (y * width + x) * 4;
+                    sr += data[i];
+                    sg += data[i + 1];
+                    sb += data[i + 2];
+                    n++;
+                }
+            }
+
+            const r = sr / n, g = sg / n, b = sb / n;
+
+            for (let y = by; y < Math.min(by + tailleBloc, height); y++) {
+                for (let x = bx; x < Math.min(bx + tailleBloc, width); x++) {
+                    const i = (y * width + x) * 4;
+                    data[i]     = r;
+                    data[i + 1] = g;
+                    data[i + 2] = b;
+                }
+            }
+        }
+    }
+}</code></pre>
+
+<h3>8.4 Teinte (hue-rotate) manuelle</h3>
+<p>Faire tourner la teinte nécessite de convertir en HSL, ce qui est plus complexe. Une approximation existe en RGB, mais elle donne des résultats approximatifs. Pour un vrai hue-rotate, on utilise <code>ctx.filter = 'hue-rotate(90deg)'</code>.</p>
+</section>
+
+<section id="composer">
+<h2>10. Composition et superposition</h2>
+<h3>9.1 Dessiner plusieurs images</h3>
+<pre><code>ctx.drawImage(fond, 0, 0, 640, 360);
+ctx.drawImage(logo, 20, 20, 100, 100);
+ctx.drawImage(texte, 200, 250, 240, 80);</code></pre>
+<p>L'ordre de dessin détermine la superposition : le dernier dessiné est au-dessus.</p>
+
+<h3>9.2 Transparence globale</h3>
+<pre><code>ctx.globalAlpha = 0.5;
+ctx.drawImage(img, 0, 0);
+ctx.globalAlpha = 1.0; // réinitialiser</code></pre>
+
+<h3>9.3 Modes de fusion (blend modes)</h3>
+<p>Canvas propose plusieurs modes pour combiner les pixels dessinés avec ceux déjà présents.</p>
+<pre><code>ctx.globalCompositeOperation = 'multiply';
+ctx.drawImage(img, 0, 0);
+
+ctx.globalCompositeOperation = 'screen';
+ctx.drawImage(img, 0, 0);
+
+ctx.globalCompositeOperation = 'overlay';
+ctx.drawImage(img, 0, 0);
+
+ctx.globalCompositeOperation = 'source-over'; // par défaut</code></pre>
+<table>
+<tr><th>Mode</th><th>Effet</th></tr>
+<tr><td><code>source-over</code></td><td>Normal (par défaut)</td></tr>
+<tr><td><code>multiply</code></td><td>Multiplication (assombrit)</td></tr>
+<tr><td><code>screen</code></td><td>Éclaircit</td></tr>
+<tr><td><code>overlay</code></td><td>Contraste</td></tr>
+<tr><td><code>darken</code></td><td>Garde la plus sombre des deux</td></tr>
+<tr><td><code>lighten</code></td><td>Garde la plus claire</td></tr>
+<tr><td><code>difference</code></td><td>Différence absolue</td></tr>
+</table>
+
+<h3>9.4 Exemple : appliquer un filtre à une zone précise</h3>
+<pre><code>// Lire une zone
+const zone = ctx.getImageData(100, 100, 200, 200);
+
+// Appliquer un filtre sur cette zone
+inverser(zone);
+
+// Réécrire la zone
+ctx.putImageData(zone, 100, 100);</code></pre>
+</section>
+
+<section id="demo">
+<h2>11. Démonstration interactive complète</h2>
+<p>Cette démonstration utilise l'image de démonstration chargée automatiquement. Vous pouvez appliquer différents filtres et ajuster leur intensité.</p>
+<div class="controls">
+<label>Filtre :
+<select id="filtreSelect">
+<option value="aucun">Aucun</option>
+<option value="gris">Niveaux de gris</option>
+<option value="desaturer">Désaturer partiel</option>
+<option value="inverser">Inverser</option>
+<option value="sepia">Sépia</option>
+<option value="seuil">Seuil</option>
+<option value="mono">Monochrome</option>
+<option value="luminosite">Luminosité</option>
+<option value="contraste">Contraste</option>
+<option value="rouge">Renforcer le rouge</option>
+<option value="bleu">Renforcer le bleu</option>
+<option value="flou">Flou moyen</option>
+<option value="pixeliser">Pixeliser</option>
+<option value="contours">Contours</option>
+</select>
+</label>
+<label>Intensité : <input id="intensite" max="200" min="0" type="range" value="100"/> <span id="intensiteVal">100</span></label>
+<label>Couleur mono : <input id="monoCouleur" type="color" value="#3a6fb0"/></label>
+<button id="btnReset">Réinitialiser</button>
+</div>
+<canvas height="420" id="cvDemo" width="700"></canvas>
+<div class="controls">
+<button id="exportPNG">Exporter en PNG</button>
+<button id="exportJPEG">Exporter en JPEG</button>
+<button id="exportWebP">Exporter en WebP</button>
+</div>
+
+<p class="small center">L'image originale est conservée en mémoire. Chaque filtre repart de l'original.</p>
+</section>
+
+<section id="exercices">
+<h2>12. Exercices progressifs</h2>
+
+<div class="exercise">
+<strong>Exercice 1 — Redimensionnement</strong>
+<p>Chargez une image et affichez-la à 25%, 50%, 100% et 200% dans quatre canvas différents. Comparez la qualité entre agrandissement lissé et non lissé.</p>
+</div>
+
+<div class="exercise">
+<strong>Exercice 2 — Vignette centrée</strong>
+<p>Créez une fonction qui génère une vignette 100×100 à partir d'une image, en rognant le centre (carré central).</p>
+</div>
+
+<div class="exercise">
+<strong>Exercice 3 — Filtre personnalisé</strong>
+<p>Appliquez un filtre qui renforce le rouge et atténue le bleu. Doser l'effet avec un curseur.</p>
+</div>
+
+<div class="exercise">
+<strong>Exercice 4 — Comparaison avant/après</strong>
+<p>Affichez côte à côte l'image originale et l'image en niveaux de gris. Un curseur contrôle le taux de désaturation entre les deux.</p>
+</div>
+
+<div class="exercise">
+<strong>Exercice 5 — Monochrome interactif</strong>
+<p>Transformez une image en monochrome avec une couleur choisie par l'utilisateur (input type="color").</p>
+</div>
+
+<div class="exercise">
+<strong>Exercice 6 — Sépia dosé</strong>
+<p>Appliquez le filtre sépia, puis ajoutez un curseur qui contrôle l'intensité du sépia entre 0% et 100%.</p>
+</div>
+
+<div class="exercise">
+<strong>Exercice 7 — Rogner une zone interactive</strong>
+<p>L'utilisateur trace un rectangle à la souris sur l'image. Le canvas affiche ensuite uniquement la zone sélectionnée, agrandie à la taille du canvas.</p>
+</div>
+
+<div class="exercise">
+<strong>Exercice 8 — Mosaïque interactive</strong>
+<p>Appliquez un effet de pixelisation dont la taille des blocs est contrôlée par un curseur.</p>
+</div>
+
+<div class="exercise">
+<strong>Exercice 9 — Effet loupe</strong>
+<p>Quand la souris passe sur l'image, affichez une loupe qui agrandit la zone sous le curseur.</p>
 </div>
 
 
-    <h3>Paramètres</h3>
+<div class="exercise">
+<strong>Exercice 11 — Export multi-format</strong>
+<p>À partir du résultat d'un filtre, proposez trois boutons d'export :
+PNG, JPEG qualité 90% et WebP qualité 80%. Comparez visuellement les résultats et les tailles des fichiers.</p>
+</div>
 
-    <table>
-        <tr><th>Paramètre</th><th>Rôle</th></tr>
-        <tr><td><code>frequency</code></td><td>Fréquence de coupure (Hz)</td></tr>
-        <tr><td><code>Q</code></td><td>Largeur de la bande (facteur de qualité)</td></tr>
-        <tr><td><code>gain</code></td><td>Amplification (pour shelf et peaking)</td></tr>
-    </table>
+<div class="exercise">
+<strong>Exercice 12 — Redimensionnement + export</strong>
+<p>Créez une fonction qui reçoit une image et une largeur maximale, conserve ses proportions, produit un canvas adapté puis exporte automatiquement le résultat.</p>
+</div>
 
-    <h3>Exemple : filtre passe-bas</h3>
+<div class="exercise">
+<strong>Exercice 13 — Recadrage carré + vignette</strong>
+<p>Construisez une vignette carrée de 300×300 : trouvez le plus petit côté, centrez le recadrage, dessinez la zone dans un canvas de 300×300 puis exportez-la en PNG.</p>
+</div>
 
-<pre><code>const filtre = audioCtx.createBiquadFilter();
+<div class="exercise">
+<strong>Exercice 14 — Mini-projet : éditeur d'image</strong>
+<p>Construisez une petite application comprenant : chargement local, aperçu, curseur de luminosité, contraste, désaturation, recadrage, choix PNG/JPEG/WebP et bouton d'export. L'original doit toujours rester intact afin que chaque modification puisse être recalculée.</p>
+</div>
 
-filtre.type = "lowpass";
-filtre.frequency.value = 800;
-filtre.Q.value = 1;
-
-oscillateur.connect(filtre);
-filtre.connect(audioCtx.destination);</code></pre>
+<div class="exercise">
+<strong>Exercice 10 — Composition</strong>
+<p>Superposez deux images avec un mode de fusion (<code>multiply</code>, <code>screen</code>, <code>overlay</code>) choisi par l'utilisateur.</p>
+</div>
 </section>
-
-
-<!-- TP1 -->
-
-<section id="tp1">
-    <h2>11. TP 1 — Piano virtuel</h2>
-
-    <div class="exercise">
-        <span class="level medium">Moyen</span>
-
-        <h3>Objectif</h3>
-        <p>
-            Construire un piano virtuel de 8 touches (Do4 à Do5)
-            jouable au clavier et à la souris.
-        </p>
-
-        <h3>Étapes</h3>
-        <ol>
-            <li>Créer un <code>AudioContext</code> au premier clic.</li>
-            <li>Associer chaque touche à une fréquence.</li>
-            <li>Au <code>keydown</code>, créer un oscillateur
-                et un gain, puis appliquer une enveloppe d'attaque.</li>
-            <li>Au <code>keyup</code>, déclencher la phase de release
-                et arrêter l'oscillateur après la rampe.</li>
-            <li>Idem pour les clics souris.</li>
-        </ol>
-
-        <h3>Indice</h3>
-        <p>
-            Conservez une référence à l'oscillateur actif par touche
-            pour pouvoir l'arrêter au bon moment.
-        </p>
-    </div>
-</section>
-
-
-<!-- TP2 -->
-
-<section id="tp2">
-    <h2>12. TP 2 — Synthétiseur paramétrable</h2>
-
-    <div class="exercise">
-        <span class="level hard">Difficile</span>
-
-        <h3>Objectif</h3>
-        <p>
-            Ajouter des contrôles à l'instrument : forme d'onde,
-            fréquence de coupure, résonance, volume.
-        </p>
-
-        <h3>Contraintes</h3>
-        <ul>
-            <li>Un sélecteur pour le type d'oscillateur ;</li>
-            <li>Un curseur pour la fréquence du filtre passe-bas ;</li>
-            <li>Un curseur pour le Q du filtre ;</li>
-            <li>Un curseur pour le volume général ;</li>
-            <li>Les modifications s'appliquent en temps réel
-                (sur les notes suivantes et/ou sur la note en cours).</li>
-        </ul>
-
-        <h3>Extension</h3>
-        <p>
-            Ajouter un second oscillateur désaccordé (detune)
-            pour un son plus riche.
-        </p>
-    </div>
-</section>
-
-
-<!-- DEMO -->
-
-<section id="demo">
-    <h2>13. Démonstration interactive</h2>
-
-    <p>
-        Cliquez sur une touche du piano (ou utilisez votre clavier)
-        pour jouer une note. Cliquez d'abord sur « Activer l'audio »
-        pour satisfaire la politique des navigateurs.
-    </p>
-
-    <div class="controls">
-        <button id="btnActiver">Activer l'audio</button>
-    </div>
-
-    <div class="piano" id="piano">
-        <div class="touche" data-freq="261.63" data-note="Do4">Do4</div>
-        <div class="touche" data-freq="293.66" data-note="Ré4">Ré4</div>
-        <div class="touche" data-freq="329.63" data-note="Mi4">Mi4</div>
-        <div class="touche" data-freq="349.23" data-note="Fa4">Fa4</div>
-        <div class="touche" data-freq="392.00" data-note="Sol4">Sol4</div>
-        <div class="touche" data-freq="440.00" data-note="La4">La4</div>
-        <div class="touche" data-freq="493.88" data-note="Si4">Si4</div>
-        <div class="touche" data-freq="523.25" data-note="Do5">Do5</div>
-    </div>
-
-    <div style="max-width: 800px; margin: 15px auto 0;">
-        <div class="slider-row">
-            <label for="typeOsc">Forme d'onde</label>
-            <select id="typeOsc" style="font-family: Arial; padding: 4px;">
-                <option value="sine">Sinusoïdale</option>
-                <option value="square">Carrée</option>
-                <option value="triangle">Triangulaire</option>
-                <option value="sawtooth">Dent de scie</option>
-            </select>
-        </div>
-        <div class="slider-row">
-            <label for="cutoff">Filtre passe-bas</label>
-            <input type="range" id="cutoff" min="200" max="8000" step="50" value="8000">
-            <span class="value" id="cutoffVal">8000 Hz</span>
-        </div>
-        <div class="slider-row">
-            <label for="volume">Volume</label>
-            <input type="range" id="volume" min="0" max="1" step="0.05" value="0.3">
-            <span class="value" id="volumeVal">0.30</span>
-        </div>
-    </div>
-
-    <div class="info">
-        <strong>À observer :</strong>
-        <ul>
-            <li>La forme d'onde change le timbre.</li>
-            <li>Le filtre passe-bas adoucit le son en coupant les aigus.</li>
-            <li>Le volume agit sur le gain général.</li>
-        </ul>
-    </div>
-</section>
-
-
-<!-- BILAN -->
 
 <section id="bilan">
-    <h2>14. À retenir — Jour 4</h2>
+<h2>13. Bilan et méthode de travail</h2>
+<table>
+<tr><th>Notion</th><th>Outil</th></tr>
+<tr><td>Afficher une image</td><td><code>ctx.drawImage(img, x, y)</code></td></tr>
+<tr><td>Redimensionner</td><td><code>ctx.drawImage(img, x, y, w, h)</code></td></tr>
+<tr><td>Rogner</td><td><code>ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)</code></td></tr>
+<tr><td>Rogner en forme</td><td><code>ctx.clip()</code></td></tr>
+<tr><td>Lire les pixels</td><td><code>ctx.getImageData(x, y, w, h)</code></td></tr>
+<tr><td>Écrire les pixels</td><td><code>ctx.putImageData(imageData, x, y)</code></td></tr>
+<tr><td>Parcourir les pixels</td><td><code>for (let i = 0; i &lt; d.length; i += 4)</code></td></tr>
+<tr><td>Filtres prêts</td><td><code>ctx.filter = 'grayscale(100%)'</code></td></tr>
+<tr><td>Filtres personnalisés</td><td>lecture/écriture de <code>imageData.data</code></td></tr>
+<tr><td>Transparence</td><td><code>ctx.globalAlpha</code></td></tr>
+<tr><td>Fusion</td><td><code>ctx.globalCompositeOperation</code></td></tr>
+<tr><td>Exporter</td><td><code>canvas.toDataURL()</code> ou <code>canvas.toBlob()</code></td></tr>
+</table>
 
-    <div class="success">
-        <ul>
-            <li>Le son est une onde de pression caractérisée par sa fréquence,
-                son amplitude et son timbre.</li>
-            <li>La numérisation repose sur l'échantillonnage et la quantification.</li>
-            <li>Le théorème de Nyquist-Shannon impose une fréquence
-                d'échantillonnage au moins double de la fréquence maximale.</li>
-            <li>Les formats audio se divisent en compression sans perte
-                (FLAC) et avec perte (MP3, AAC, Opus).</li>
-            <li>La Web Audio API modélise le traitement audio comme un
-                graphe de nœuds.</li>
-            <li>Un oscillateur génère un signal périodique ; un gain
-                contrôle le volume ; un filtre atténue certaines fréquences.</li>
-            <li>L'enveloppe ADSR façonne l'amplitude dans le temps.</li>
-        </ul>
-    </div>
 
-    <h3>Travail à remettre pour le Jour 4</h3>
+<h3>13.1 Méthode de résolution d'un exercice</h3>
+<ol>
+<li><strong>Identifier la source :</strong> image, fichier local ou autre canvas.</li>
+<li><strong>Déterminer la sortie :</strong> dimensions attendues et format d'export.</li>
+<li><strong>Choisir le bon niveau :</strong> <code>drawImage</code> pour géométrie, <code>filter</code> pour filtres standards, <code>ImageData</code> pour logique pixel par pixel.</li>
+<li><strong>Conserver l'original :</strong> surtout dans une interface interactive.</li>
+<li><strong>Tester sur une petite image :</strong> les opérations pixel par pixel peuvent être coûteuses.</li>
+<li><strong>Exporter à la fin :</strong> une fois le rendu définitif obtenu.</li>
+</ol>
 
-    <p>Chaque étudiant remet un instrument audio organisé comme suit :</p>
+<h3>13.2 Choisir le bon outil</h3>
+<table>
+<tr><th>Besoin</th><th>Outil conseillé</th></tr>
+<tr><td>Afficher une image</td><td><code>drawImage()</code></td></tr>
+<tr><td>Changer sa taille</td><td><code>drawImage()</code> avec destination</td></tr>
+<tr><td>Recadrer</td><td><code>drawImage()</code> avec source + destination</td></tr>
+<tr><td>Rogner selon une forme</td><td><code>clip()</code></td></tr>
+<tr><td>Filtre standard</td><td><code>ctx.filter</code></td></tr>
+<tr><td>Modifier chaque pixel</td><td><code>getImageData()</code> + <code>putImageData()</code></td></tr>
+<tr><td>Exporter simplement</td><td><code>toDataURL()</code></td></tr>
+<tr><td>Exporter efficacement</td><td><code>toBlob()</code></td></tr>
+</table>
 
-<pre><code>jour4/
-│
-├── index.html
-├── style.css
-└── script.js</code></pre>
+<div class="success">
+<strong>La règle mentale à retenir :</strong><br><br>
+Une image est un tableau de pixels. Chaque pixel est un groupe de 4 valeurs (R, G, B, A). Modifier une image, c'est parcourir ce tableau et transformer ces valeurs.
+</div>
 
-    <p>L'application doit comporter :</p>
-    <ul>
-        <li>au moins 5 notes jouables ;</li>
-        <li>une enveloppe ADSR ;</li>
-        <li>un contrôle de forme d'onde ;</li>
-        <li>un filtre passe-bas réglable ;</li>
-        <li>un contrôle de volume.</li>
-    </ul>
+<h3>Les 10 idées essentielles</h3>
+<ol>
+<li>Une image dans Canvas est une grille de pixels, chaque pixel ayant 4 canaux (R, G, B, A).</li>
+<li>Le chargement d'une image est asynchrone : il faut attendre <code>onload</code>.</li>
+<li><code>drawImage</code> possède trois signatures, dont une complète qui permet de rogner et redimensionner.</li>
+<li>Conserver les proportions évite la déformation.</li>
+<li>La miniaturisation progressive donne de meilleurs résultats qu'une réduction directe.</li>
+<li><code>getImageData</code> et <code>putImageData</code> permettent de lire et d'écrire les pixels.</li>
+<li>On parcourt les pixels avec un pas de 4.</li>
+<li>Les filtres classiques (gris, sépia, négatif, seuil) sont des transformations simples appliquées à chaque pixel.</li>
+<li>Les filtres natifs (<code>ctx.filter</code>) sont rapides mais ne permettent pas de logique personnalisée.</li>
+<li>Les effets avancés (flou, contours, pixelisation) nécessitent de considérer le voisinage des pixels.</li>
+<li><code>toDataURL()</code> permet d'obtenir une représentation exportable sous forme de chaîne.</li>
+<li><code>toBlob()</code> permet de produire un fichier binaire exportable plus adapté aux gros résultats.</li>
+<li>Le format PNG conserve la transparence, tandis que JPEG ne possède pas de canal alpha.</li>
+<li>La taille interne du canvas détermine la résolution de l'image exportée.</li>
+<li>Une application interactive doit idéalement conserver l'image originale et recalculer le résultat.</li>
+</ol>
+
+<div class="important">
+<strong>Pièges à éviter :</strong>
+<ul>
+<li>Dessiner avant <code>onload</code> : rien ne s'affiche.</li>
+<li>Oublier de copier les données avant une convolution : les pixels modifiés influencent les suivants.</li>
+<li>Lire les pixels d'une image d'un autre domaine sans CORS : erreur de sécurité.</li>
+<li>Modifier les pixels sans réinitialiser l'alpha : la transparence peut être altérée.</li>
+</ul>
+</div>
 </section>
 
-
 </main>
-
-
 <footer>
-    <p><strong>Programmation Multimédia — Jour 4</strong></p>
-    <p>Son numérique et Web Audio API</p>
-    <p>HTML5 · CSS3 · JavaScript</p>
+<div class="inner">
+<p><strong>Programmation Multimédia — Manipulation d'images dans Canvas</strong></p>
+<p>Charger · Afficher · Exporter · Redimensionner · Rogner · Filtrer · Composer</p>
+<p>HTML5 · CSS3 · JavaScript</p>
+</div>
 </footer>
 
-
-<!-- =====================================================
-     JAVASCRIPT DE LA DEMONSTRATION
-====================================================== -->
-
 <script>
-    let audioCtx = null;
-    let filtreGlobal = null;
-    let gainGlobal = null;
+// ============================================================
+// IMAGE DE DÉMONSTRATION (générée par canvas pour être autonome)
+// ============================================================
+function creerImageDemo(largeur = 600, hauteur = 400) {
+    const c = document.createElement('canvas');
+    c.width = largeur;
+    c.height = hauteur;
+    const g = c.getContext('2d');
 
-    const notesActives = {};   // index → { osc, gain }
+    // Dégradé de fond
+    const grad = g.createLinearGradient(0, 0, largeur, hauteur);
+    grad.addColorStop(0, '#2a4d6e');
+    grad.addColorStop(0.5, '#b45f2a');
+    grad.addColorStop(1, '#3f7547');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, largeur, hauteur);
 
-    /* ==============================
-       INITIALISATION
-    =============================== */
-
-    function initialiserAudio() {
-        if (audioCtx) return;
-
-        audioCtx = new AudioContext();
-
-        filtreGlobal = audioCtx.createBiquadFilter();
-        filtreGlobal.type = "lowpass";
-        filtreGlobal.frequency.value = 8000;
-        filtreGlobal.Q.value = 1;
-
-        gainGlobal = audioCtx.createGain();
-        gainGlobal.gain.value = 0.3;
-
-        filtreGlobal.connect(gainGlobal);
-        gainGlobal.connect(audioCtx.destination);
+    // Cercles colorés
+    const couleurs = ['#ff6b6b', '#6bcbff', '#ffd93d', '#a06bff', '#6bffb8'];
+    for (let i = 0; i < 25; i++) {
+        const x = Math.random() * largeur;
+        const y = Math.random() * hauteur;
+        const r = 15 + Math.random() * 50;
+        g.fillStyle = couleurs[i % couleurs.length];
+        g.globalAlpha = 0.6;
+        g.beginPath();
+        g.arc(x, y, r, 0, Math.PI * 2);
+        g.fill();
     }
 
-    document.getElementById("btnActiver").addEventListener("click", () => {
-        initialiserAudio();
-        if (audioCtx.state === "suspended") {
-            audioCtx.resume();
-        }
-        document.getElementById("btnActiver").textContent = "Audio actif";
-        document.getElementById("btnActiver").classList.add("success");
-    });
-
-    /* ==============================
-       JOUER UNE NOTE
-    =============================== */
-
-    function jouerNote(frequence, id) {
-        if (!audioCtx) return;
-        if (notesActives[id]) return;
-
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc.type = document.getElementById("typeOsc").value;
-        osc.frequency.value = frequence;
-
-        const maintenant = audioCtx.currentTime;
-
-        gain.gain.setValueAtTime(0, maintenant);
-        gain.gain.linearRampToValueAtTime(0.5, maintenant + 0.02);
-        gain.gain.linearRampToValueAtTime(0.3, maintenant + 0.1);
-
-        osc.connect(gain);
-        gain.connect(filtreGlobal);
-
-        osc.start();
-
-        notesActives[id] = { osc, gain };
+    // Quelques rectangles
+    g.globalAlpha = 0.5;
+    for (let i = 0; i < 8; i++) {
+        const x = Math.random() * largeur;
+        const y = Math.random() * hauteur;
+        g.fillStyle = couleurs[i % couleurs.length];
+        g.fillRect(x, y, 40 + Math.random() * 80, 20 + Math.random() * 40);
     }
 
-    /* ==============================
-       ARRÊTER UNE NOTE
-    =============================== */
+    // Un texte pour identifier l'image
+    g.globalAlpha = 1;
+    g.fillStyle = '#ffffff';
+    g.font = 'bold 36px Arial';
+    g.textAlign = 'center';
+    g.fillText('IMAGE DE DÉMONSTRATION', largeur / 2, hauteur / 2);
+    g.font = '20px Arial';
+    g.fillText('Programmation Multimédia', largeur / 2, hauteur / 2 + 30);
 
-    function arreterNote(id) {
-        const note = notesActives[id];
-        if (!note) return;
+    return c;
+}
 
-        const maintenant = audioCtx.currentTime;
+// Image de démonstration prête à l'emploi
+const imageDemo = creerImageDemo(600, 400);
 
-        note.gain.gain.cancelScheduledValues(maintenant);
-        note.gain.gain.setValueAtTime(note.gain.gain.value, maintenant);
-        note.gain.gain.linearRampToValueAtTime(0, maintenant + 0.25);
+// ============================================================
+// OUTIL : copier un imageData
+// ============================================================
+function copierImageData(imageData) {
+    return new ImageData(
+        new Uint8ClampedArray(imageData.data),
+        imageData.width,
+        imageData.height
+    );
+}
 
-        note.osc.stop(maintenant + 0.3);
+// ============================================================
+// SECTION 2 : CHARGEMENT D'IMAGE
+// ============================================================
+const cvCharger = document.getElementById('cvCharger');
+const ctxCharger = cvCharger.getContext('2d');
+const fileInput = document.getElementById('fileInput');
+let imageChargee = imageDemo;
 
-        delete notesActives[id];
-    }
+function afficherDansCanvasCharger(img) {
+    ctxCharger.clearRect(0, 0, cvCharger.width, cvCharger.height);
+    const ratio = Math.min(cvCharger.width / img.width, cvCharger.height / img.height);
+    const w = img.width * ratio;
+    const h = img.height * ratio;
+    const x = (cvCharger.width - w) / 2;
+    const y = (cvCharger.height - h) / 2;
+    ctxCharger.drawImage(img, x, y, w, h);
+}
 
-    /* ==============================
-       PIANO — SOURIS
-    =============================== */
-
-    document.querySelectorAll(".piano .touche").forEach(touche => {
-        const freq = parseFloat(touche.dataset.freq);
-        const id = touche.dataset.note;
-
-        touche.addEventListener("mousedown", () => {
-            initialiserAudio();
-            if (audioCtx.state === "suspended") audioCtx.resume();
-            jouerNote(freq, id);
-            touche.classList.add("active");
-        });
-
-        touche.addEventListener("mouseup", () => {
-            arreterNote(id);
-            touche.classList.remove("active");
-        });
-
-        touche.addEventListener("mouseleave", () => {
-            arreterNote(id);
-            touche.classList.remove("active");
-        });
-    });
-
-    /* ==============================
-       PIANO — CLAVIER
-    =============================== */
-
-    const correspondanceClavier = {
-        "a": { freq: 261.63, id: "Do4" },
-        "z": { freq: 293.66, id: "Ré4" },
-        "e": { freq: 329.63, id: "Mi4" },
-        "r": { freq: 349.23, id: "Fa4" },
-        "t": { freq: 392.00, id: "Sol4" },
-        "y": { freq: 440.00, id: "La4" },
-        "u": { freq: 493.88, id: "Si4" },
-        "i": { freq: 523.25, id: "Do5" }
+fileInput.addEventListener('change', (e) => {
+    const fichier = e.target.files[0];
+    if (!fichier) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+            imageChargee = img;
+            afficherDansCanvasCharger(img);
+        };
+        img.src = ev.target.result;
     };
+    reader.readAsDataURL(fichier);
+});
 
-    document.addEventListener("keydown", e => {
-        const touche = correspondanceClavier[e.key.toLowerCase()];
-        if (!touche) return;
-        if (e.repeat) return;
+document.getElementById('btnDemoImage').onclick = () => {
+    imageChargee = imageDemo;
+    afficherDansCanvasCharger(imageDemo);
+};
 
-        initialiserAudio();
-        if (audioCtx.state === "suspended") audioCtx.resume();
+// Affichage initial
+afficherDansCanvasCharger(imageDemo);
 
-        jouerNote(touche.freq, touche.id);
+// ============================================================
+// SECTION 3 : REDIMENSIONNEMENT
+// ============================================================
+const cvRedim = document.getElementById('cvRedim');
+const ctxRedim = cvRedim.getContext('2d');
+const echelle = document.getElementById('echelle');
+const echelleVal = document.getElementById('echelleVal');
+const smooth = document.getElementById('smooth');
 
-        const el = document.querySelector(`[data-note="${touche.id}"]`);
-        if (el) el.classList.add("active");
+function redessinerRedim() {
+    const facteur = Number(echelle.value) / 100;
+    echelleVal.textContent = echelle.value + '%';
+
+    ctxRedim.imageSmoothingEnabled = smooth.checked;
+    ctxRedim.imageSmoothingQuality = 'high';
+
+    ctxRedim.clearRect(0, 0, cvRedim.width, cvRedim.height);
+
+    const w = imageDemo.width * facteur;
+    const h = imageDemo.height * facteur;
+    const x = (cvRedim.width - w) / 2;
+    const y = (cvRedim.height - h) / 2;
+
+    ctxRedim.drawImage(imageDemo, x, y, w, h);
+}
+
+echelle.addEventListener('input', redessinerRedim);
+smooth.addEventListener('change', redessinerRedim);
+redessinerRedim();
+
+// ============================================================
+// SECTION 4 : ROGNAGE
+// ============================================================
+const cvRogner = document.getElementById('cvRogner');
+const ctxRogner = cvRogner.getContext('2d');
+const sx = document.getElementById('sx');
+const sy = document.getElementById('sy');
+const sw = document.getElementById('sw');
+const sh = document.getElementById('sh');
+const cercle = document.getElementById('cercle');
+
+function redessinerRogner() {
+    document.getElementById('sxv').textContent = sx.value;
+    document.getElementById('syv').textContent = sy.value;
+    document.getElementById('swv').textContent = sw.value;
+    document.getElementById('shv').textContent = sh.value;
+
+    ctxRogner.clearRect(0, 0, cvRogner.width, cvRogner.height);
+
+    const sxv = Number(sx.value);
+    const syv = Number(sy.value);
+    const swv = Number(sw.value);
+    const shv = Number(sh.value);
+
+    if (cercle.checked) {
+        ctxRogner.save();
+        ctxRogner.beginPath();
+        ctxRogner.arc(cvRogner.width / 2, cvRogner.height / 2, Math.min(cvRogner.width, cvRogner.height) / 2 - 10, 0, Math.PI * 2);
+        ctxRogner.clip();
+    }
+
+    // Calculer la zone d'affichage en conservant les proportions
+    const ratio = Math.min(cvRogner.width / swv, cvRogner.height / shv);
+    const dw = swv * ratio;
+    const dh = shv * ratio;
+    const dx = (cvRogner.width - dw) / 2;
+    const dy = (cvRogner.height - dh) / 2;
+
+    ctxRogner.drawImage(imageDemo, sxv, syv, swv, shv, dx, dy, dw, dh);
+
+    if (cercle.checked) {
+        ctxRogner.restore();
+    }
+
+    // Dessiner le contour de la zone source sur une miniature
+    ctxRogner.strokeStyle = '#ff6b6b';
+    ctxRogner.lineWidth = 2;
+    ctxRogner.strokeRect(dx, dy, dw, dh);
+}
+
+[sx, sy, sw, sh].forEach(el => el.addEventListener('input', redessinerRogner));
+cercle.addEventListener('change', redessinerRogner);
+redessinerRogner();
+
+// ============================================================
+// SECTION 6 & 10 : FILTRES PERSONNALISÉS
+// ============================================================
+function appliquerGris(imageData) {
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+        const v = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        d[i] = d[i + 1] = d[i + 2] = v;
+    }
+}
+
+function appliquerDesaturer(imageData, taux) {
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+        const gris = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        d[i]     = d[i]     + (gris - d[i])     * taux;
+        d[i + 1] = d[i + 1] + (gris - d[i + 1]) * taux;
+        d[i + 2] = d[i + 2] + (gris - d[i + 2]) * taux;
+    }
+}
+
+function appliquerInverser(imageData) {
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+        d[i]     = 255 - d[i];
+        d[i + 1] = 255 - d[i + 1];
+        d[i + 2] = 255 - d[i + 2];
+    }
+}
+
+function appliquerSepia(imageData, taux) {
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i + 1], b = d[i + 2];
+        const nr = Math.min(255, 0.393 * r + 0.769 * g + 0.189 * b);
+        const ng = Math.min(255, 0.349 * r + 0.686 * g + 0.168 * b);
+        const nb = Math.min(255, 0.272 * r + 0.534 * g + 0.131 * b);
+        d[i]     = r + (nr - r) * taux;
+        d[i + 1] = g + (ng - g) * taux;
+        d[i + 2] = b + (nb - b) * taux;
+    }
+}
+
+function appliquerSeuil(imageData, seuil) {
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+        const gris = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        const v = gris > seuil ? 255 : 0;
+        d[i] = d[i + 1] = d[i + 2] = v;
+    }
+}
+
+function appliquerMonochrome(imageData, couleur, taux) {
+    const d = imageData.data;
+    const r = parseInt(couleur.slice(1, 3), 16);
+    const g = parseInt(couleur.slice(3, 5), 16);
+    const b = parseInt(couleur.slice(5, 7), 16);
+    for (let i = 0; i < d.length; i += 4) {
+        const gris = (0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]) / 255;
+        const nr = r * gris, ng = g * gris, nb = b * gris;
+        d[i]     = d[i]     + (nr - d[i])     * taux;
+        d[i + 1] = d[i + 1] + (ng - d[i + 1]) * taux;
+        d[i + 2] = d[i + 2] + (nb - d[i + 2]) * taux;
+    }
+}
+
+function appliquerLuminosite(imageData, delta) {
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+        d[i]     = Math.min(255, Math.max(0, d[i]     + delta));
+        d[i + 1] = Math.min(255, Math.max(0, d[i + 1] + delta));
+        d[i + 2] = Math.min(255, Math.max(0, d[i + 2] + delta));
+    }
+}
+
+function appliquerContraste(imageData, facteur) {
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+        d[i]     = Math.min(255, Math.max(0, (d[i]     - 128) * facteur + 128));
+        d[i + 1] = Math.min(255, Math.max(0, (d[i + 1] - 128) * facteur + 128));
+        d[i + 2] = Math.min(255, Math.max(0, (d[i + 2] - 128) * facteur + 128));
+    }
+}
+
+function appliquerRenforcerCanal(imageData, canal, facteur) {
+    const d = imageData.data;
+    const offset = { r: 0, g: 1, b: 2 }[canal];
+    for (let i = offset; i < d.length; i += 4) {
+        d[i] = Math.min(255, d[i] * facteur);
+    }
+}
+
+function appliquerFlou(imageData, intensite) {
+    const { width, height, data } = imageData;
+    const copie = new Uint8ClampedArray(data);
+    const r = Math.floor(intensite);
+
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            let sr = 0, sg = 0, sb = 0, n = 0;
+            for (let dy = -r; dy <= r; dy++) {
+                for (let dx = -r; dx <= r; dx++) {
+                    const nx = x + dx, ny = y + dy;
+                    if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+                    const i = (ny * width + nx) * 4;
+                    sr += copie[i]; sg += copie[i + 1]; sb += copie[i + 2];
+                    n++;
+                }
+            }
+            const i = (y * width + x) * 4;
+            data[i]     = sr / n;
+            data[i + 1] = sg / n;
+            data[i + 2] = sb / n;
+        }
+    }
+}
+
+function appliquerPixeliser(imageData, tailleBloc) {
+    const { width, height, data } = imageData;
+    for (let by = 0; by < height; by += tailleBloc) {
+        for (let bx = 0; bx < width; bx += tailleBloc) {
+            let sr = 0, sg = 0, sb = 0, n = 0;
+            for (let y = by; y < Math.min(by + tailleBloc, height); y++) {
+                for (let x = bx; x < Math.min(bx + tailleBloc, width); x++) {
+                    const i = (y * width + x) * 4;
+                    sr += data[i]; sg += data[i + 1]; sb += data[i + 2];
+                    n++;
+                }
+            }
+            const r = sr / n, g = sg / n, b = sb / n;
+            for (let y = by; y < Math.min(by + tailleBloc, height); y++) {
+                for (let x = bx; x < Math.min(bx + tailleBloc, width); x++) {
+                    const i = (y * width + x) * 4;
+                    data[i] = r; data[i + 1] = g; data[i + 2] = b;
+                }
+            }
+        }
+    }
+}
+
+function appliquerContours(imageData, seuil) {
+    const { width, height, data } = imageData;
+    const copie = new Uint8ClampedArray(data);
+    for (let y = 1; y < height - 1; y++) {
+        for (let x = 1; x < width - 1; x++) {
+            const i = (y * width + x) * 4;
+            const gx =
+                -1 * copie[((y-1)*width + (x-1))*4] +
+                 1 * copie[((y-1)*width + (x+1))*4] +
+                -2 * copie[( y   *width + (x-1))*4] +
+                 2 * copie[( y   *width + (x+1))*4] +
+                -1 * copie[((y+1)*width + (x-1))*4] +
+                 1 * copie[((y+1)*width + (x+1))*4];
+            const gy =
+                -1 * copie[((y-1)*width + (x-1))*4] +
+                -2 * copie[((y-1)*width +  x   )*4] +
+                -1 * copie[((y-1)*width + (x+1))*4] +
+                 1 * copie[((y+1)*width + (x-1))*4] +
+                 2 * copie[((y+1)*width +  x   )*4] +
+                 1 * copie[((y+1)*width + (x+1))*4];
+            const mag = Math.sqrt(gx * gx + gy * gy);
+            const v = mag > seuil ? 255 : 0;
+            data[i] = data[i + 1] = data[i + 2] = v;
+        }
+    }
+}
+
+// ============================================================
+// SECTION 10 : DÉMONSTRATION INTERACTIVE
+// ============================================================
+const cvDemo = document.getElementById('cvDemo');
+const ctxDemo = cvDemo.getContext('2d');
+const filtreSelect = document.getElementById('filtreSelect');
+const intensite = document.getElementById('intensite');
+const intensiteVal = document.getElementById('intensiteVal');
+const monoCouleur = document.getElementById('monoCouleur');
+let imageDataOriginalDemo = null;
+
+function initialiserDemo() {
+    // Afficher l'image de démo dans le canvas de démo
+    const ratio = Math.min(cvDemo.width / imageDemo.width, cvDemo.height / imageDemo.height);
+    const w = imageDemo.width * ratio;
+    const h = imageDemo.height * ratio;
+    const x = (cvDemo.width - w) / 2;
+    const y = (cvDemo.height - h) / 2;
+
+    ctxDemo.fillStyle = '#101820';
+    ctxDemo.fillRect(0, 0, cvDemo.width, cvDemo.height);
+    ctxDemo.drawImage(imageDemo, x, y, w, h);
+
+    // Sauvegarder les pixels originaux (uniquement la zone où l'image est dessinée)
+    imageDataOriginalDemo = ctxDemo.getImageData(0, 0, cvDemo.width, cvDemo.height);
+}
+
+function appliquerFiltreDemo() {
+    if (!imageDataOriginalDemo) return;
+
+    const type = filtreSelect.value;
+    const val = Number(intensite.value) / 100;
+    intensiteVal.textContent = intensite.value;
+
+    const imageData = copierImageData(imageDataOriginalDemo);
+
+    switch (type) {
+        case 'gris':
+            appliquerGris(imageData);
+            break;
+        case 'desaturer':
+            appliquerDesaturer(imageData, val);
+            break;
+        case 'inverser':
+            appliquerInverser(imageData);
+            break;
+        case 'sepia':
+            appliquerSepia(imageData, val);
+            break;
+        case 'seuil':
+            appliquerSeuil(imageData, 128 - (val - 1) * 100);
+            break;
+        case 'mono':
+            appliquerMonochrome(imageData, monoCouleur.value, val);
+            break;
+        case 'luminosite':
+            appliquerLuminosite(imageData, (val - 1) * 100);
+            break;
+        case 'contraste':
+            appliquerContraste(imageData, val * 2);
+            break;
+        case 'rouge':
+            appliquerRenforcerCanal(imageData, 'r', 1 + val);
+            break;
+        case 'bleu':
+            appliquerRenforcerCanal(imageData, 'b', 1 + val);
+            break;
+        case 'flou':
+            appliquerFlou(imageData, Math.max(1, Math.round(val * 5)));
+            break;
+        case 'pixeliser':
+            appliquerPixeliser(imageData, Math.max(2, Math.round(val * 30)));
+            break;
+        case 'contours':
+            appliquerContours(imageData, 50 + val * 100);
+            break;
+        case 'aucun':
+        default:
+            break;
+    }
+
+    ctxDemo.putImageData(imageData, 0, 0);
+}
+
+filtreSelect.addEventListener('change', appliquerFiltreDemo);
+intensite.addEventListener('input', appliquerFiltreDemo);
+monoCouleur.addEventListener('input', appliquerFiltreDemo);
+document.getElementById('btnReset').onclick = () => {
+    filtreSelect.value = 'aucun';
+    intensite.value = 100;
+    intensiteVal.textContent = '100';
+    appliquerFiltreDemo();
+};
+
+initialiserDemo();
+
+// ============================================================
+// EXPORT : PNG / JPEG / WEBP
+// ============================================================
+function telechargerCanvasFormat(canvas, nom, format, qualite) {
+    canvas.toBlob((blob) => {
+        if (!blob) {
+            console.error("Export impossible");
+            return;
+        }
+
+        const url = URL.createObjectURL(blob);
+        const lien = document.createElement('a');
+
+        lien.href = url;
+        lien.download = nom;
+        document.body.appendChild(lien);
+        lien.click();
+        lien.remove();
+
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }, format, qualite);
+}
+
+const exportPNG = document.getElementById('exportPNG');
+const exportJPEG = document.getElementById('exportJPEG');
+const exportWebP = document.getElementById('exportWebP');
+
+if (exportPNG) {
+    exportPNG.addEventListener('click', () => {
+        telechargerCanvasFormat(
+            document.getElementById('cvDemo'),
+            'image-canvas.png',
+            'image/png'
+        );
     });
+}
 
-    document.addEventListener("keyup", e => {
-        const touche = correspondanceClavier[e.key.toLowerCase()];
-        if (!touche) return;
-
-        arreterNote(touche.id);
-
-        const el = document.querySelector(`[data-note="${touche.id}"]`);
-        if (el) el.classList.remove("active");
+if (exportJPEG) {
+    exportJPEG.addEventListener('click', () => {
+        telechargerCanvasFormat(
+            document.getElementById('cvDemo'),
+            'image-canvas.jpg',
+            'image/jpeg',
+            0.9
+        );
     });
+}
 
-    /* ==============================
-       CONTRÔLES
-    =============================== */
-
-    document.getElementById("cutoff").addEventListener("input", e => {
-        const v = parseFloat(e.target.value);
-        document.getElementById("cutoffVal").textContent = v + " Hz";
-        if (filtreGlobal) filtreGlobal.frequency.value = v;
+if (exportWebP) {
+    exportWebP.addEventListener('click', () => {
+        telechargerCanvasFormat(
+            document.getElementById('cvDemo'),
+            'image-canvas.webp',
+            'image/webp',
+            0.9
+        );
     });
+}
 
-    document.getElementById("volume").addEventListener("input", e => {
-        const v = parseFloat(e.target.value);
-        document.getElementById("volumeVal").textContent = v.toFixed(2);
-        if (gainGlobal) gainGlobal.gain.value = v;
-    });
 </script>
-
-
-<script>
-(function () {
-    const $ = id => document.getElementById(id);
-
-    function setupCanvas(id) {
-        const c = $(id);
-        if (!c) return null;
-        const ctx = c.getContext("2d");
-        return {c, ctx, w:c.width, h:c.height};
-    }
-
-    function clear(ctx,w,h) {
-        ctx.clearRect(0,0,w,h);
-        ctx.fillStyle = "#101820";
-        ctx.fillRect(0,0,w,h);
-    }
-
-    function axes(ctx,w,h, midY=h/2) {
-        ctx.strokeStyle = "#607080";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(35,midY); ctx.lineTo(w-20,midY);
-        ctx.stroke();
-    }
-
-    // 1. Propagation physique
-    const p = setupCanvas("soundPropagation");
-    if (p) {
-        let phase = 0, running = true;
-        function drawPropagation() {
-            clear(p.ctx,p.w,p.h);
-            const ctx=p.ctx, n=42, spacing=19, base=85, speed=parseFloat($("propFreq").value);
-            ctx.fillStyle="#d8e0ec";
-            ctx.font="13px Arial";
-            ctx.fillText("compression",20,25);
-            ctx.fillText("raréfaction",20,205);
-            for(let i=0;i<n;i++){
-                const x=65+i*spacing;
-                const displacement=8*Math.sin(i*0.52-phase);
-                const y=base+displacement;
-                const density=(Math.cos(i*0.52-phase)+1)/2;
-                ctx.globalAlpha=0.45+0.55*density;
-                ctx.beginPath(); ctx.arc(x,y,4.5,0,Math.PI*2); ctx.fill();
-                ctx.globalAlpha=1;
-            }
-            ctx.strokeStyle="#7fa7c9";
-            ctx.beginPath();
-            for(let x=45;x<p.w-20;x+=3){
-                const y=160 + 28*Math.sin((x-45)*0.045-phase);
-                if(x===45) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-            }
-            ctx.stroke();
-            if(running) phase += 0.035*speed;
-            requestAnimationFrame(drawPropagation);
-        }
-        $("propToggle").onclick=()=>{running=!running; $("propToggle").textContent=running?"Pause":"Reprendre";};
-        $("propFreq").oninput=e=>$("propFreqVal").textContent=parseFloat(e.target.value).toFixed(1)+"×";
-        drawPropagation();
-    }
-
-    // 2. Fréquence / amplitude
-    const fa=setupCanvas("freqAmpCanvas");
-    if(fa){
-        function drawFA(){
-            clear(fa.ctx,fa.w,fa.h); axes(fa.ctx,fa.w,fa.h,125);
-            const f=+$("faFreq").value, a=+$("faAmp").value;
-            fa.ctx.strokeStyle="#9bc3e3"; fa.ctx.lineWidth=2;
-            fa.ctx.beginPath();
-            for(let x=35;x<fa.w-20;x+=2){
-                const y=125-Math.sin((x-35)*f/180)*92*a;
-                if(x===35) fa.ctx.moveTo(x,y); else fa.ctx.lineTo(x,y);
-            }
-            fa.ctx.stroke();
-            fa.ctx.fillStyle="#d8e0ec"; fa.ctx.font="14px Arial";
-            fa.ctx.fillText("fréquence = "+f+" Hz",45,25);
-            fa.ctx.fillText("amplitude = "+a.toFixed(2),45,48);
-        }
-        $("faFreq").oninput=e=>{$("faFreqVal").textContent=e.target.value+" Hz";drawFA();};
-        $("faAmp").oninput=e=>{$("faAmpVal").textContent=(+e.target.value).toFixed(2);drawFA();};
-        drawFA();
-    }
-
-    // 3. Formes d'onde
-    function drawWave(id,type){
-        const x=setupCanvas(id); if(!x)return;
-        clear(x.ctx,x.w,x.h); axes(x.ctx,x.w,x.h,65);
-        x.ctx.strokeStyle="#9bc3e3"; x.ctx.lineWidth=2;
-        x.ctx.beginPath();
-        for(let px=20;px<x.w-15;px++){
-            const t=(px-20)/70, s=t-Math.floor(t);
-            let y;
-            if(type==="sine") y=Math.sin(t*Math.PI*2);
-            if(type==="square") y=s<0.5?1:-1;
-            if(type==="triangle") y=1-4*Math.abs(s-0.5);
-            if(type==="saw") y=2*s-1;
-            const py=65-y*45;
-            if(px===20)x.ctx.moveTo(px,py);else x.ctx.lineTo(px,py);
-        }
-        x.ctx.stroke();
-    }
-    drawWave("waveSine","sine"); drawWave("waveSquare","square");
-    drawWave("waveTriangle","triangle"); drawWave("waveSaw","saw");
-
-    // 4. Sampling
-    const sm=setupCanvas("samplingCanvas");
-    if(sm){
-        function drawSampling(){
-            clear(sm.ctx,sm.w,sm.h);
-            const n=+$("sampleRate").value, left=35, right=875;
-            sm.ctx.strokeStyle="#718096"; sm.ctx.beginPath(); sm.ctx.moveTo(left,140); sm.ctx.lineTo(right,140); sm.ctx.stroke();
-            sm.ctx.strokeStyle="#9bc3e3"; sm.ctx.lineWidth=2; sm.ctx.beginPath();
-            for(let x=left;x<=right;x+=2){
-                const y=140-75*Math.sin((x-left)/85);
-                if(x===left)sm.ctx.moveTo(x,y);else sm.ctx.lineTo(x,y);
-            }
-            sm.ctx.stroke();
-            sm.ctx.fillStyle="#e5eef7";
-            for(let i=0;i<n;i++){
-                const x=left+i*(right-left)/(n-1), y=140-75*Math.sin((x-left)/85);
-                sm.ctx.beginPath();sm.ctx.arc(x,y,4,0,Math.PI*2);sm.ctx.fill();
-            }
-        }
-        $("sampleRate").oninput=e=>{$("sampleRateVal").textContent=e.target.value+" points";drawSampling();};
-        drawSampling();
-    }
-
-    // 5. Quantification
-    const q=setupCanvas("quantCanvas");
-    if(q){
-        function drawQuant(){
-            clear(q.ctx,q.w,q.h);
-            const bits=+$("quantBits").value, levels=2**bits;
-            $("quantBitsVal").textContent=bits+" bits — "+levels+" niveaux";
-            for(let i=0;i<levels;i++){
-                const y=35+i*(210/(levels-1));
-                q.ctx.strokeStyle="#34495e"; q.ctx.globalAlpha=.45;
-                q.ctx.beginPath();q.ctx.moveTo(35,y);q.ctx.lineTo(875,y);q.ctx.stroke();
-                q.ctx.globalAlpha=1;
-            }
-            q.ctx.strokeStyle="#9bc3e3";q.ctx.lineWidth=2;q.ctx.beginPath();
-            for(let x=35;x<875;x+=2){
-                const raw=35+105*(1-Math.sin((x-35)/85))/2;
-                const step=210/(levels-1);
-                const quant=35+Math.round((raw-35)/step)*step;
-                if(x===35)q.ctx.moveTo(x,quant);else q.ctx.lineTo(x,quant);
-            }
-            q.ctx.stroke();
-        }
-        $("quantBits").oninput=drawQuant; drawQuant();
-    }
-
-    // 6. Graphe audio
-    const g=setupCanvas("audioGraphCanvas");
-    if(g){
-        clear(g.ctx,g.w,g.h);
-        const boxes=[["OscillatorNode",70],["GainNode",350],["BiquadFilterNode",600],["destination",790]];
-        g.ctx.font="14px Arial";
-        boxes.forEach(([label,x],i)=>{
-            g.ctx.fillStyle="#eef1f5";g.ctx.strokeStyle="#718096";g.ctx.lineWidth=1;
-            g.ctx.fillRect(x,85,120,60);g.ctx.strokeRect(x,85,120,60);
-            g.ctx.fillStyle="#1a2b4a";g.ctx.textAlign="center";g.ctx.fillText(label,x+60,120);
-            if(i<boxes.length-1){
-                g.ctx.strokeStyle="#9bc3e3";g.ctx.lineWidth=3;
-                g.ctx.beginPath();g.ctx.moveTo(x+120,115);g.ctx.lineTo(boxes[i+1][1],115);g.ctx.stroke();
-                g.ctx.fillStyle="#9bc3e3";g.ctx.beginPath();
-                g.ctx.moveTo(boxes[i+1][1]-8,108);g.ctx.lineTo(boxes[i+1][1],115);g.ctx.lineTo(boxes[i+1][1]-8,122);g.ctx.fill();
-            }
-        });
-        g.ctx.textAlign="left";
-    }
-
-    // 7. Oscillator
-    const oc=setupCanvas("oscCanvas");
-    if(oc){
-        function wave(t,type){
-            const s=t-Math.floor(t);
-            if(type==="sine")return Math.sin(2*Math.PI*t);
-            if(type==="square")return s<.5?1:-1;
-            if(type==="triangle")return 1-4*Math.abs(s-.5);
-            return 2*s-1;
-        }
-        function drawOsc(){
-            clear(oc.ctx,oc.w,oc.h); axes(oc.ctx,oc.w,oc.h,125);
-            const f=+$("oscFreq").value, type=$("oscShape").value;
-            oc.ctx.strokeStyle="#9bc3e3";oc.ctx.lineWidth=2;oc.ctx.beginPath();
-            for(let x=35;x<875;x++){
-                const y=125-85*wave((x-35)*f/10000,type);
-                if(x===35)oc.ctx.moveTo(x,y);else oc.ctx.lineTo(x,y);
-            }
-            oc.ctx.stroke();
-            oc.ctx.fillStyle="#d8e0ec";oc.ctx.font="14px Arial";
-            oc.ctx.fillText(type+" — "+f+" Hz",45,25);
-        }
-        $("oscShape").onchange=drawOsc;
-        $("oscFreq").oninput=e=>{$("oscFreqVal").textContent=e.target.value+" Hz";drawOsc();};
-        drawOsc();
-    }
-
-    // 8. ADSR
-    const ad=setupCanvas("adsrCanvas");
-    if(ad){
-        function drawADSR(){
-            clear(ad.ctx,ad.w,ad.h);
-            const A=+$("adsrA").value,D=+$("adsrD").value,S=+$("adsrS").value,R=+$("adsrR").value;
-            const total=A+D+1+R, L=55, Rg=870, base=220, top=35;
-            const scale=(Rg-L)/total;
-            const pts=[
-                [L,base],[L+A*scale,top],[L+(A+D)*scale,base-(base-top)*S],
-                [L+(A+D+1)*scale,base-(base-top)*S],[Rg,base]
-            ];
-            ad.ctx.strokeStyle="#9bc3e3";ad.ctx.lineWidth=3;ad.ctx.beginPath();
-            pts.forEach((p,i)=>i?ad.ctx.lineTo(...p):ad.ctx.moveTo(...p));ad.ctx.stroke();
-            ad.ctx.fillStyle="#d8e0ec";ad.ctx.font="13px Arial";
-            ["Attack","Decay","Sustain","Release"].forEach((t,i)=>{
-                const x=[L+20,L+(A+.15)*scale,L+(A+D+.3)*scale,Rg-80][i];
-                ad.ctx.fillText(t,x,20);
-            });
-        }
-        ["adsrA","adsrD","adsrS","adsrR"].forEach(id=>$(id).oninput=drawADSR);
-        drawADSR();
-    }
-
-    // 9. Filtre
-    const fi=setupCanvas("filterCanvas");
-    if(fi){
-        function drawFilter(){
-            clear(fi.ctx,fi.w,fi.h);
-            const cut=+$("filterCut").value;
-            $("filterCutVal").textContent=cut+" Hz";
-            fi.ctx.strokeStyle="#607080";fi.ctx.lineWidth=1;
-            fi.ctx.beginPath();fi.ctx.moveTo(45,230);fi.ctx.lineTo(870,230);fi.ctx.moveTo(45,25);fi.ctx.lineTo(45,230);fi.ctx.stroke();
-            fi.ctx.strokeStyle="#9bc3e3";fi.ctx.lineWidth=3;fi.ctx.beginPath();
-            for(let x=45;x<=870;x++){
-                const freq=100+((x-45)/(825))*10000;
-                const gain=1/Math.sqrt(1+Math.pow(freq/cut,4));
-                const y=230-gain*185;
-                if(x===45)fi.ctx.moveTo(x,y);else fi.ctx.lineTo(x,y);
-            }
-            fi.ctx.stroke();
-            fi.ctx.setLineDash([5,5]);fi.ctx.strokeStyle="#d8e0ec";
-            const cx=45+((cut-100)/9900)*825;
-            fi.ctx.beginPath();fi.ctx.moveTo(cx,30);fi.ctx.lineTo(cx,230);fi.ctx.stroke();fi.ctx.setLineDash([]);
-            fi.ctx.fillStyle="#d8e0ec";fi.ctx.font="13px Arial";fi.ctx.fillText("fréquence de coupure",cx+8,45);
-        }
-        $("filterCut").oninput=drawFilter;drawFilter();
-    }
-})();
-</script>
-
 </body>
 </html>

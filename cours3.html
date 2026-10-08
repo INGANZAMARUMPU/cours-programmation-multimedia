@@ -1,771 +1,207 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Programmation Multimédia — Jour 3 : Introduction à la 3D</title>
-    <style>
-        :root {
-            --primary: #1a2b4a;
-            --secondary: #4a5568;
-            --accent: #2c5282;
-            --bg: #f7f7f5;
-            --card: #ffffff;
-            --text: #1a1a1a;
-            --muted: #4a4a4a;
-            --border: #c8c8c8;
-            --code-bg: #f4f4f0;
-            --code-border: #d0d0c8;
-            --warning-bg: #fdfaf2;
-            --warning-border: #b8860b;
-            --info-bg: #f2f6fa;
-            --info-border: #2c5282;
-            --success-bg: #f2f8f3;
-            --success-border: #2f6b3a;
-            --danger-bg: #faf3f3;
-            --danger-border: #8b2c2c;
-        }
-
-        * { box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-
-        body {
-            margin: 0;
-            font-family: "Times New Roman", "Liberation Serif", Georgia, serif;
-            background: var(--bg);
-            color: var(--text);
-            font-size: 12pt;
-            line-height: 1.5;
-        }
-
-        header {
-            background: var(--primary);
-            color: #ffffff;
-            padding: 45px 25px 35px;
-            border-bottom: 3px solid #0f1a30;
-        }
-
-        .header-content { max-width: 1050px; margin: auto; }
-
-        header h1 {
-            font-size: 1.9rem;
-            margin: 0 0 6px;
-            font-weight: 700;
-        }
-
-        header h2 {
-            color: #d8e0ec;
-            border: none;
-            margin: 0 0 16px;
-            font-weight: 400;
-            font-size: 1.15rem;
-            font-style: italic;
-        }
-
-        header p {
-            font-size: 1rem;
-            max-width: 760px;
-            color: #e8edf4;
-        }
-
-        .badge {
-            display: inline-block;
-            background: transparent;
-            border: 1px solid #8fa3c0;
-            padding: 3px 10px;
-            border-radius: 2px;
-            margin: 3px 6px 3px 0;
-            font-size: 0.75rem;
-            font-family: Arial, Helvetica, sans-serif;
-            letter-spacing: 0.6px;
-            text-transform: uppercase;
-            color: #d8e0ec;
-        }
-
-        nav {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: #0f1a30;
-            border-bottom: 1px solid #2a3a55;
-        }
-
-        .nav-content {
-            max-width: 1050px;
-            margin: auto;
-            display: flex;
-            overflow-x: auto;
-            gap: 0;
-            padding: 4px 10px;
-        }
-
-        nav a {
-            color: #c8d4e4;
-            text-decoration: none;
-            padding: 9px 13px;
-            white-space: nowrap;
-            font-size: 0.82rem;
-            font-family: Arial, Helvetica, sans-serif;
-            border-bottom: 2px solid transparent;
-            transition: border-color 0.15s, color 0.15s;
-        }
-
-        nav a:hover {
-            color: #ffffff;
-            border-bottom-color: #8fa3c0;
-        }
-
-        main { max-width: 1050px; margin: auto; padding: 35px 20px; }
-
-        section {
-            background: var(--card);
-            border: 1px solid var(--border);
-            padding: 28px 32px;
-            margin-bottom: 24px;
-        }
-
-        h2 {
-            color: var(--primary);
-            font-size: 1.35rem;
-            font-weight: 700;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 8px;
-            margin-top: 0;
-            margin-bottom: 18px;
-        }
-
-        h3 {
-            color: #2a3a55;
-            margin-top: 24px;
-            margin-bottom: 8px;
-            font-weight: 700;
-            font-size: 1.05rem;
-        }
-
-        h4 {
-            color: var(--accent);
-            font-weight: 700;
-            margin-bottom: 6px;
-            font-size: 1rem;
-        }
-
-        p { margin: 10px 0; }
-        ul, ol { padding-left: 28px; }
-        li { margin: 4px 0; }
-
-        .objectifs {
-            background: var(--info-bg);
-            border-left: 3px solid var(--info-border);
-            padding: 16px 22px;
-            margin: 15px 0;
-        }
-
-        .important {
-            background: var(--warning-bg);
-            border-left: 3px solid var(--warning-border);
-            padding: 16px 22px;
-            margin: 15px 0;
-        }
-
-        .success {
-            background: var(--success-bg);
-            border-left: 3px solid var(--success-border);
-            padding: 16px 22px;
-            margin: 15px 0;
-        }
-
-        .danger {
-            background: var(--danger-bg);
-            border-left: 3px solid var(--danger-border);
-            padding: 16px 22px;
-            margin: 15px 0;
-        }
-
-        .info {
-            background: var(--info-bg);
-            border-left: 3px solid var(--info-border);
-            padding: 16px 22px;
-            margin: 15px 0;
-        }
-
-        pre {
-            background: var(--code-bg);
-            color: #1a1a1a;
-            padding: 16px 20px;
-            border: 1px solid var(--code-border);
-            overflow-x: auto;
-            font-family: "Consolas", "Courier New", monospace;
-            font-size: 0.85rem;
-            line-height: 1.45;
-            margin: 14px 0;
-        }
-
-        code {
-            font-family: "Consolas", "Courier New", monospace;
-            background: #eeeeea;
-            color: #1a1a1a;
-            padding: 1px 5px;
-            font-size: 0.88em;
-            border: 1px solid #dcdcd6;
-        }
-
-        pre code {
-            background: transparent;
-            border: none;
-            padding: 0;
-            font-size: 0.85rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 18px 0;
-            font-size: 0.95rem;
-        }
-
-        th, td {
-            border: 1px solid var(--border);
-            padding: 9px 12px;
-            text-align: left;
-            vertical-align: top;
-        }
-
-        th {
-            background: #eef1f5;
-            color: #1a2b4a;
-            font-weight: 700;
-        }
-
-        tr:nth-child(even) { background: #fafaf8; }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 14px;
-            margin: 18px 0;
-        }
-
-        .card {
-            border: 1px solid var(--border);
-            padding: 16px;
-            background: #fcfcfa;
-        }
-
-        .card h3 {
-            margin-top: 0;
-            color: var(--accent);
-            font-size: 1rem;
-        }
-
-        .exercise {
-            border: 1px solid #a0a0a0;
-            border-left: 3px solid var(--primary);
-            background: #fcfcfa;
-            padding: 18px 22px;
-            margin: 20px 0;
-        }
-
-        .level {
-            display: inline-block;
-            padding: 2px 10px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            font-family: Arial, Helvetica, sans-serif;
-            border: 1px solid;
-            margin-bottom: 8px;
-        }
-
-        .easy { background: #eef6ee; color: #2f6b3a; border-color: #2f6b3a; }
-        .medium { background: #fdf8ee; color: #8a6508; border-color: #8a6508; }
-        .hard { background: #f8eeee; color: #8b2c2c; border-color: #8b2c2c; }
-
-        .canvas-wrapper {
-            background: #1a1a1a;
-            padding: 14px;
-            border: 1px solid #333333;
-            margin: 18px 0;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            max-width: 800px;
-            height: auto;
-            margin: auto;
-            background: #111111;
-            border: 1px solid #444444;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 14px;
-        }
-
-        button {
-            border: 1px solid #1a2b4a;
-            background: #1a2b4a;
-            color: #ffffff;
-            padding: 7px 16px;
-            cursor: pointer;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 0.85rem;
-            transition: background 0.15s;
-        }
-
-        button:hover { background: #2c5282; }
-        button.secondary { background: #ffffff; color: #1a2b4a; }
-        button.secondary:hover { background: #eef1f5; }
-        button.success { background: #2f6b3a; border-color: #2f6b3a; }
-        button.success:hover { background: #24522e; }
-
-        .key {
-            display: inline-block;
-            background: #ffffff;
-            border: 1px solid #888888;
-            padding: 4px 9px;
-            margin: 2px;
-            min-width: 30px;
-            text-align: center;
-            font-family: "Consolas", monospace;
-            font-size: 0.85rem;
-            box-shadow: 0 1px 0 #888888;
-        }
-
-        .plantuml {
-            background: #ffffff;
-            border: 1px solid var(--border);
-            padding: 18px;
-            margin: 18px 0;
-            text-align: center;
-            overflow-x: auto;
-        }
-
-        .plantuml svg,
-        .plantuml img {
-            max-width: 100%;
-            height: auto;
-        }
-
-        .plantuml-caption {
-            font-size: 0.85rem;
-            font-style: italic;
-            color: var(--muted);
-            margin-top: 8px;
-            text-align: center;
-        }
-
-        footer {
-            background: #1a2b4a;
-            color: #c8d4e4;
-            text-align: center;
-            padding: 28px 20px;
-            margin-top: 30px;
-            font-size: 0.85rem;
-            font-family: Arial, Helvetica, sans-serif;
-            border-top: 3px solid #0f1a30;
-        }
-
-        footer p { margin: 4px 0; }
-
-        .slider-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 8px 0;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 0.88rem;
-        }
-
-        .slider-row label {
-            min-width: 130px;
-            color: var(--text);
-        }
-
-        .slider-row input[type="range"] {
-            flex: 1;
-            max-width: 300px;
-        }
-
-        .slider-row .value {
-            min-width: 60px;
-            font-family: "Consolas", monospace;
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        @media (max-width: 700px) {
-            header h1 { font-size: 1.4rem; }
-            header h2 { font-size: 1rem; }
-            section { padding: 20px 18px; }
-            pre { font-size: 0.78rem; }
-            h2 { font-size: 1.15rem; }
-            .slider-row label { min-width: 90px; font-size: 0.8rem; }
-        }
-    
-/* ===== Illustrations comparatives — ajout pédagogique ===== */
-.compare-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-    gap:16px;
-    margin:18px 0;
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Programmation Multimédia — Jour 3 : Introduction à la 3D avec POO</title>
+<style>
+:root{
+ --primary:#18324b;--secondary:#315a78;--accent:#b45f2a;--bg:#f4f1eb;--card:#fff;
+ --text:#202020;--muted:#5d6268;--border:#c9c5bd;--code:#f0eee8;
+ --info:#eef5fa;--info-border:#39739a;--warn:#fbf5e7;--warn-border:#a47721;
+ --success:#eef7ef;--success-border:#3f7547;--danger:#faf0ef;--danger-border:#9a3d34;
 }
-.compare-card{
-    border:1px solid var(--border);
-    background:#fcfcfa;
-    padding:14px;
-}
-.compare-card h4{margin-top:0;}
-.compare-card canvas{
-    width:100%;
-    max-width:none;
-    height:auto;
-    background:#fff;
-    border:1px solid #b8b8b8;
-}
-.compare-caption{
-    font-size:.88rem;
-    color:var(--muted);
-    margin-top:8px;
-}
-.visual-lab{
-    background:var(--info-bg);
-    border:1px solid var(--info-border);
-    padding:16px;
-    margin:18px 0;
-}
-.legend{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px 14px;
-    margin:8px 0;
-    font-size:.85rem;
-}
-.legend span{font-family:Arial,Helvetica,sans-serif;}
-
-    </style>
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Times New Roman",Georgia,serif;font-size:12pt;line-height:1.55}
+header{background:var(--primary);color:#fff;padding:46px 24px 38px;border-bottom:4px solid #0e2132}
+.header-content,main,footer .inner{max-width:1080px;margin:auto}
+header h1{font-size:2rem;margin:0 0 8px} header h2{font-size:1.15rem;font-weight:400;font-style:italic;color:#dce7ef;border:0;margin:0 0 16px}
+header p{max-width:850px;color:#edf3f7}.badge{display:inline-block;border:1px solid #9db1c0;padding:3px 10px;margin:4px 6px 4px 0;font:12px Arial,sans-serif;color:#dce7ef}
+nav{position:sticky;top:0;z-index:20;background:#102638;border-bottom:1px solid #365166}.nav{max-width:1080px;margin:auto;display:flex;overflow:auto}
+nav a{color:#d7e1e8;text-decoration:none;padding:9px 12px;white-space:nowrap;font:12px Arial,sans-serif}nav a:hover{background:#1b3b54;color:white}
+main{padding:32px 20px}section{background:var(--card);border:1px solid var(--border);padding:28px 32px;margin-bottom:24px}
+h2{color:var(--primary);font-size:1.4rem;border-bottom:1px solid var(--border);padding-bottom:8px;margin:0 0 18px}h3{color:var(--secondary);margin-top:25px}h4{color:var(--accent)}
+p{margin:10px 0}li{margin:5px 0}code{font-family:Consolas,"Courier New",monospace;background:#e9e7e0;border:1px solid #d8d4ca;padding:1px 5px;font-size:.88em}
+pre{background:var(--code);border:1px solid #d4d0c6;padding:17px 19px;overflow:auto;font:13px/1.5 Consolas,"Courier New",monospace}pre code{background:none;border:0;padding:0}
+.info,.important,.success,.danger{padding:15px 20px;margin:16px 0;border-left:4px solid}.info{background:var(--info);border-color:var(--info-border)}.important{background:var(--warn);border-color:var(--warn-border)}.success{background:var(--success);border-color:var(--success-border)}.danger{background:var(--danger);border-color:var(--danger-border)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{border:1px solid var(--border);padding:17px;background:#fff}.card h3{margin-top:0}
+table{width:100%;border-collapse:collapse;margin:15px 0}th,td{border:1px solid var(--border);padding:9px 11px;text-align:left;vertical-align:top}th{background:#eae7df;color:var(--primary)}
+.flow{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:20px 0}.flow span{border:1px solid var(--secondary);padding:10px 14px;background:#f8fafb}.arrow{border:0!important;background:transparent!important;font-size:20px;color:var(--accent)}
+canvas{display:block;max-width:100%;background:#101820;border:1px solid #283844;margin:12px auto}.controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap;border:1px solid var(--border);padding:13px;background:#f8f6f1}.controls label{font:13px Arial,sans-serif}.controls input[type=range]{width:150px}
+button{font:14px Arial,sans-serif;border:1px solid var(--secondary);background:#fff;padding:8px 13px;cursor:pointer}button:hover{background:#edf3f6}
+.exercise{border-left:4px solid var(--accent);background:#fbf7f2;padding:18px 22px;margin:18px 0}.exercise strong:first-child{color:var(--accent)}
+details{border:1px solid var(--border);padding:10px 14px;margin:12px 0;background:#faf9f6}summary{cursor:pointer;font-weight:bold;color:var(--secondary)}
+.small{font-size:.9rem;color:var(--muted)}.center{text-align:center}.kbd{font-family:Arial,sans-serif;border:1px solid #aaa;border-bottom-width:2px;padding:2px 6px;background:#fafafa;border-radius:3px}
+footer{background:var(--primary);color:#dce7ef;padding:28px 20px}footer p{margin:4px 0}
+@media(max-width:760px){.grid,.grid3{grid-template-columns:1fr}section{padding:21px 18px}header h1{font-size:1.55rem}}
+</style>
 </head>
-
 <body>
-
 <header>
-    <div class="header-content">
-        <span class="badge">Programmation Multimédia</span>
-        <span class="badge">Jour 3 / 6</span>
-        <span class="badge">HTML5 Canvas</span>
-        <span class="badge">3D</span>
-
-        <h1>Jour 3 — Introduction à la 3D</h1>
-        <h2>Projection, caméra, transformations et rendu</h2>
-
-        <p>
-            Cette journée introduit les principes fondamentaux de la 3D
-            sur Canvas 2D. L'objectif n'est pas de construire un moteur 3D
-            complet, mais de comprendre comment un point en trois dimensions
-            devient un pixel à l'écran.
-        </p>
-
-        <p>
-            <strong>Durée :</strong> 5 heures &nbsp;|&nbsp;
-            <strong>Prérequis :</strong> Jours 1 et 2 (formes, transformations, animation)
-        </p>
-    </div>
+<div class="header-content">
+<div><span class="badge">Programmation Multimédia</span><span class="badge">Jour 3</span><span class="badge">JavaScript</span><span class="badge">Canvas 2D</span><span class="badge">POO</span></div>
+<h1>Jour 3 — Introduction à la 3D avec la POO</h1>
+<h2>Du cube à la scène : POO, rotations, caméra, projection et éclairage</h2>
+<p>Le but de cette journée n'est pas de fabriquer un moteur 3D professionnel. Le but est de comprendre une idée simple : <strong>nous décrivons des objets dans l'espace, puis nous calculons comment ils doivent apparaître sur un écran 2D.</strong></p>
+<p style="font-weight:700; margin-top:12px;">Progression : Cube → Rotation → Caméra → Projection → Éclairage → Scène → Profondeur</p><p><strong>Durée indicative :</strong> 5 heures  |  <strong>Prérequis :</strong> Jours 1 et 2 — Canvas, fonctions, transformations 2D et animation</p>
+</div>
 </header>
-
-
-<nav>
-    <div class="nav-content">
-        <a href="#objectifs">Objectifs</a>
-        <a href="#point3d">Point 3D</a>
-        <a href="#camera">Caméra</a>
-        <a href="#projection">Projection</a>
-        <a href="#transformations3d">Transformations 3D</a>
-        <a href="#profondeur">Profondeur</a>
-        <a href="#fil-de-fer">Fil de fer</a>
-        <a href="#faces">Faces et polygones</a>
-        <a href="#eclairage">Éclairage simple</a>
-        <a href="#tp1">TP1 — Cube rotatif</a>
-        <a href="#tp2">TP2 — Scène 3D</a>
-        <a href="#demo">Démonstration</a>
-        <a href="#bilan">Bilan</a>
-    </div>
-</nav>
-
-
+<nav><div class="nav"><a href="#objectifs">Objectifs</a><a href="#idee">Idée centrale</a><a href="#point">Point 3D</a><a href="#cube">Cube</a><a href="#transform">Rotation</a><a href="#camera">Caméra</a><a href="#projection">Projection</a><a href="#lumiere">Éclairage</a><a href="#scene">Scène</a><a href="#profondeur">Profondeur</a><a href="#faces">Rendu plein</a><a href="#demo">Démonstration</a><a href="#tp">TP</a><a href="#architecture">Architecture</a><a href="#bilan">Bilan</a></div></nav>
 <main>
 
-<!-- OBJECTIFS -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <section id="objectifs">
-    <h2>1. Objectifs pédagogiques</h2>
-
-    <div class="objectifs">
-        <p>
-            À l'issue de cette troisième journée, l'étudiant doit être capable de :
-        </p>
-        <ul>
-            <li>représenter un point en trois dimensions <code>(x, y, z)</code> ;</li>
-            <li>comprendre le rôle d'une caméra et d'un plan de projection ;</li>
-            <li>projeter un point 3D sur un écran 2D (perspective) ;</li>
-            <li>appliquer des rotations 3D autour des axes X, Y et Z ;</li>
-            <li>trier des objets selon leur profondeur (algorithme du peintre) ;</li>
-            <li>construire un objet filaire (cube, pyramide) ;</li>
-            <li>remplir des faces et simuler un éclairage simple.</li>
-        </ul>
-    </div>
-
-    <h3>Organisation de la journée</h3>
-    <table>
-        <tr><th>Activité</th><th>Durée</th></tr>
-        <tr><td>Cours — Espace 3D, caméra, projection</td><td>1 h 00</td></tr>
-        <tr><td>Cours — Rotations 3D et matrices</td><td>1 h 00</td></tr>
-        <tr><td>TP guidé — Cube filaire rotatif</td><td>1 h 00</td></tr>
-        <tr><td>Cours — Faces, profondeur, éclairage</td><td>0 h 45</td></tr>
-        <tr><td>TP — Scène 3D complète</td><td>1 h 00</td></tr>
-        <tr><td>Synthèse et questions</td><td>0 h 15</td></tr>
-    </table>
-</section>
-
-
-<!-- INTRODUCTION -->
-
-<section>
-    <h2>2. Pourquoi la 3D sur Canvas 2D ?</h2>
-
-    <p>
-        Un Canvas est une surface <strong>plate</strong> : chaque pixel
-        possède deux coordonnées <code>(x, y)</code>. Pourtant, l'œil humain
-        perçoit la profondeur grâce à plusieurs indices (taille, perspective,
-        occlusion, ombres).
-    </p>
-
-    <p>
-        Faire de la 3D sur Canvas consiste donc à <strong>simuler</strong>
-        ces indices : on calcule les positions dans un espace à trois
-        dimensions, puis on les <strong>projette</strong> sur le plan 2D
-        de l'écran.
-    </p>
-
-    <div class="info">
-        <strong>Idée directrice :</strong>
-        <p>
-            La 3D sur Canvas ne change pas la façon de dessiner — on utilise
-            toujours <code>fillRect</code>, <code>arc</code>, <code>moveTo</code>/<code>lineTo</code>.
-            Ce qui change, c'est la <strong>façon de calculer les coordonnées</strong>
-            avant de dessiner.
-        </p>
-    </div>
-
-    <div class="grid">
-        <div class="card">
-            <h3>WebGL</h3>
-            <p>API bas niveau, accélérée par le GPU, pour la 3D temps réel.</p>
-        </div>
-        <div class="card">
-            <h3>Three.js / Babylon.js</h3>
-            <p>Bibliothèques de haut niveau construites sur WebGL.</p>
-        </div>
-        <div class="card">
-            <h3>Canvas 2D + calculs 3D</h3>
-            <p>Approche pédagogique : comprendre les principes sans GPU.</p>
-        </div>
-    </div>
-</section>
-
-
-<!-- POINT 3D -->
-
-<section id="point3d">
-    <h2>3. Représenter un point en 3D</h2>
-
-    <p>
-        Un point dans l'espace possède trois coordonnées :
-    </p>
-
+<h2>1. Objectifs pédagogiques</h2>
+<p>À la fin du Jour 3, l'étudiant doit pouvoir expliquer et programmer le chemin suivant :</p>
+<div class="flow"><span>Cube / Objet 3D</span><span class="arrow">→</span><span>Rotation</span><span class="arrow">→</span><span>Caméra</span><span class="arrow">→</span><span>Projection</span><span class="arrow">→</span><span>Éclairage</span><span class="arrow">→</span><span>Canvas 2D</span></div>
+<div class="grid3">
+<div class="card"><h3>Comprendre</h3><p>Point <code>(x,y,z)</code>, profondeur, caméra, perspective et axes X/Y/Z.</p></div>
+<div class="card"><h3>Organiser</h3><p>Utiliser la POO pour représenter des objets : <code>Objet3D</code>, <code>Cube</code>, <code>Scene</code>, <code>Camera</code>.</p></div>
+<div class="card"><h3>Construire</h3><p>Une scène avec plusieurs objets, rotation, tri par profondeur, faces et éclairage simple.</p></div>
+</div>
+<div class="important"><strong>Principe pédagogique :</strong> on ne commence pas par les formules. On commence par le problème à résoudre. La formule arrive lorsque nous avons besoin de la calculer.</div>
+<h3>Organisation proposée</h3>
+<table><tr><th>Étape</th><th>Durée</th><th>Question à laquelle on répond</th></tr><tr><td>1. Comprendre la 3D et le point</td><td>35 min</td><td>Que signifie (x, y, z) ?</td></tr><tr><td>2. Concevoir un cube en POO</td><td>45 min</td><td>Comment décrire un objet 3D sans encore le dessiner ?</td></tr><tr><td>3. Faire tourner le cube</td><td>45 min</td><td>Comment transformer ses sommets ?</td></tr><tr><td>4. Introduire la caméra</td><td>30 min</td><td>Depuis quel point de vue observe-t-on la scène ?</td></tr><tr><td>5. Projeter vers Canvas</td><td>40 min</td><td>Comment transformer la 3D en coordonnées 2D ?</td></tr><tr><td>6. Ajouter un éclairage simple</td><td>35 min</td><td>Comment montrer l’orientation des faces ?</td></tr><tr><td>7. Construire une scène + profondeur</td><td>45 min</td><td>Comment organiser et ordonner plusieurs objets ?</td></tr><tr><td>8. TP final</td><td>45 min</td><td>Comment assembler toutes les notions ?</td></tr></table>
+</section><section id="idee">
+<h2>2. L'idée centrale : Canvas reste en 2D</h2>
+<p>Un élément <code>&lt;canvas&gt;</code> possède une surface plate. Quand nous faisons :</p>
+<pre><code>ctx.fillRect(100, 80, 20, 20);</code></pre>
+<p>Canvas comprend seulement une position <code>x</code> et une position <code>y</code>. Il n'existe pas de paramètre <code>z</code>.</p>
+<div class="grid">
+<div class="card"><h3>En 2D</h3><p>Nous avons directement :</p><pre><code>(x, y) → Canvas</code></pre></div>
+<div class="card"><h3>En 3D simulée</h3><p>Nous faisons d'abord :</p><pre><code>(x, y, z)
+   ↓
+calculs
+   ↓
+(x écran, y écran)
+   ↓
+Canvas</code></pre></div>
+</div>
+<div class="success"><strong>Phrase à retenir :</strong> la 3D ne change pas le pinceau du Canvas ; elle change les calculs qui déterminent où placer ce pinceau.</div>
+<h3>Une analogie : photographier une boîte</h3>
+<p>Imaginez une boîte réelle devant vos yeux. La boîte existe dans l'espace. Votre œil, lui, reçoit une image plane. Notre programme fait quelque chose de comparable : il possède des coordonnées 3D puis calcule une image 2D.</p>
+</section><section id="point">
+<h2>3. Première notion : le point 3D</h2>
+<p>En 2D, un point est décrit par deux valeurs :</p>
+<pre><code>const point = { x: 100, y: 50 };</code></pre>
+<p>En 3D, nous ajoutons la profondeur :</p>
 <pre><code>const point = { x: 100, y: 50, z: 200 };</code></pre>
-
-    <p>
-        Contrairement au Canvas 2D, il n'y a pas de convention universelle
-        pour l'orientation des axes. En infographie, on utilise souvent
-        le repère suivant :
-    </p>
-
-    <table>
-        <tr><th>Axe</th><th>Direction usuelle</th></tr>
-        <tr><td>X</td><td>vers la droite</td></tr>
-        <tr><td>Y</td><td>vers le haut</td></tr>
-        <tr><td>Z</td><td>vers l'observateur (ou l'inverse selon la convention)</td></tr>
-    </table>
-
-    <div class="important">
-        <strong>Attention :</strong>
-        <p>
-            Sur Canvas 2D, l'axe Y descend. En 3D, on utilise souvent
-            un axe Y qui monte. Il faudra donc <strong>inverser Y</strong>
-            lors de la projection finale.
-        </p>
-    </div>
-</section>
-
-
-<div class="visual-lab">
-<h3>Illustration comparative — 2D contre 3D</h3>
-<div class="compare-grid">
-<div class="compare-card">
-<h4>Repère Canvas 2D</h4>
-<canvas id="cmp2D" width="420" height="250"></canvas>
-<p class="compare-caption">Un point est décrit uniquement par <code>(x, y)</code>. L'écran reçoit directement ces coordonnées.</p>
+<table><tr><th>Coordonnée</th><th>Idée intuitive</th><th>Exemple</th></tr>
+<tr><td>X</td><td>gauche ↔ droite</td><td>+100 = vers la droite</td></tr>
+<tr><td>Y</td><td>haut ↔ bas dans notre modèle 3D</td><td>+100 = vers le haut</td></tr>
+<tr><td>Z</td><td>profondeur</td><td>+100 = plus loin selon la convention choisie</td></tr></table>
+<div class="important"><strong>Attention à Canvas :</strong> Canvas 2D utilise généralement un axe Y qui augmente vers le bas. Notre espace 3D pédagogique peut utiliser Y vers le haut. Lors de la projection, nous devrons adapter cette convention.</div>
+<h3>Premier petit exercice</h3>
+<div class="exercise"><strong>Exercice 1.</strong> Créez trois points : un point proche, un point éloigné et un point situé à gauche. Modifiez uniquement leurs coordonnées <code>x</code>, <code>y</code> et <code>z</code>.</div>
+<details><summary>Correction possible</summary><pre><code>const proche = { x: 0, y: 0, z: 100 };
+const loin   = { x: 0, y: 0, z: 400 };
+const gauche = { x: -150, y: 0, z: 200 };</code></pre></details>
+</section><section id="cube">
+<h2>4. Concevoir notre premier objet : le Cube 🧊</h2>
+<p>Avant de parler de caméra ou de projection, nous allons d'abord <strong>concevoir l'objet 3D lui-même</strong>. À ce stade, notre cube existe uniquement sous forme de données : il n'est pas encore affiché à l'écran.</p>
+<div class="important"><strong>Idée pédagogique :</strong> construire un cube ne signifie pas encore le voir. Nous définissons d'abord sa géométrie, puis nous apprendrons à le transformer, à le regarder avec une caméra et enfin à le projeter sur Canvas.</div>
+<h3>4.1 Pourquoi utiliser la POO ici ?</h3>
+<p>Un objet 3D possède naturellement un état : une position, une rotation et une géométrie. La POO nous permet de regrouper ces informations dans des objets faciles à manipuler.</p>
+<div class="grid3">
+<div class="card"><h3>Classe</h3><p>Le modèle général. Exemple : <code>Cube</code>.</p></div>
+<div class="card"><h3>Objet</h3><p>Une instance concrète. Exemple : <code>cubeRouge</code>.</p></div>
+<div class="card"><h3>Méthode</h3><p>Une action de l'objet. Exemple : <code>tournerY()</code>.</p></div>
 </div>
-<div class="compare-card">
-<h4>Repère 3D avant projection</h4>
-<canvas id="cmp3D" width="420" height="250"></canvas>
-<p class="compare-caption">Un point possède <code>(x, y, z)</code>. La profondeur <code>z</code> n'est pas directement dessinée : elle influence la projection.</p>
-</div>
-</div>
-<div class="important"><strong>À observer :</strong> la 3D ajoute une information de profondeur, mais le résultat final reste un dessin 2D.</div>
-</div>
+<h3>4.2 Une classe de base : <code>Objet3D</code></h3>
+<pre><code>class Objet3D {
+    constructor(x, y, z) {
+        this.position = { x, y, z };
+        this.rotation = { x: 0, y: 0, z: 0 };
+    }
 
+    tournerX(angle) {
+        this.rotation.x += angle;
+    }
 
+    tournerY(angle) {
+        this.rotation.y += angle;
+    }
 
-<!-- CAMERA -->
-
-<section id="camera">
-    <h2>4. La caméra</h2>
-
-    <p>
-        La caméra représente le point de vue de l'observateur. Elle est
-        définie par :
-    </p>
-
-    <ul>
-        <li>une <strong>position</strong> dans l'espace <code>(cx, cy, cz)</code> ;</li>
-        <li>une <strong>direction</strong> de visée (souvent l'axe Z) ;</li>
-        <li>un <strong>plan de projection</strong> situé à une distance <code>d</code> devant elle.</li>
-    </ul>
-
-    <p>
-        Pour simplifier, on place la caméra à l'origine et on regarde
-        vers les Z positifs. Un point est visible s'il est <strong>devant</strong>
-        la caméra, c'est-à-dire si <code>z &gt; 0</code> (ou <code>z &gt; d</code>).
-    </p>
-
-    <div class="info">
-        <strong>Analogie :</strong>
-        <p>
-            Imaginez que vous regardez par une fenêtre. La caméra est votre œil,
-            le plan de projection est la vitre, et l'écran est la photo
-            prise à travers la vitre.
-        </p>
-    </div>
-</section>
-
-
-<div class="visual-lab">
-<h3>Illustration comparative — objet, caméra et écran</h3>
-<canvas id="cmpCamera" width="820" height="280"></canvas>
-<p class="compare-caption">La caméra observe la scène et le plan de projection transforme la position spatiale en position sur l'écran.</p>
-</div>
-
-
-
-<!-- PROJECTION -->
-
-<section id="projection">
-    <h2>5. Projection perspective</h2>
-
-    <p>
-        C'est le cœur de la 3D. La projection transforme un point
-        <code>(x, y, z)</code> en un point 2D <code>(sx, sy)</code> sur l'écran.
-    </p>
-
-    <h3>Principe</h3>
-
-    <p>
-        Plus un objet est loin, plus il paraît petit. C'est la
-        <strong>perspective</strong>. Mathématiquement, on divise
-        les coordonnées par la profondeur <code>z</code> :
-    </p>
-
-<pre><code>const d = 400; // distance focale
-
-function projeter(point) {
-    const facteur = d / (d + point.z);
-
-    return {
-        x: point.x * facteur,
-        y: -point.y * facteur   // inversion de Y pour Canvas
-    };
+    tournerZ(angle) {
+        this.rotation.z += angle;
+    }
 }</code></pre>
+<p><code>Objet3D</code> ne représente pas encore une forme précise. Il contient seulement ce que plusieurs objets 3D auront en commun : <strong>une position et une rotation</strong>.</p>
+<h3>4.3 Les 8 sommets du cube</h3>
+<p>Un cube possède <strong>8 sommets</strong>. Chaque sommet est un point local <code>(x, y, z)</code> situé autour du centre du cube.</p>
+<pre><code>class Cube extends Objet3D {
+    constructor(x, y, z, taille) {
+        super(x, y, z);
 
-    <h3>Interprétation</h3>
+        const s = taille / 2;
 
-    <table>
-        <tr><th>Cas</th><th>Effet</th></tr>
-        <tr><td><code>z = 0</code></td><td>L'objet est au niveau de la caméra : taille normale.</td></tr>
-        <tr><td><code>z &gt; 0</code></td><td>L'objet s'éloigne : il rétrécit.</td></tr>
-        <tr><td><code>z &lt; 0</code></td><td>L'objet est derrière la caméra : il faut le masquer.</td></tr>
-    </table>
-
-    <div class="important">
-        <strong>Point crucial :</strong>
-        <p>
-            Le signe et le décalage de <code>z</code> dépendent de la convention
-            choisie. L'essentiel est de rester <strong>cohérent</strong> dans
-            tout le programme.
-        </p>
-    </div>
-
-    <h3>Ajout du centre de l'écran</h3>
-
-    <p>
-        La caméra regarde vers le centre du Canvas. On translate donc
-        le résultat :
-    </p>
-
-<pre><code>const centreX = canvas.width / 2;
-const centreY = canvas.height / 2;
-
-function projeter(point) {
-    const facteur = d / (d + point.z);
-
-    return {
-        x: centreX + point.x * facteur,
-        y: centreY - point.y * facteur
-    };
+        this.sommets = [
+            {x:-s,y:-s,z:-s}, {x:s,y:-s,z:-s},
+            {x:s,y:s,z:-s},   {x:-s,y:s,z:-s},
+            {x:-s,y:-s,z:s},  {x:s,y:-s,z:s},
+            {x:s,y:s,z:s},    {x:-s,y:s,z:s}
+        ];
+    }
 }</code></pre>
-</section>
-
-
-<div class="visual-lab">
-<h3>Illustration interactive — effet de perspective</h3>
-<canvas id="cmpPerspective" width="820" height="300"></canvas>
-<div class="slider-row">
-<label for="cmpDepth">Profondeur z</label>
-<input type="range" id="cmpDepth" min="0" max="700" step="10" value="300">
-<span class="value" id="cmpDepthVal">300</span>
+<h3>4.4 Les 12 arêtes</h3>
+<p>Une arête relie deux sommets. Au lieu de recopier les coordonnées, nous stockons seulement les indices des sommets à relier.</p>
+<pre><code>this.aretes = [
+    [0,1],[1,2],[2,3],[3,0],
+    [4,5],[5,6],[6,7],[7,4],
+    [0,4],[1,5],[2,6],[3,7]
+];</code></pre>
+<h3>4.5 Les 6 faces</h3>
+<p>Nous définissons déjà les faces, car elles seront utiles plus tard pour le rendu plein et l'éclairage.</p>
+<pre><code>this.faces = [
+    [0,1,2,3],
+    [4,5,6,7],
+    [0,1,5,4],
+    [2,3,7,6],
+    [1,2,6,5],
+    [0,3,7,4]
+];</code></pre>
+<div class="flow">
+<span>8 sommets</span><span class="arrow">→</span>
+<span>12 arêtes</span><span class="arrow">→</span>
+<span>6 faces</span><span class="arrow">→</span>
+<span>1 Cube</span>
 </div>
-<p class="compare-caption">Déplacez le curseur : plus <code>z</code> augmente, plus le facteur <code>d/(d+z)</code> diminue et plus l'objet paraît petit.</p>
-</div>
+<h3>4.6 À ce stade, pourquoi le cube n'apparaît-il pas encore ?</h3>
+<p>Parce que Canvas ne sait dessiner que des coordonnées 2D. Notre cube est correctement conçu en 3D, mais il nous manque encore plusieurs étapes :</p>
+<pre><code>Cube 3D
+   ↓
+rotation
+   ↓
+caméra
+   ↓
+projection 2D
+   ↓
+Canvas</code></pre>
+<div class="exercise"><strong>Exercice 2.</strong> Créez deux instances de <code>Cube</code> avec des tailles et des positions différentes. Pour l'instant, affichez simplement leurs propriétés avec <code>console.log()</code>.</div>
+<details><summary>Correction possible</summary><pre><code>const cube1 = new Cube(0, 0, 300, 100);
+const cube2 = new Cube(150, 50, 500, 160);
 
-
-
-<!-- TRANSFORMATIONS 3D -->
-
-<section id="transformations3d">
-    <h2>6. Transformations 3D</h2>
-
-    <p>
-        Comme en 2D, on peut translater, tourner et redimensionner
-        un point 3D. La nouveauté, c'est qu'il existe <strong>trois rotations</strong>,
-        une autour de chaque axe.
-    </p>
-
-    <h3>Rotation autour de l'axe X</h3>
-
+console.log(cube1);
+console.log(cube2);</code></pre></details>
+</section><section id="transform">
+<h2>5. Faire tourner le cube : transformations 3D 🔄</h2>
+<p>Un cube possède des sommets. Pour faire tourner le cube, nous devons faire tourner chacun de ses sommets.</p>
+<h3>5.1 Rotation autour de X</h3>
 <pre><code>function rotationX(p, angle) {
     const c = Math.cos(angle);
     const s = Math.sin(angle);
@@ -776,860 +212,566 @@ function projeter(point) {
         z: p.y * s + p.z * c
     };
 }</code></pre>
-
-    <h3>Rotation autour de l'axe Y</h3>
-
+<p>Nous ne demandons pas encore de mémoriser cette formule. Il faut surtout comprendre son rôle : <strong>elle reçoit un point et renvoie le même point après rotation autour de X.</strong></p>
+<h3>5.2 Rotation autour de Y et Z</h3>
 <pre><code>function rotationY(p, angle) {
     const c = Math.cos(angle);
     const s = Math.sin(angle);
-
     return {
         x: p.x * c + p.z * s,
         y: p.y,
         z: -p.x * s + p.z * c
     };
-}</code></pre>
+}
 
-    <h3>Rotation autour de l'axe Z</h3>
-
-<pre><code>function rotationZ(p, angle) {
+function rotationZ(p, angle) {
     const c = Math.cos(angle);
     const s = Math.sin(angle);
-
     return {
         x: p.x * c - p.y * s,
         y: p.x * s + p.y * c,
         z: p.z
     };
 }</code></pre>
+<div class="grid3"><div class="card"><h3>Rotation X</h3><p>Le point tourne comme autour d'une barre gauche-droite.</p></div><div class="card"><h3>Rotation Y</h3><p>Le point tourne comme autour d'une barre verticale.</p></div><div class="card"><h3>Rotation Z</h3><p>Le point tourne dans le plan de l'écran.</p></div></div>
+<div class="success"><strong>Règle mentale :</strong> une fonction de transformation ne dessine rien. Elle transforme des données. Le dessin arrive seulement après la projection.</div><div class="info"><strong>Important :</strong> les rotations modifient les coordonnées 3D. Elles ne dessinent rien. Nous allons maintenant introduire la caméra, puis la projection.</div>
+<h3>5.3 Ordre des opérations</h3>
+<pre><code>sommet local
+    ↓
+rotation X
+    ↓
+rotation Y
+    ↓
+rotation Z
+    ↓
+translation de l'objet
+    ↓
+projection caméra
+    ↓
+dessin Canvas</code></pre>
+<p>L'ordre exact peut changer le résultat. C'est pourquoi il est utile de séparer les étapes plutôt que de tout mélanger dans une seule fonction.</p>
+</section><section id="camera">
+<h2>6. La caméra : choisir le point de vue 📷</h2>
+<p>Notre cube existe et peut tourner, mais nous devons maintenant décider depuis quel point de vue nous l'observons. C'est le rôle de la caméra.</p>
+<p>Nous pouvons maintenant encapsuler ce rôle dans une classe :</p>
+<pre><code>class Camera {
+    constructor(x, y, z, distanceFocale) {
+        this.position = { x, y, z };
+        this.d = distanceFocale;
+    }
 
-    <div class="info">
-        <strong>Remarque :</strong>
-        <p>
-            Ces formules sont directement issues des matrices de rotation
-            <code>3×3</code>. On peut les combiner en appliquant successivement
-            plusieurs rotations.
-        </p>
-    </div>
+    project(point, largeur, hauteur) {
+        // calcul de la projection
+    }
+}</code></pre>
+<p>La responsabilité est claire : <strong>la caméra sait comment transformer un point de l'espace en point écran.</strong></p>
+<div class="flow"><span>Objet</span><span class="arrow">→</span><span>Point 3D</span><span class="arrow">→</span><span>Camera.project()</span><span class="arrow">→</span><span>Point écran</span></div>
+<div class="important"><strong>Bonne pratique :</strong> l'objet 3D ne devrait pas connaître les dimensions du Canvas. La caméra s'occupe de la projection ; le renderer s'occupe du dessin.</div>
+</section><section id="projection">
+<h2>7. Projection : transformer la 3D en coordonnées Canvas 🎯</h2>
+<p>Voici le moment où nous répondons à une question essentielle : <strong>comment passer de <code>(x,y,z)</code> à une position sur l'écran ?</strong></p>
+<h3>7.1 Pourquoi les objets lointains paraissent-ils plus petits ?</h3>
+<p>Une photographie nous montre qu'un objet proche occupe davantage de place qu'un objet identique éloigné. Nous allons reproduire cet effet avec un facteur de perspective.</p>
+<p>Dans le modèle simplifié utilisé dans ce cours :</p>
+<pre><code>facteur = d / (d + z)</code></pre>
+<p>où <code>d</code> représente une distance focale simplifiée et <code>z</code> la profondeur.</p>
+<table><tr><th>Profondeur</th><th>Effet</th></tr><tr><td>z petit</td><td>facteur plus grand → objet visuellement plus grand</td></tr><tr><td>z grand</td><td>facteur plus petit → objet visuellement plus petit</td></tr></table>
+<h3>7.2 Calcul des coordonnées écran</h3>
+<pre><code>const facteur = d / (d + point.z);
+const xEcran = centreX + point.x * facteur;
+const yEcran = centreY - point.y * facteur;</code></pre>
+<div class="info"><strong>Pourquoi <code>- point.y</code> ?</strong> Parce que notre repère 3D pédagogique considère Y positif vers le haut, alors que Canvas considère Y positif vers le bas.</div>
+<h3>7.3 Projection interactive</h3>
+<div class="controls"><label>Distance focale : <input id="focal" max="900" min="100" type="range" value="400"/> <span id="focalVal">400</span></label></div>
+<canvas height="300" id="projectionCanvas" width="760"></canvas>
+<p class="small center">Le point rouge représente un même point 3D. Modifiez la distance focale pour observer l'effet de la projection.</p>
+</section><section id="lumiere">
+<h2>8. Éclairage simple : donner du relief 💡</h2>
+<p>Une surface tournée vers une source lumineuse paraît plus éclairée qu'une surface tournée dans une autre direction.</p>
+<p>Pour un modèle simple, nous utilisons le <strong>produit scalaire</strong> entre une normale et une direction de lumière.</p>
+<pre><code>intensite = max(0, normale.x * lumiere.x
+                  + normale.y * lumiere.y
+                  + normale.z * lumiere.z);</code></pre>
+<p>Nous pouvons ensuite faire varier une couleur ou une luminosité à partir de cette intensité.</p>
+<h3>8.1 Normale d'une face</h3>
+<p>Pour une face, nous pouvons prendre deux vecteurs situés sur la surface puis calculer leur produit vectoriel. Dans un cours d'introduction, il suffit de comprendre le rôle :</p>
+<div class="flow"><span>Face</span><span class="arrow">→</span><span>Normale</span><span class="arrow">→</span><span>Comparaison avec lumière</span><span class="arrow">→</span><span>Intensité</span></div>
+<h3>8.2 Pourquoi l'éclairage arrive maintenant ?</h3>
+<p>Le cube possède déjà ses faces, et nous savons maintenant les transformer puis les observer depuis une caméra. L'éclairage devient donc concret : il sert à différencier visuellement les faces selon leur orientation.</p>
+<div class="success"><strong>Progression :</strong> cube → rotation → caméra → projection → lumière.</div>
+</section><section id="scene">
+<h2>9. La scène : organiser plusieurs objets</h2>
+<p>Une fois que nous avons une classe <code>Cube</code>, nous pouvons créer plusieurs cubes sans recopier leur code.</p>
+<pre><code>const cube1 = new Cube(-140, 0, 350, 100);
+const cube2 = new Cube(140, 0, 500, 160);
+const cube3 = new Cube(0, 70, 700, 80);</code></pre>
+<p>Mais trois objets signifient aussi qu'il faut organiser leur rendu. C'est le rôle de <code>Scene</code>.</p>
+<pre><code>class Scene {
+    constructor() {
+        this.objects = [];
+    }
 
-    <h3>Translation et échelle</h3>
+    add(object) {
+        this.objects.push(object);
+    }
 
-<pre><code>function translater(p, dx, dy, dz) {
-    return { x: p.x + dx, y: p.y + dy, z: p.z + dz };
+    update() {
+        for (const object of this.objects) {
+            object.update();
+        }
+    }
+
+    draw(ctx, camera) {
+        for (const object of this.objects) {
+            object.draw(ctx, camera);
+        }
+    }
+}</code></pre>
+<div class="grid"><div class="card"><h3>Objet3D</h3><p>Connaît sa position, sa rotation et sa géométrie.</p></div><div class="card"><h3>Scene</h3><p>Connaît les objets présents dans la scène.</p></div></div>
+<h3>Une architecture simple</h3>
+<pre><code>Scene
+ ├── Cube
+ ├── Cube
+ └── Pyramide
+
+Camera
+
+Renderer / Canvas</code></pre>
+<div class="success"><strong>Ce que la POO apporte :</strong> nous passons de « gérer plein de tableaux » à « gérer des objets qui ont chacun une responsabilité ».</div>
+</section><section id="profondeur">
+<h2>10. La profondeur : qui doit être dessiné en premier ?</h2>
+<p>Imaginez deux cubes qui se chevauchent. Si nous dessinons le cube proche puis le cube éloigné, le cube éloigné peut recouvrir le proche. L'ordre de dessin devient donc important.</p>
+<h3>10.1 L'algorithme du peintre</h3>
+<p>L'idée est comparable à un peintre qui commence par le décor lointain puis ajoute les éléments proches.</p>
+<pre><code>scene.objects.sort((a, b) =&gt; {
+    return b.position.z - a.position.z;
+});</code></pre>
+<p>Dans la convention de ce cours, nous dessinons les objets les plus éloignés avant les plus proches.</p>
+<div class="important"><strong>Attention :</strong> ce tri par objet est une simplification. Pour des objets qui s'interpénètrent ou des faces qui se croisent, il faut des techniques plus avancées. Ici, l'objectif est de comprendre le principe.</div>
+<h3>10.2 Pourquoi la profondeur appartient-elle à la scène ?</h3>
+<p>Parce que ce n'est pas un cube isolé qui sait quel autre cube doit être dessiné avant lui. C'est la <strong>scène</strong> qui connaît l'ensemble des objets.</p>
+<pre><code>draw(ctx, camera) {
+    const objets = [...this.objects];
+
+    objets.sort((a, b) =&gt; b.position.z - a.position.z);
+
+    for (const objet of objets) {
+        objet.draw(ctx, camera);
+    }
+}</code></pre>
+</section><section id="faces">
+<h2>11. Rendu plein : dessiner les faces du cube</h2>
+<p>Les 6 faces ont été définies dès la conception du cube. Nous allons maintenant les utiliser pour passer du rendu filaire au rendu plein.</p>
+<pre><code>this.faces = [
+    [0,1,2,3],
+    [4,5,6,7],
+    [0,1,5,4],
+    [2,3,7,6],
+    [1,2,6,5],
+    [0,3,7,4]
+];</code></pre>
+<p>Chaque tableau contient les indices des sommets qui forment une face.</p>
+<h3>11.1 Dessiner une face</h3>
+<pre><code>ctx.beginPath();
+ctx.moveTo(points[face[0]].x, points[face[0]].y);
+
+for (let i = 1; i &lt; face.length; i++) {
+    ctx.lineTo(points[face[i]].x, points[face[i]].y);
 }
 
-function echelle(p, k) {
-    return { x: p.x * k, y: p.y * k, z: p.z * k };
-}</code></pre>
+ctx.closePath();
+ctx.fill();
+ctx.stroke();</code></pre>
+<h3>11.2 Trier aussi les faces</h3>
+<p>Si le cube tourne, une face peut devenir devant une autre. Nous pouvons calculer une profondeur moyenne :</p>
+<pre><code>const profondeur = face.reduce((somme, index) =&gt; {
+    return somme + sommets[index].z;
+}, 0) / face.length;</code></pre>
+<p>Puis dessiner les faces de la plus éloignée à la plus proche.</p>
+<div class="info"><strong>Étape importante :</strong> le même principe revient : calculer → trier → dessiner.</div>
 </section>
 
+<!-- ============================================================ -->
+<!-- SECTION AJOUTÉE : CODE FINAL COMPLET -->
+<!-- ============================================================ -->
+<section id="code-final">
+<h2>12. Code final complet 📦</h2>
+<p>Voici l'ensemble des classes telles qu'elles doivent être écrites à la fin du cours. Ce code est complet et fonctionnel : il dessine trois cubes en filaire avec rotation, caméra, projection et tri par profondeur.</p>
 
-<div class="visual-lab">
-<h3>Illustration comparative — trois axes de rotation</h3>
-<div class="compare-grid">
-<div class="compare-card"><h4>Rotation X</h4><canvas id="cmpRotX" width="360" height="240"></canvas><p class="compare-caption">L'axe X reste invariant ; Y et Z changent.</p></div>
-<div class="compare-card"><h4>Rotation Y</h4><canvas id="cmpRotY" width="360" height="240"></canvas><p class="compare-caption">L'axe Y reste invariant ; X et Z changent.</p></div>
-<div class="compare-card"><h4>Rotation Z</h4><canvas id="cmpRotZ" width="360" height="240"></canvas><p class="compare-caption">L'axe Z reste invariant ; la rotation ressemble à une rotation 2D.</p></div>
-</div>
-</div>
-
-
-
-<!-- PROFONDEUR -->
-
-<section id="profondeur">
-    <h2>7. Gestion de la profondeur</h2>
-
-    <p>
-        En 3D, plusieurs objets peuvent se superposer à l'écran alors
-        qu'ils sont à des profondeurs différentes. Deux techniques
-        simples :
-    </p>
-
-    <h3>Algorithme du peintre</h3>
-
-    <p>
-        On trie les objets du plus lointain au plus proche, puis on les
-        dessine dans cet ordre. Les objets proches recouvrent naturellement
-        les objets lointains.
-    </p>
-
-<pre><code>objets.sort((a, b) => b.z - a.z);
-
-for (const objet of objets) {
-    dessiner(objet);
-}</code></pre>
-
-    <h3>Taille proportionnelle à la distance</h3>
-
-    <p>
-        On module la taille de l'objet en fonction de sa profondeur
-        (via le facteur de projection).
-    </p>
-
-    <div class="important">
-        <strong>Limite :</strong>
-        <p>
-            L'algorithme du peintre ne fonctionne pas dans tous les cas
-            (objets qui s'interpénètrent). Un vrai moteur 3D utilise
-            un <strong>Z-buffer</strong> (tampon de profondeur). Nous nous
-            contenterons de l'algorithme du peintre, qui est suffisant
-            pour des scènes simples.
-        </p>
-    </div>
-</section>
-
-
-<div class="visual-lab">
-<h3>Illustration comparative — ordre de dessin</h3>
-<div class="compare-grid">
-<div class="compare-card"><h4>Sans tri</h4><canvas id="cmpPainterBad" width="360" height="240"></canvas><p class="compare-caption">Le dernier objet dessiné peut recouvrir un objet qui devrait être devant ou derrière.</p></div>
-<div class="compare-card"><h4>Algorithme du peintre</h4><canvas id="cmpPainterGood" width="360" height="240"></canvas><p class="compare-caption">On dessine du plus lointain au plus proche.</p></div>
-</div>
-<div class="important"><strong>Limite :</strong> le tri par profondeur moyenne reste une simplification ; les objets qui s'interpénètrent nécessitent une gestion plus avancée.</div>
-</div>
-
-
-
-<!-- FIL DE FER -->
-
-<section id="fil-de-fer">
-    <h2>8. Rendu filaire</h2>
-
-    <p>
-        Le rendu filaire (<em>wireframe</em>) consiste à ne dessiner que
-        les arêtes d'un objet. C'est la forme la plus simple de rendu 3D.
-    </p>
-
-    <h3>Définir un cube</h3>
-
-<pre><code>const cube = {
-    sommets: [
-        { x: -50, y: -50, z: -50 },
-        { x:  50, y: -50, z: -50 },
-        { x:  50, y:  50, z: -50 },
-        { x: -50, y:  50, z: -50 },
-        { x: -50, y: -50, z:  50 },
-        { x:  50, y: -50, z:  50 },
-        { x:  50, y:  50, z:  50 },
-        { x: -50, y:  50, z:  50 }
-    ],
-
-    aretes: [
-        [0, 1], [1, 2], [2, 3], [3, 0],
-        [4, 5], [5, 6], [6, 7], [7, 4],
-        [0, 4], [1, 5], [2, 6], [3, 7]
-    ]
-};</code></pre>
-
-    <h3>Dessiner le cube</h3>
-
-<pre><code>function dessinerCube(cube) {
-    // 1. Transformer les sommets
-    const transformes = cube.sommets.map(s =>
-        rotationY(rotationX(s, angleX), angleY)
-    );
-
-    // 2. Projeter en 2D
-    const projetes = transformes.map(projeter);
-
-    // 3. Tracer les arêtes
-    ctx.beginPath();
-    ctx.strokeStyle = "white";
-
-    for (const [a, b] of cube.aretes) {
-        ctx.moveTo(projetes[a].x, projetes[a].y);
-        ctx.lineTo(projetes[b].x, projetes[b].y);
+<h3>12.1 La classe <code>Vec3</code> (vecteur 3D)</h3>
+<pre><code>class Vec3 {
+    constructor(x = 0, y = 0, z = 0) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
-    ctx.stroke();
+    add(v) {
+        return new Vec3(this.x + v.x, this.y + v.y, this.z + v.z);
+    }
 }</code></pre>
-</section>
 
+<h3>12.2 Les fonctions de rotation</h3>
+<pre><code>function rotationX(p, angle) {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    return new Vec3(p.x, p.y * c - p.z * s, p.y * s + p.z * c);
+}
 
-<div class="visual-lab">
-<h3>Illustration comparative — fil de fer contre solide</h3>
-<div class="compare-grid">
-<div class="compare-card"><h4>Wireframe</h4><canvas id="cmpWire" width="360" height="240"></canvas><p class="compare-caption">Seules les arêtes sont tracées.</p></div>
-<div class="compare-card"><h4>Faces remplies</h4><canvas id="cmpSolid" width="360" height="240"></canvas><p class="compare-caption">Les polygones sont remplis puis éventuellement bordés.</p></div>
-</div>
-</div>
+function rotationY(p, angle) {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    return new Vec3(p.x * c + p.z * s, p.y, -p.x * s + p.z * c);
+}
 
+function rotationZ(p, angle) {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    return new Vec3(p.x * c - p.y * s, p.x * s + p.y * c, p.z);
+}</code></pre>
 
-
-<!-- FACES -->
-
-<section id="faces">
-    <h2>9. Faces et polygones</h2>
-
-    <p>
-        Pour un rendu plein, il faut définir les <strong>faces</strong>
-        (polygones) de l'objet, puis les remplir avec <code>fill()</code>.
-    </p>
-
-<pre><code>const faces = [
-    [0, 1, 2, 3], // face arrière
-    [4, 5, 6, 7], // face avant
-    [0, 1, 5, 4], // bas
-    [2, 3, 7, 6], // haut
-    [1, 2, 6, 5], // droite
-    [0, 3, 7, 4]  // gauche
-];</code></pre>
-
-    <h3>Dessiner une face</h3>
-
-<pre><code>function dessinerFace(indices, projetes, couleur) {
-    ctx.beginPath();
-    ctx.moveTo(projetes[indices[0]].x, projetes[indices[0]].y);
-
-    for (let i = 1; i < indices.length; i++) {
-        ctx.lineTo(projetes[indices[i]].x, projetes[indices[i]].y);
+<h3>12.3 La classe <code>Camera</code></h3>
+<pre><code>class Camera {
+    constructor(distanceFocale = 520) {
+        this.d = distanceFocale;
     }
 
-    ctx.closePath();
-    ctx.fillStyle = couleur;
-    ctx.fill();
-    ctx.strokeStyle = "white";
-    ctx.stroke();
-}</code></pre>
-
-    <h3>Élimination des faces cachées</h3>
-
-    <p>
-        Une face est cachée si elle est orientée vers l'intérieur
-        de l'objet. On calcule son <strong>produit vectoriel</strong>
-        pour déterminer son orientation par rapport à la caméra.
-    </p>
-
-<pre><code>function faceVisible(p1, p2, p3) {
-    // Produit vectoriel des deux arêtes
-    const ux = p2.x - p1.x;
-    const uy = p2.y - p1.y;
-    const vx = p3.x - p1.x;
-    const vy = p3.y - p1.y;
-
-    // Signe de la composante Z
-    return (ux * vy - uy * vx) > 0;
-}</code></pre>
-
-    <div class="info">
-        <strong>Simplification :</strong>
-        <p>
-            Pour un cube, on peut aussi se contenter de trier les faces
-            par profondeur moyenne et de les dessiner de la plus lointaine
-            à la plus proche.
-        </p>
-    </div>
-</section>
-
-
-<div class="visual-lab">
-<h3>Illustration comparative — face visible et face cachée</h3>
-<canvas id="cmpFaces" width="820" height="280"></canvas>
-<p class="compare-caption">Deux faces peuvent avoir des orientations différentes par rapport à la caméra. Leur ordre et leur orientation influencent le rendu.</p>
-</div>
-
-
-
-<!-- ECLAIRAGE -->
-
-<section id="eclairage">
-    <h2>10. Éclairage simple</h2>
-
-    <p>
-        Pour donner du relief, on module la couleur d'une face en fonction
-        de son orientation par rapport à une source de lumière.
-    </p>
-
-    <h3>Principe</h3>
-
-    <p>
-        On définit une direction de lumière, puis on calcule l'angle
-        entre la normale de la face et cette direction. Plus l'angle est
-        petit, plus la face est éclairée.
-    </p>
-
-<pre><code>function intensiteLumiere(normale, lumiere) {
-    // Produit scalaire normalisé
-    const dot = normale.x * lumiere.x +
-                normale.y * lumiere.y +
-                normale.z * lumiere.z;
-
-    return Math.max(0, dot);
-}</code></pre>
-
-    <h3>Application</h3>
-
-<pre><code>const lumiere = { x: 0.5, y: 0.7, z: 0.5 };
-const intensite = intensiteLumiere(normale, lumiere);
-
-const couleur = `rgb(
-    ${Math.round(200 * intensite)},
-    ${Math.round(220 * intensite)},
-    ${Math.round(255 * intensite)}
-)`;</code></pre>
-
-    <div class="important">
-        <strong>Résultat :</strong>
-        <p>
-            Les faces les mieux orientées vers la lumière apparaissent
-            claires ; les autres sombres. C'est la base de tout éclairage
-            en infographie.
-        </p>
-    </div>
-</section>
-
-
-<div class="visual-lab">
-<h3>Illustration interactive — orientation et lumière</h3>
-<canvas id="cmpLight" width="820" height="280"></canvas>
-<div class="slider-row">
-<label for="cmpLightAngle">Angle de la lumière</label>
-<input type="range" id="cmpLightAngle" min="0" max="360" step="1" value="45">
-<span class="value" id="cmpLightVal">45°</span>
-</div>
-<p class="compare-caption">La luminosité dépend du produit scalaire entre la normale de la face et la direction de la lumière.</p>
-</div>
-
-
-
-<!-- TP1 -->
-
-<section id="tp1">
-    <h2>11. TP 1 — Cube rotatif filaire</h2>
-
-    <div class="exercise">
-        <span class="level medium">Moyen</span>
-
-        <h3>Objectif</h3>
-        <p>
-            Construire un cube en fil de fer qui tourne sur lui-même
-            autour des axes X et Y.
-        </p>
-
-        <h3>Étapes</h3>
-        <ol>
-            <li>Définir les 8 sommets du cube dans un tableau.</li>
-            <li>Définir les 12 arêtes comme des paires d'indices.</li>
-            <li>Écrire les fonctions <code>rotationX</code> et <code>rotationY</code>.</li>
-            <li>Écrire la fonction <code>projeter</code>.</li>
-            <li>Dans la boucle d'animation, appliquer les rotations, projeter, puis tracer les arêtes.</li>
-        </ol>
-
-        <h3>Indice</h3>
-        <p>
-            Incrémentez les angles à chaque image :
-            <code>angleX += 0.01;</code>, <code>angleY += 0.015;</code>.
-        </p>
-    </div>
-</section>
-
-
-<!-- TP2 -->
-
-<section id="tp2">
-    <h2>12. TP 2 — Scène 3D</h2>
-
-    <div class="exercise">
-        <span class="level hard">Difficile</span>
-
-        <h3>Objectif</h3>
-        <p>
-            Construire une scène contenant plusieurs cubes à des
-            profondeurs différentes, avec tri par profondeur.
-        </p>
-
-        <h3>Contraintes</h3>
-        <ul>
-            <li>Au moins 4 cubes ;</li>
-            <li>Chaque cube a une position <code>(x, y, z)</code> propre ;</li>
-            <li>Les cubes tournent sur eux-mêmes ;</li>
-            <li>Les cubes sont triés du plus lointain au plus proche avant dessin ;</li>
-            <li>Les faces sont remplies et éclairées.</li>
-        </ul>
-
-        <h3>Extension</h3>
-        <p>
-            Ajouter un déplacement de la scène avec les flèches du clavier
-            (translation sur X et Y) et avec <code>+</code> / <code>-</code>
-            pour le zoom (modification de la distance focale <code>d</code>).
-        </p>
-    </div>
-</section>
-
-
-<!-- DEMO -->
-
-<section id="demo">
-    <h2>13. Démonstration interactive</h2>
-
-    <p>
-        Cette démonstration présente un cube en fil de fer qui tourne
-        sur lui-même. Utilisez les curseurs pour ajuster les angles
-        et la distance focale.
-    </p>
-
-    <div class="canvas-wrapper">
-        <canvas id="demoCanvas" width="800" height="450"></canvas>
-
-        <div class="controls">
-            <button onclick="toggleRotation()">Rotation auto</button>
-            <button class="secondary" onclick="resetCube()">Réinitialiser</button>
-            <button class="success" onclick="toggleFaces()">Faces / Filaire</button>
-        </div>
-
-        <div style="max-width: 800px; margin: 15px auto 0; padding: 0 10px;">
-            <div class="slider-row">
-                <label for="angleX">Angle X</label>
-                <input type="range" id="angleX" min="0" max="6.28" step="0.01" value="0.5">
-                <span class="value" id="angleXVal">0.50</span>
-            </div>
-            <div class="slider-row">
-                <label for="angleY">Angle Y</label>
-                <input type="range" id="angleY" min="0" max="6.28" step="0.01" value="0.8">
-                <span class="value" id="angleYVal">0.80</span>
-            </div>
-            <div class="slider-row">
-                <label for="focale">Distance focale</label>
-                <input type="range" id="focale" min="200" max="800" step="10" value="400">
-                <span class="value" id="focaleVal">400</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="info">
-        <strong>À observer :</strong>
-        <ul>
-            <li>Quand <code>z</code> augmente, le cube rétrécit.</li>
-            <li>La rotation autour de Y fait tourner le cube sur lui-même.</li>
-            <li>La distance focale modifie l'effet de perspective :
-                une focale courte exagère la profondeur.</li>
-        </ul>
-    </div>
-</section>
-
-
-<!-- BILAN -->
-
-<section id="bilan">
-    <h2>14. À retenir — Jour 3</h2>
-
-    <div class="success">
-        <ul>
-            <li>Un point 3D possède trois coordonnées <code>(x, y, z)</code>.</li>
-            <li>La caméra définit le point de vue ; le plan de projection
-                reçoit l'image.</li>
-            <li>La projection perspective divise les coordonnées par
-                la profondeur : <code>facteur = d / (d + z)</code>.</li>
-            <li>Les rotations 3D se font autour des axes X, Y et Z.</li>
-            <li>L'algorithme du peintre trie les objets par profondeur.</li>
-            <li>Le rendu filaire ne dessine que les arêtes ; le rendu plein
-                remplit les faces.</li>
-            <li>Un éclairage simple module la couleur selon l'orientation
-                des faces.</li>
-        </ul>
-    </div>
-
-    <h3>Travail à remettre pour le Jour 3</h3>
-
-    <p>Chaque étudiant remet une scène 3D organisée comme suit :</p>
-
-<pre><code>jour3/
-│
-├── index.html
-├── style.css
-└── script.js</code></pre>
-
-    <p>L'application doit comporter :</p>
-    <ul>
-        <li>au moins deux objets 3D ;</li>
-        <li>des rotations sur au moins deux axes ;</li>
-        <li>un tri par profondeur ;</li>
-        <li>un rendu avec faces remplies et contour ;</li>
-        <li>une interaction clavier ou souris simple.</li>
-    </ul>
-</section>
-
-
-</main>
-
-
-<footer>
-    <p><strong>Programmation Multimédia — Jour 3</strong></p>
-    <p>Introduction à la 3D : projection, caméra, transformations</p>
-    <p>HTML5 · CSS3 · JavaScript</p>
-</footer>
-
-
-<!-- =====================================================
-     JAVASCRIPT DE LA DEMONSTRATION
-====================================================== -->
-
-<script>
-    const canvas = document.getElementById("demoCanvas");
-    const ctx = canvas.getContext("2d");
-
-    const centreX = canvas.width / 2;
-    const centreY = canvas.height / 2;
-
-    /* ==============================
-       ÉTAT
-    =============================== */
-
-    let d = 400;              // distance focale
-    let angleX = 0.5;
-    let angleY = 0.8;
-    let autoRotation = true;
-    let afficherFaces = false;
-
-    /* ==============================
-       CUBE
-    =============================== */
-
-    const cube = {
-        sommets: [
-            { x: -60, y: -60, z: -60 },
-            { x:  60, y: -60, z: -60 },
-            { x:  60, y:  60, z: -60 },
-            { x: -60, y:  60, z: -60 },
-            { x: -60, y: -60, z:  60 },
-            { x:  60, y: -60, z:  60 },
-            { x:  60, y:  60, z:  60 },
-            { x: -60, y:  60, z:  60 }
-        ],
-        aretes: [
-            [0, 1], [1, 2], [2, 3], [3, 0],
-            [4, 5], [5, 6], [6, 7], [7, 4],
-            [0, 4], [1, 5], [2, 6], [3, 7]
-        ],
-        faces: [
-            [0, 1, 2, 3],
-            [4, 5, 6, 7],
-            [0, 1, 5, 4],
-            [2, 3, 7, 6],
-            [1, 2, 6, 5],
-            [0, 3, 7, 4]
-        ]
-    };
-
-    /* ==============================
-       TRANSFORMATIONS 3D
-    =============================== */
-
-    function rotationX(p, a) {
-        const c = Math.cos(a), s = Math.sin(a);
+    project(point, largeur, hauteur) {
+        const facteur = this.d / (this.d + point.z);
         return {
-            x: p.x,
-            y: p.y * c - p.z * s,
-            z: p.y * s + p.z * c
+            x: largeur / 2 + point.x * facteur,
+            y: hauteur / 2 - point.y * facteur
         };
     }
+}</code></pre>
 
-    function rotationY(p, a) {
-        const c = Math.cos(a), s = Math.sin(a);
-        return {
-            x: p.x * c + p.z * s,
-            y: p.y,
-            z: -p.x * s + p.z * c
-        };
+<h3>12.4 La classe <code>Objet3D</code></h3>
+<pre><code>class Objet3D {
+    constructor(x, y, z) {
+        this.position = new Vec3(x, y, z);
+        this.rotation = new Vec3(0, 0, 0);
     }
 
-    function projeter(p) {
-        const facteur = d / (d + p.z + 200);
-        return {
-            x: centreX + p.x * facteur,
-            y: centreY - p.y * facteur,
-            z: p.z
-        };
+    tournerX(angle) {
+        this.rotation.x += angle;
     }
 
-    /* ==============================
-       DESSIN
-    =============================== */
+    tournerY(angle) {
+        this.rotation.y += angle;
+    }
 
-    function dessinerFilaire(projetes) {
-        ctx.strokeStyle = "#c8d4e4";
+    tournerZ(angle) {
+        this.rotation.z += angle;
+    }
+
+    transform(point) {
+        let p = rotationX(point, this.rotation.x);
+        p = rotationY(p, this.rotation.y);
+        p = rotationZ(p, this.rotation.z);
+        return p.add(this.position);
+    }
+}</code></pre>
+
+<h3>12.5 La classe <code>Cube</code></h3>
+<pre><code>class Cube extends Objet3D {
+    constructor(x, y, z, taille, couleur = '#d9e6ed') {
+        super(x, y, z);
+
+        const s = taille / 2;
+        this.couleur = couleur;
+
+        // 8 sommets
+        this.sommets = [
+            new Vec3(-s, -s, -s), new Vec3( s, -s, -s),
+            new Vec3( s,  s, -s), new Vec3(-s,  s, -s),
+            new Vec3(-s, -s,  s), new Vec3( s, -s,  s),
+            new Vec3( s,  s,  s), new Vec3(-s,  s,  s)
+        ];
+
+        // 12 arêtes
+        this.aretes = [
+            [0,1],[1,2],[2,3],[3,0],
+            [4,5],[5,6],[6,7],[7,4],
+            [0,4],[1,5],[2,6],[3,7]
+        ];
+    }
+
+    draw(ctx, camera) {
+        // 1. Transformer les sommets
+        const sommetsTransformes = this.sommets.map(s => this.transform(s));
+
+        // 2. Projeter les sommets
+        const sommetsProjetes = sommetsTransformes.map(s =>
+            camera.project(s, ctx.canvas.width, ctx.canvas.height)
+        );
+
+        // 3. Dessiner les arêtes
+        ctx.strokeStyle = this.couleur;
         ctx.lineWidth = 1.5;
         ctx.beginPath();
 
-        for (const [a, b] of cube.aretes) {
-            ctx.moveTo(projetes[a].x, projetes[a].y);
-            ctx.lineTo(projetes[b].x, projetes[b].y);
+        for (const [a, b] of this.aretes) {
+            ctx.moveTo(sommetsProjetes[a].x, sommetsProjetes[a].y);
+            ctx.lineTo(sommetsProjetes[b].x, sommetsProjetes[b].y);
         }
 
         ctx.stroke();
     }
+}</code></pre>
 
-    function dessinerFaces(transformes, projetes) {
-        // Trier les faces par profondeur moyenne (algorithme du peintre)
-        const facesTriees = cube.faces
-            .map(indices => {
-                const zMoyen = indices.reduce((s, i) => s + transformes[i].z, 0) / indices.length;
-                return { indices, zMoyen };
-            })
-            .sort((a, b) => b.zMoyen - a.zMoyen);
-
-        for (const face of facesTriees) {
-            const indices = face.indices;
-
-            ctx.beginPath();
-            ctx.moveTo(projetes[indices[0]].x, projetes[indices[0]].y);
-
-            for (let i = 1; i < indices.length; i++) {
-                ctx.lineTo(projetes[indices[i]].x, projetes[indices[i]].y);
-            }
-
-            ctx.closePath();
-
-            // Intensité lumineuse basée sur la profondeur moyenne
-            const intensite = Math.max(0.25, Math.min(1, 1 - face.zMoyen / 400));
-            const r = Math.round(60 + 100 * intensite);
-            const g = Math.round(80 + 120 * intensite);
-            const b = Math.round(120 + 135 * intensite);
-
-            ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-            ctx.fill();
-            ctx.strokeStyle = "#0f1a30";
-            ctx.lineWidth = 1;
-            ctx.stroke();
-        }
+<h3>12.6 La classe <code>Scene</code></h3>
+<pre><code>class Scene {
+    constructor() {
+        this.objects = [];
     }
 
-    /* ==============================
-       BOUCLE
-    =============================== */
+    add(objet) {
+        this.objects.push(objet);
+    }
 
-    function render() {
-        // Fond
-        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        gradient.addColorStop(0, "#020617");
-        gradient.addColorStop(1, "#0f1a30");
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Grille au sol (optionnelle, pour la profondeur)
-        ctx.strokeStyle = "#ffffff08";
-        ctx.lineWidth = 1;
-
-        for (let i = -5; i <= 5; i++) {
-            ctx.beginPath();
-            ctx.moveTo(centreX + i * 80, centreY - 120);
-            ctx.lineTo(centreX + i * 80, canvas.height);
-            ctx.stroke();
-        }
-
-        // Transformer les sommets
-        const transformes = cube.sommets.map(s =>
-            rotationY(rotationX(s, angleX), angleY)
+    draw(ctx, camera) {
+        // Trier les objets du plus loin au plus proche (algorithme du peintre)
+        const objetsTries = [...this.objects].sort(
+            (a, b) => b.position.z - a.position.z
         );
 
-        const projetes = transformes.map(projeter);
-
-        // Dessiner
-        if (afficherFaces) {
-            dessinerFaces(transformes, projetes);
-        } else {
-            dessinerFilaire(projetes);
+        for (const objet of objetsTries) {
+            objet.draw(ctx, camera);
         }
-
-        // Texte
-        ctx.fillStyle = "#c8d4e4";
-        ctx.font = "16px Arial";
-        ctx.fillText("Cube 3D — projection perspective", 20, 30);
-        ctx.fillText("z (profondeur) : " + Math.round(transformes[0].z), 20, 55);
     }
+}</code></pre>
 
-    function loop() {
-        if (autoRotation) {
-            angleX += 0.008;
-            angleY += 0.012;
+<h3>12.7 Utilisation complète</h3>
+<pre><code>// Créer le canvas et le contexte
+const canvas = document.getElementById('sceneCanvas');
+const ctx = canvas.getContext('2d');
 
-            // Mettre à jour les curseurs
-            document.getElementById("angleX").value = angleX % (Math.PI * 2);
-            document.getElementById("angleY").value = angleY % (Math.PI * 2);
-            document.getElementById("angleXVal").textContent = (angleX % (Math.PI * 2)).toFixed(2);
-            document.getElementById("angleYVal").textContent = (angleY % (Math.PI * 2)).toFixed(2);
-        }
+// Créer la caméra
+const camera = new Camera(520);
 
-        render();
-        requestAnimationFrame(loop);
-    }
+// Créer la scène
+const scene = new Scene();
 
-    /* ==============================
-       CONTRÔLES
-    =============================== */
+// Ajouter des cubes
+scene.add(new Cube(-150,  20, 430, 150, '#ff6b6b'));
+scene.add(new Cube( 150, -15, 610, 190, '#6bcbff'));
+scene.add(new Cube(   0, 125, 800, 105, '#ffd93d'));
 
-    function toggleRotation() {
-        autoRotation = !autoRotation;
-    }
+// Boucle d'animation
+function animer(temps) {
+    // Effacer le canvas
+    ctx.fillStyle = '#101820';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    function toggleFaces() {
-        afficherFaces = !afficherFaces;
-    }
-
-    function resetCube() {
-        angleX = 0.5;
-        angleY = 0.8;
-        d = 400;
-
-        document.getElementById("angleX").value = angleX;
-        document.getElementById("angleY").value = angleY;
-        document.getElementById("focale").value = d;
-        document.getElementById("angleXVal").textContent = angleX.toFixed(2);
-        document.getElementById("angleYVal").textContent = angleY.toFixed(2);
-        document.getElementById("focaleVal").textContent = d;
-
-        autoRotation = true;
-    }
-
-    /* ==============================
-       ÉCOUTEURS CURSEURS
-    =============================== */
-
-    document.getElementById("angleX").addEventListener("input", e => {
-        angleX = parseFloat(e.target.value);
-        document.getElementById("angleXVal").textContent = angleX.toFixed(2);
-        autoRotation = false;
+    // Faire tourner les cubes
+    scene.objects.forEach((objet, i) => {
+        objet.tournerX(0.01 * (i + 1));
+        objet.tournerY(0.015 * (i + 1));
     });
 
-    document.getElementById("angleY").addEventListener("input", e => {
-        angleY = parseFloat(e.target.value);
-        document.getElementById("angleYVal").textContent = angleY.toFixed(2);
-        autoRotation = false;
-    });
+    // Dessiner la scène
+    scene.draw(ctx, camera);
 
-    document.getElementById("focale").addEventListener("input", e => {
-        d = parseFloat(e.target.value);
-        document.getElementById("focaleVal").textContent = d;
-    });
+    requestAnimationFrame(animer);
+}
 
-    /* ==============================
-       DÉMARRAGE
-    =============================== */
+requestAnimationFrame(animer);</code></pre>
 
-    requestAnimationFrame(loop);
-</script>
+<div class="success">
+<strong>Résumé des responsabilités :</strong>
+<ul>
+<li><code>Vec3</code> : représente un point ou vecteur 3D.</li>
+<li><code>rotationX/Y/Z</code> : transforment un point 3D.</li>
+<li><code>Camera</code> : projette un point 3D en point 2D écran.</li>
+<li><code>Objet3D</code> : base commune (position, rotation, transformation).</li>
+<li><code>Cube</code> : géométrie concrète + dessin de ses arêtes.</li>
+<li><code>Scene</code> : collection d'objets + tri par profondeur + rendu global.</li>
+</ul>
+</div>
+</section>
+<!-- ============================================================ -->
+<!-- FIN SECTION AJOUTÉE -->
+<!-- ============================================================ -->
 
-
+<section id="demo">
+<h2>13. Démonstration interactive : une petite scène POO</h2>
+<p>Le programme ci-dessous utilise réellement les classes <code>Vec3</code>, <code>Camera</code>, <code>Object3D</code>, <code>Cube</code> et <code>Scene</code>. L'objectif est de voir que l'architecture POO suit le raisonnement du cours.</p>
+<div class="controls">
+<label>Rotation X <input id="rx" max="628" min="0" type="range" value="70"/> <span id="rxv">0.70</span></label>
+<label>Rotation Y <input id="ry" max="628" min="0" type="range" value="90"/> <span id="ryv">0.90</span></label>
+<label>Rotation Z <input id="rz" max="628" min="0" type="range" value="0"/> <span id="rzv">0.00</span></label>
+<button id="auto">Animation : ON</button>
+<button id="facesBtn">Faces : ON</button>
+</div>
+<canvas height="470" id="sceneCanvas" width="820"></canvas>
+<p class="small center">Astuce : observez les objets à différentes profondeurs. La scène trie les objets avant de les dessiner.</p>
+</section><section id="tp">
+<h2>14. TP guidé — Construire sa scène 3D</h2><div class="important"><strong>Ordre obligatoire conseillé :</strong> ne commencez pas par la caméra. Créez d'abord la géométrie du cube, faites-la tourner, puis ajoutez la caméra, la projection, la lumière et enfin la scène.</div>
+<h3>TP 1 — Concevoir le cube</h3>
+<div class="exercise"><strong>Objectif :</strong> créer une fonction <code>project(point)</code> qui reçoit un point 3D et renvoie un point 2D.</div>
+<ol><li>Créer un point <code>(x,y,z)</code>.</li><li>Créer une distance focale <code>d</code>.</li><li>Calculer <code>facteur</code>.</li><li>Calculer <code>xEcran</code> et <code>yEcran</code>.</li><li>Dessiner un petit cercle avec <code>ctx.arc()</code>.</li></ol>
+<h3>TP 2 — Faire tourner le cube</h3>
+<div class="exercise"><strong>Objectif :</strong> créer une classe contenant <code>position</code> et <code>rotation</code>, puis ajouter les méthodes <code>tournerX()</code>, <code>tournerY()</code> et <code>tournerZ()</code>.</div>
+<h3>TP 3 — Ajouter la caméra et la projection</h3>
+<ol><li>Créer les 8 sommets.</li><li>Créer les 12 arêtes.</li><li>Transformer les sommets.</li><li>Les projeter avec la caméra.</li><li>Relier les points avec <code>lineTo()</code>.</li><li>Animer les rotations.</li></ol>
+<h3>TP 4 — Ajouter l'éclairage</h3>
+<div class="exercise"><strong>Objectif :</strong> placer au moins trois cubes à différentes profondeurs et créer une classe <code>Scene</code> qui les stocke et les dessine.</div>
+<h3>TP 5 — Construire la scène et gérer la profondeur</h3>
+<ol><li>Ajouter les faces.</li><li>Calculer leur profondeur moyenne.</li><li>Trier les faces.</li><li>Les remplir.</li><li>Ajouter un contour.</li></ol>
+<h3>TP final — Une mini-scène 3D</h3>
+<p>Réalisez une application composée d'au moins <strong>deux objets 3D</strong>.</p>
+<table><tr><th>Exigence</th><th>Attendu</th></tr>
+<tr><td>POO</td><td>Classes <code>Object3D</code>, une forme concrète et <code>Scene</code>.</td></tr>
+<tr><td>Transformation</td><td>Rotation sur au moins deux axes.</td></tr>
+<tr><td>Projection</td><td>Perspective visible.</td></tr>
+<tr><td>Profondeur</td><td>Tri des objets ou faces.</td></tr>
+<tr><td>Rendu</td><td>Faces remplies + contour.</td></tr>
+<tr><td>Interaction</td><td>Clavier, souris ou curseurs.</td></tr></table>
+<h3>Organisation recommandée du projet</h3>
+<pre><code>jour3/
+├── index.html
+├── style.css
+└── script.js</code></pre>
+</section><section id="architecture">
+<h2>15. Architecture finale à retenir</h2>
+<p>Voici le modèle mental que l'étudiant doit avoir à la fin de la journée :</p>
+<pre><code>                 ┌──────────────┐
+                 │    Scene     │
+                 │ objets[]     │
+                 └──────┬───────┘
+                        │
+             ┌──────────┴──────────┐
+             ↓                     ↓
+        ┌──────────┐          ┌──────────┐
+        │   Cube   │          │ Pyramide │
+        └────┬─────┘          └────┬─────┘
+             │                     │
+             └──────────┬──────────┘
+                        ↓
+                 points 3D transformés
+                        ↓
+                    Camera
+                        ↓
+                    projection
+                        ↓
+                     Canvas</code></pre>
+<div class="grid3"><div class="card"><h3>Objet3D</h3><p>« Je sais où je suis et comment je suis orienté. »</p></div><div class="card"><h3>Camera</h3><p>« Je sais comment voir les objets. »</p></div><div class="card"><h3>Scene</h3><p>« Je sais quels objets doivent être rendus et dans quel ordre. »</p></div></div>
+</section><section id="bilan">
+<h2>16. Bilan du Jour 3</h2>
+<h3>Les 10 idées essentielles</h3>
+<ol>
+<li>Un point 3D possède trois coordonnées : <code>x</code>, <code>y</code>, <code>z</code>.</li>
+<li>Canvas reste un espace 2D.</li>
+<li>La projection transforme un point 3D en point écran.</li>
+<li>La perspective fait paraître les objets lointains plus petits.</li>
+<li>La caméra représente le point de vue.</li>
+<li>Les rotations permettent de transformer les sommets d'un objet.</li>
+<li>La POO permet de regrouper données et comportements dans des objets.</li>
+<li>Une scène contient plusieurs objets et peut gérer leur ordre de rendu.</li>
+<li>Les faces permettent de passer du filaire au rendu plein.</li>
+<li>Une lumière simple peut utiliser l'orientation des faces pour moduler leur apparence.</li>
+</ol>
+<div class="success"><strong>Le schéma à mémoriser :</strong><br/><br/><strong>Créer → Transformer → Placer → Projeter → Trier → Dessiner</strong></div>
+<h3>Questions de vérification</h3>
+<div class="exercise"><strong>1.</strong> Pourquoi Canvas ne peut-il pas dessiner directement un point <code>(x,y,z)</code> ?</div>
+<div class="exercise"><strong>2.</strong> Pourquoi avons-nous besoin d'une projection ?</div>
+<div class="exercise"><strong>3.</strong> Quel est l'intérêt de <code>Objet3D</code> ?</div>
+<div class="exercise"><strong>4.</strong> Pourquoi la scène doit-elle connaître plusieurs objets ?</div>
+<div class="exercise"><strong>5.</strong> Pourquoi le tri par profondeur est-il nécessaire ?</div>
+<div class="exercise"><strong>6.</strong> Quelle différence entre une arête et une face ?</div>
+<div class="exercise"><strong>7.</strong> Que représente la normale d'une face ?</div>
+<details><summary>Réponses courtes</summary><ol><li>Canvas dessine sur une surface 2D.</li><li>Pour convertir les coordonnées 3D en coordonnées écran.</li><li>Pour regrouper position, rotation et comportements communs.</li><li>Pour organiser la scène et le rendu global.</li><li>Pour éviter qu'un objet lointain soit dessiné par-dessus un objet proche.</li><li>Une arête relie deux sommets ; une face regroupe plusieurs sommets pour former une surface.</li><li>Elle indique l'orientation de la surface.</li></ol></details>
+<h3>Ce que l'on ne demande pas encore</h3>
+<p>À ce stade, l'étudiant n'a pas besoin de connaître les moteurs 3D, les matrices 4×4, les shaders, WebGL ou les algorithmes avancés de visibilité. Ces notions pourront venir plus tard. Le but du Jour 3 est d'acquérir un <strong>modèle mental solide</strong> de la chaîne de rendu 3D.</p>
+</section></main>
+<footer><div class="inner"><p><strong>Programmation Multimédia — Jour 3</strong></p><p>Introduction à la 3D avec Canvas 2D et POO</p><p>HTML5 · CSS3 · JavaScript</p></div></footer>
 <script>
-/* ============================================================
-   ILLUSTRATIONS COMPARATIVES — JOUR 3
-   ============================================================ */
-(function(){
-    const PI2 = Math.PI * 2;
+// ============================================================
+// DEMONSTRATION 1 : PROJECTION
+// ============================================================
+const pCanvas=document.getElementById('projectionCanvas');
+const pctx=pCanvas.getContext('2d');
+const focal=document.getElementById('focal');
+const focalVal=document.getElementById('focalVal');
+function drawProjection(){
+  const d=Number(focal.value); focalVal.textContent=d;
+  pctx.clearRect(0,0,pCanvas.width,pCanvas.height);
+  const cx=pCanvas.width/2, cy=pCanvas.height/2;
+  pctx.strokeStyle='#536b7c'; pctx.beginPath(); pctx.moveTo(cx,20); pctx.lineTo(cx,pCanvas.height-20); pctx.stroke();
+  const z=230, x=180, y=70, f=d/(d+z);
+  const sx=cx+x*f, sy=cy-y*f;
+  pctx.fillStyle='#fff'; pctx.font='16px Arial'; pctx.fillText('Espace 3D',20,28); pctx.fillText('Point projeté',sx+12,sy-10);
+  pctx.fillStyle='#d96b3b'; pctx.beginPath(); pctx.arc(sx,sy,8,0,Math.PI*2); pctx.fill();
+  pctx.strokeStyle='#8aa0af'; pctx.setLineDash([5,5]); pctx.beginPath(); pctx.moveTo(cx+x,cy-y); pctx.lineTo(sx,sy); pctx.stroke(); pctx.setLineDash([]);
+  pctx.fillStyle='#b9c8d1'; pctx.font='14px Arial'; pctx.fillText('x = 180, y = 70, z = 230',20,pCanvas.height-25); pctx.fillText('facteur = '+f.toFixed(2),20,pCanvas.height-48);
+}
+focal.addEventListener('input',drawProjection); drawProjection();
 
-    function axis(c, ox, oy, scale=1){
-        c.strokeStyle="#777"; c.lineWidth=1;
-        c.beginPath(); c.moveTo(ox,oy); c.lineTo(ox+120*scale,oy); c.moveTo(ox,oy); c.lineTo(ox,oy-90*scale); c.stroke();
-        c.fillStyle="#555"; c.font="12px Arial";
-        c.fillText("X",ox+125*scale,oy+4); c.fillText("Y",ox-10,oy-95*scale);
+// ============================================================
+// DEMONSTRATION 2 : POO 3D
+// ============================================================
+class Vec3{
+  constructor(x=0,y=0,z=0){this.x=x;this.y=y;this.z=z;}
+  add(v){return new Vec3(this.x+v.x,this.y+v.y,this.z+v.z);}
+}
+function rotX(p,a){const c=Math.cos(a),s=Math.sin(a);return new Vec3(p.x,p.y*c-p.z*s,p.y*s+p.z*c);}
+function rotY(p,a){const c=Math.cos(a),s=Math.sin(a);return new Vec3(p.x*c+p.z*s,p.y,-p.x*s+p.z*c);}
+function rotZ(p,a){const c=Math.cos(a),s=Math.sin(a);return new Vec3(p.x*c-p.y*s,p.x*s+p.y*c,p.z);}
+class Camera{
+  constructor(d=520){this.d=d;}
+  project(p,w,h){
+    const den=this.d+p.z;
+    const f=this.d/den;
+    return {x:w/2+p.x*f,y:h/2-p.y*f,z:p.z};
+  }
+}
+class Object3D{
+  constructor(x,y,z){this.position=new Vec3(x,y,z);this.rotation=new Vec3();}
+  rotate(ax,ay,az){this.rotation.x+=ax;this.rotation.y+=ay;this.rotation.z+=az;}
+  transform(p){
+    let r=rotX(p,this.rotation.x); r=rotY(r,this.rotation.y); r=rotZ(r,this.rotation.z); return r.add(this.position);
+  }
+}
+class Cube extends Object3D{
+  constructor(x,y,z,size,stroke='#d9e6ed'){
+    super(x,y,z); const s=size/2; this.stroke=stroke;
+    this.vertices=[new Vec3(-s,-s,-s),new Vec3(s,-s,-s),new Vec3(s,s,-s),new Vec3(-s,s,-s),new Vec3(-s,-s,s),new Vec3(s,-s,s),new Vec3(s,s,s),new Vec3(-s,s,s)];
+    this.edges=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+    this.faces=[[0,1,2,3],[4,5,6,7],[0,1,5,4],[2,3,7,6],[1,2,6,5],[0,3,7,4]];
+  }
+  transformed(){return this.vertices.map(v=>this.transform(v));}
+  depth(){return this.position.z;}
+  draw(ctx,camera,filled){
+    const vs=this.transformed(), ps=vs.map(v=>camera.project(v,ctx.canvas.width,ctx.canvas.height));
+    if(filled){
+      const fs=this.faces.map(face=>({face,depth:face.reduce((s,i)=>s+vs[i].z,0)/face.length})).sort((a,b)=>b.depth-a.depth);
+      for(const item of fs){
+        const f=item.face; ctx.beginPath(); ctx.moveTo(ps[f[0]].x,ps[f[0]].y); for(let i=1;i<f.length;i++)ctx.lineTo(ps[f[i]].x,ps[f[i]].y); ctx.closePath();
+        const light=Math.max(0,Math.min(1,0.35+(-item.depth/700+1)*0.35));
+        const g=Math.floor(65+light*95); ctx.fillStyle='rgb('+g+','+(g+20)+','+(g+28)+')'; ctx.fill();
+      }
     }
-
-    function cube2D(c, cx, cy, s, alpha=0.8){
-        c.save(); c.globalAlpha=alpha; c.strokeStyle="#1a2b4a"; c.lineWidth=2;
-        const pts=[[cx-s,cy-s],[cx+s,cy-s],[cx+s,cy+s],[cx-s,cy+s],
-                   [cx-s+35,cy-s-35],[cx+s+35,cy-s-35],[cx+s+35,cy+s-35],[cx-s+35,cy+s-35]];
-        [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]].forEach(e=>{
-            c.beginPath(); c.moveTo(...pts[e[0]]); c.lineTo(...pts[e[1]]); c.stroke();
-        }); c.restore();
-    }
-
-    const c2=document.getElementById("cmp2D");
-    if(c2){const c=c2.getContext("2d"); c.clearRect(0,0,c2.width,c2.height); axis(c,70,190);
-        c.fillStyle="#2c5282"; c.beginPath(); c.arc(220,120,7,0,PI2); c.fill();
-        c.fillStyle="#333"; c.font="14px Arial"; c.fillText("P(x, y)",230,116);
-        c.fillText("Canvas = plan 2D",150,225);
-    }
-
-    const c3=document.getElementById("cmp3D");
-    if(c3){const c=c3.getContext("2d"); c.clearRect(0,0,c3.width,c3.height); axis(c,70,190);
-        cube2D(c,205,125,42);
-        c.fillStyle="#2c5282"; c.beginPath(); c.arc(205,125,6,0,PI2); c.fill();
-        c.fillStyle="#333"; c.font="14px Arial"; c.fillText("P(x, y, z)",220,120);
-        c.fillText("z = profondeur",155,225);
-    }
-
-    const cc=document.getElementById("cmpCamera");
-    if(cc){const c=cc.getContext("2d"); c.clearRect(0,0,cc.width,cc.height);
-        c.strokeStyle="#888"; c.setLineDash([5,5]); c.beginPath(); c.moveTo(160,140); c.lineTo(610,140); c.stroke(); c.setLineDash([]);
-        c.fillStyle="#1a2b4a"; c.beginPath(); c.arc(90,140,18,0,PI2); c.fill();
-        c.fillStyle="#333"; c.font="14px Arial"; c.fillText("Caméra",55,185);
-        c.strokeStyle="#2c5282"; c.lineWidth=4; c.beginPath(); c.moveTo(610,70); c.lineTo(610,210); c.stroke();
-        c.fillText("Plan de projection",540,235);
-        c.fillStyle="#2f6b3a"; c.fillRect(350,115,50,50); c.fillText("Objet 3D",340,95);
-        c.fillText("rayon de visée",260,130);
-    }
-
-    function perspective(){
-        const cv=document.getElementById("cmpPerspective"); if(!cv)return;
-        const c=cv.getContext("2d"), z=+document.getElementById("cmpDepth").value, d=400, f=d/(d+z);
-        c.clearRect(0,0,cv.width,cv.height);
-        c.strokeStyle="#bbb"; c.beginPath(); c.moveTo(410,30); c.lineTo(410,270); c.stroke();
-        c.fillStyle="#555"; c.font="14px Arial"; c.fillText("Plan écran",365,20);
-        const size=100*f; c.strokeStyle="#2c5282"; c.lineWidth=3; c.strokeRect(410-size/2,150-size/2,size,size);
-        c.fillStyle="#333"; c.fillText("facteur = "+f.toFixed(2),20,40); c.fillText("z = "+z,20,65);
-        c.fillText("Plus z ↑  →  objet projeté plus petit",450,150);
-        document.getElementById("cmpDepthVal").textContent=z;
-    }
-    const depth=document.getElementById("cmpDepth"); if(depth){depth.addEventListener("input",perspective); perspective();}
-
-    function drawRot(id, axisName){
-        const cv=document.getElementById(id); if(!cv)return; const c=cv.getContext("2d");
-        c.clearRect(0,0,cv.width,cv.height); const cx=cv.width/2,cy=cv.height/2,s=48;
-        c.strokeStyle="#1a2b4a"; c.lineWidth=2;
-        c.strokeRect(cx-s,cy-s,s*2,s*2);
-        c.strokeStyle="#2f6b3a"; c.beginPath();
-        if(axisName==="X"){c.moveTo(cx-110,cy+75);c.lineTo(cx+110,cy+75);}
-        if(axisName==="Y"){c.moveTo(cx-110,cy);c.lineTo(cx+110,cy);}
-        if(axisName==="Z"){c.arc(cx,cy,85,0,Math.PI*1.45);}
-        c.stroke(); c.fillStyle="#333"; c.font="13px Arial"; c.fillText("axe "+axisName,cx-25,215);
-    }
-    drawRot("cmpRotX","X"); drawRot("cmpRotY","Y"); drawRot("cmpRotZ","Z");
-
-    function painter(id,good){
-        const cv=document.getElementById(id); if(!cv)return; const c=cv.getContext("2d");
-        c.clearRect(0,0,cv.width,cv.height);
-        const objs=good?[{x:80,y:100,s:55,z:500},{x:150,y:110,s:65,z:300},{x:230,y:120,s:75,z:100}]
-                        :[{x:230,y:120,s:75,z:100},{x:80,y:100,s:55,z:500},{x:150,y:110,s:65,z:300}];
-        objs.forEach((o,i)=>{c.fillStyle=["#c8d4e4","#8fa3c0","#2c5282"][i];c.fillRect(o.x,o.y,o.s,o.s);
-            c.fillStyle="#333";c.font="11px Arial";c.fillText("z="+o.z,o.x+8,o.y+o.s+16);});
-    }
-    painter("cmpPainterBad",false); painter("cmpPainterGood",true);
-
-    function solid(id,fill){
-        const cv=document.getElementById(id); if(!cv)return; const c=cv.getContext("2d");
-        c.clearRect(0,0,cv.width,cv.height); const pts=[[110,70],[220,70],[250,110],[140,110],[110,70],[160,35],[270,35],[250,110],[160,75]];
-        c.strokeStyle="#1a2b4a";c.lineWidth=2;
-        c.beginPath();c.moveTo(pts[0][0],pts[0][1]);pts.slice(1,4).forEach(p=>c.lineTo(...p));c.closePath();
-        if(fill){c.fillStyle="#9fb1c8";c.fill();}c.stroke();
-        c.beginPath();c.moveTo(110,70);c.lineTo(160,35);c.lineTo(270,35);c.lineTo(250,110);c.stroke();
-        c.beginPath();c.moveTo(160,35);c.lineTo(160,75);c.stroke();
-    }
-    solid("cmpWire",false); solid("cmpSolid",true);
-
-    const cf=document.getElementById("cmpFaces");
-    if(cf){const c=cf.getContext("2d");c.clearRect(0,0,cf.width,cf.height);
-        c.fillStyle="#2f6b3a";c.beginPath();c.moveTo(130,60);c.lineTo(300,100);c.lineTo(260,210);c.lineTo(90,170);c.closePath();c.fill();
-        c.fillStyle="#8b2c2c";c.beginPath();c.moveTo(500,100);c.lineTo(680,60);c.lineTo(720,170);c.lineTo(540,210);c.closePath();c.fill();
-        c.fillStyle="#333";c.font="14px Arial";c.fillText("face orientée vers la caméra",110,235);c.fillText("face orientée à l'opposé",520,235);
-    }
-
-    function light(){
-        const cv=document.getElementById("cmpLight"); if(!cv)return;
-        const c=cv.getContext("2d"), deg=+document.getElementById("cmpLightAngle").value, a=deg*Math.PI/180;
-        c.clearRect(0,0,cv.width,cv.height);
-        const lx=200+Math.cos(a)*140,ly=140+Math.sin(a)*100;
-        c.strokeStyle="#8a6508";c.lineWidth=3;c.beginPath();c.moveTo(lx,ly);c.lineTo(410,140);c.stroke();
-        c.fillStyle="#b8860b";c.beginPath();c.arc(lx,ly,12,0,PI2);c.fill();
-        const intensity=Math.max(0,Math.cos(a));
-        c.fillStyle=`rgba(44,82,130,${0.25+0.75*intensity})`;c.beginPath();c.moveTo(350,80);c.lineTo(560,110);c.lineTo(540,210);c.lineTo(330,180);c.closePath();c.fill();
-        c.strokeStyle="#1a2b4a";c.stroke();
-        c.fillStyle="#333";c.font="14px Arial";c.fillText("intensité ≈ "+intensity.toFixed(2),600,145);
-        document.getElementById("cmpLightVal").textContent=deg+"°";
-    }
-    const la=document.getElementById("cmpLightAngle"); if(la){la.addEventListener("input",light);light();}
-})();
+    ctx.strokeStyle=this.stroke;ctx.lineWidth=1.4;ctx.beginPath();
+    for(const [a,b] of this.edges){ctx.moveTo(ps[a].x,ps[a].y);ctx.lineTo(ps[b].x,ps[b].y);}ctx.stroke();
+  }
+}
+class Scene{
+  constructor(){this.objects=[];}
+  add(o){this.objects.push(o);}
+  draw(ctx,camera,filled){const objects=[...this.objects].sort((a,b)=>b.depth()-a.depth());for(const o of objects)o.draw(ctx,camera,filled);}
+}
+const sCanvas=document.getElementById('sceneCanvas'), sctx=sCanvas.getContext('2d');
+const camera=new Camera(520), scene=new Scene();
+const c1=new Cube(-150,20,430,150), c2=new Cube(150,-15,610,190), c3=new Cube(0,125,800,105);
+scene.add(c1);scene.add(c2);scene.add(c3);
+let auto=true, filled=true, last=performance.now();
+const rx=document.getElementById('rx'),ry=document.getElementById('ry'),rz=document.getElementById('rz');
+function sliderAngles(){c1.rotation.x=Number(rx.value)/100;c1.rotation.y=Number(ry.value)/100;c1.rotation.z=Number(rz.value)/100;document.getElementById('rxv').textContent=c1.rotation.x.toFixed(2);document.getElementById('ryv').textContent=c1.rotation.y.toFixed(2);document.getElementById('rzv').textContent=c1.rotation.z.toFixed(2);}
+[rx,ry,rz].forEach(x=>x.addEventListener('input',sliderAngles));sliderAngles();
+document.getElementById('auto').onclick=()=>{auto=!auto;document.getElementById('auto').textContent='Animation : '+(auto?'ON':'OFF');};
+document.getElementById('facesBtn').onclick=()=>{filled=!filled;document.getElementById('facesBtn').textContent='Faces : '+(filled?'ON':'OFF');};
+function loop(t){const dt=Math.min(.05,(t-last)/1000);last=t;if(auto){c1.rotate(dt*.7,dt*.9,dt*.25);rx.value=c1.rotation.x*100%628;ry.value=c1.rotation.y*100%628;rz.value=c1.rotation.z*100%628;sliderAngles();c2.rotate(dt*.35,-dt*.45,0);c3.rotate(0,dt*.55,dt*.15);}sctx.fillStyle='#101820';sctx.fillRect(0,0,sCanvas.width,sCanvas.height);sctx.fillStyle='#9fb2bf';sctx.font='14px Arial';sctx.fillText('Scene → objets → transformations → projection → Canvas',18,25);scene.draw(sctx,camera,filled);requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
 </script>
-
 </body>
 </html>
