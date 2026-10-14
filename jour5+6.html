@@ -214,25 +214,6 @@ th {
 
 tr:nth-child(even) { background: #fafaf8; }
 
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 14px;
-    margin: 18px 0;
-}
-
-.card {
-    border: 1px solid var(--border);
-    padding: 16px;
-    background: #fcfcfa;
-}
-
-.card h3 {
-    margin-top: 0;
-    color: var(--accent);
-    font-size: 1rem;
-}
-
 .exercise {
     border: 1px solid #a0a0a0;
     border-left: 3px solid var(--primary);
@@ -319,6 +300,17 @@ tr:nth-child(even) { background: #fafaf8; }
     margin: 10px 0;
 }
 .sandbox .state strong { color: #f0c674; }
+
+/* Filtres : mini-graphes dans un tableau */
+.filter-cell canvas {
+    display: block;
+    width: 100%;
+    max-width: 240px;
+    height: auto;
+    background: #101820;
+    border: 1px solid #3c4652;
+    margin: 0;
+}
 
 footer {
     background: #1a2b4a;
@@ -409,7 +401,8 @@ footer p { margin: 4px 0; }
             <li>façonner une enveloppe sonore (attack, decay, sustain, release) ;</li>
             <li>filtrer un signal avec un <code>BiquadFilterNode</code> ;</li>
             <li>programmer des événements audio dans le temps (<code>currentTime</code>,
-                rampes).</li>
+                rampes) ;</li>
+            <li>brancher des nœuds de traitement (delay, convolver, analyser).</li>
         </ul>
     </div>
 
@@ -427,7 +420,7 @@ footer p { margin: 4px 0; }
 </section>
 
 <!-- ============================================================
-     2. AUDIOCONTEXT — NOUVELLE SECTION
+     2. AUDIOCONTEXT
 ============================================================ -->
 <section id="audiocontext">
     <h2>2. AudioContext : l'outil de base</h2>
@@ -522,11 +515,9 @@ footer p { margin: 4px 0; }
         </div>
         <div class="state">État : <strong id="ctxState">(aucun contexte)</strong></div>
         <p style="font-size:0.9rem; color:#4a5568; margin:8px 0 0;">
-            Le code correspondant à chaque bouton est celui montré dans les
-            sections 2.3 à 2.7. Le bouton « Créer » instancie un
-            <code>AudioContext</code> ; « Démarrer » appelle
-            <code>resume()</code> ; « Pause » appelle <code>suspend()</code> ;
-            « Fermer » appelle <code>close()</code>.
+            Le bouton « Créer » instancie un <code>AudioContext</code> ;
+            « Démarrer » appelle <code>resume()</code> ; « Pause » appelle
+            <code>suspend()</code> ; « Fermer » appelle <code>close()</code>.
         </p>
     </div>
 
@@ -763,7 +754,7 @@ osc.start();
 </section>
 
 <!-- ============================================================
-     3. NATURE DU SON — RÉÉCRIT (blocs 1 + 2 + ajouts)
+     3. NATURE DU SON
 ============================================================ -->
 <section id="nature">
     <h2>3. Nature physique du son</h2>
@@ -1244,7 +1235,7 @@ const triangle = n => n % 2 === 1 ? 1 / (n * n) : 0;</code></pre>
 </section>
 
 <!-- ============================================================
-     4. NUMERISATION — RÉÉCRIT (bloc 3)
+     4. NUMERISATION
 ============================================================ -->
 <section id="numerisation">
     <h2>4. Numérisation du son</h2>
@@ -1485,7 +1476,7 @@ tailleAudio(44100, 16, 2, 60);
 </section>
 
 <!-- ============================================================
-     5. FORMATS ET COMPRESSION — RÉÉCRIT (bloc 4)
+     5. FORMATS ET COMPRESSION
 ============================================================ -->
 <section id="formats">
     <h2>5. Formats et compression</h2>
@@ -1737,7 +1728,7 @@ const apresMasquage = t => fort(t);
 </section>
 
 <!-- ============================================================
-     6. AUDIO HTML — RÉÉCRIT (bloc 5)
+     6. AUDIO HTML
 ============================================================ -->
 <section id="audio-html">
     <h2>6. L'élément audio</h2>
@@ -2027,19 +2018,224 @@ chargerEtJouer("son-court.mp3");</code></pre>
 </section>
 
 <!-- ============================================================
-     7. GRAPHE — RÉDUIT (structure de base remontée en section 2)
+     7. GRAPHE — ENRICHI
 ============================================================ -->
 <section id="graphe">
-    <h2>7. Graphe audio — récapitulatif des nœuds</h2>
+    <h2>7. Le graphe audio : nœuds de traitement</h2>
+
+    <h3>7.1 — À quoi servent les nœuds de traitement ?</h3>
 
     <p>
-        La structure de base du graphe (<code>source → traitement → destination</code>)
-        et l'exemple minimal (<code>OscillatorNode + GainNode</code>) ont été
-        vus en section 2. Cette section récapitule les <strong>types de nœuds</strong>
-        disponibles dans la Web Audio API.
+        Un oscillateur seul produit un son pur, plat, sans relief. Les
+        nœuds de traitement servent à <strong>transformer</strong> ce signal :
+        changer son volume, couper des fréquences, ajouter un écho,
+        analyser son spectre. Chaque nœud est un <strong>effet</strong>
+        qu'on branche dans la chaîne.
     </p>
 
-    <h3>Types de nœuds courants</h3>
+    <p>
+        La structure de base est toujours la même :
+    </p>
+
+<pre><code>source → traitement(s) → destination</code></pre>
+
+    <p>
+        On peut <strong>chaîner</strong> autant de nœuds qu'on veut :
+    </p>
+
+<pre><code>source → gain → filtre → delay → destination</code></pre>
+
+    <p>
+        Chaque nœud a une <strong>entrée</strong> (ce qui arrive) et une
+        <strong>sortie</strong> (ce qui repart). On connecte la sortie
+        d'un nœud à l'entrée du suivant avec <code>connect()</code>.
+    </p>
+
+    <div class="schema">
+        <h4>Schéma — Le graphe audio complet</h4>
+        <canvas id="schemaGrapheComplet" width="900" height="300"></canvas>
+        <p class="caption">
+            À gauche, les sources possibles (oscillateur, buffer, <code>&lt;audio&gt;</code>).
+            Au centre, les traitements (gain, filtre, delay, convolver, analyser).
+            À droite, la destination.
+        </p>
+    </div>
+
+    <h3>7.2 — Les nœuds déjà vus</h3>
+
+    <p>
+        Trois nœuds ont déjà été utilisés dans les sections précédentes.
+        Rappel rapide :
+    </p>
+
+    <table>
+        <tr><th>Nœud</th><th>Rôle</th><th>Section</th></tr>
+        <tr>
+            <td><code>OscillatorNode</code></td>
+            <td>Génère un signal périodique</td>
+            <td>2, 8</td>
+        </tr>
+        <tr>
+            <td><code>GainNode</code></td>
+            <td>Contrôle le volume</td>
+            <td>2, 9</td>
+        </tr>
+        <tr>
+            <td><code>BiquadFilterNode</code></td>
+            <td>Filtre fréquentiel (passe-bas, passe-haut…)</td>
+            <td>10</td>
+        </tr>
+    </table>
+
+    <h3>7.3 — Les nœuds à découvrir</h3>
+
+    <p>
+        Trois nœuds n'ont pas encore été utilisés. Voici ce qu'ils font
+        et comment on les branche.
+    </p>
+
+    <h4><code>DelayNode</code> — l'écho</h4>
+
+    <p>
+        Le <code>DelayNode</code> <strong>retarde</strong> le signal d'un
+        temps donné. Branché en boucle avec un gain, il produit un
+        <strong>écho</strong> qui se répète et s'atténue.
+    </p>
+
+<pre><code>// 1. Le contexte
+const audioCtx = new AudioContext();
+
+// 2. La source
+const source = audioCtx.createOscillator();
+source.type = "sine";
+source.frequency.value = 440;
+
+// 3. Le nœud de délai (1 seconde max)
+const delay = audioCtx.createDelay(1.0);
+delay.delayTime.value = 0.3;      // 300 ms
+
+// 4. Le feedback : une partie du signal retardé
+//    est renvoyée dans le delay
+const feedback = audioCtx.createGain();
+feedback.gain.value = 0.4;        // 40 % du signal
+
+// 5. Les connexions
+source.connect(delay);
+delay.connect(feedback);
+feedback.connect(delay);          // boucle de feedback
+delay.connect(audioCtx.destination);
+
+// 6. Le démarrage
+source.start();</code></pre>
+
+    <div class="callout info">
+        <strong>Comment ça marche ?</strong>
+        <p>
+            La source envoie son signal au delay. Le delay l'atténue
+            (via <code>feedback.gain</code>) et le renvoie dans le delay.
+            À chaque tour, le signal est encore atténué. Résultat :
+            une répétition qui s'estompe. <strong>Attention :</strong>
+            si <code>feedback.gain.value &gt;= 1</code>, le son s'amplifie
+            à l'infini. Il faut toujours rester en dessous de 1.
+        </p>
+    </div>
+
+    <div class="schema">
+        <h4>Schéma — Effet du DelayNode</h4>
+        <canvas id="schemaDelay" width="900" height="240"></canvas>
+        <p class="caption">
+            En haut : signal original (une impulsion). En bas : signal
+            après passage dans un delay avec feedback. Le signal est
+            répété plusieurs fois, chaque répétition étant plus faible.
+        </p>
+    </div>
+
+    <h4><code>ConvolverNode</code> — la réverbération</h4>
+
+    <p>
+        Le <code>ConvolverNode</code> applique une <strong>réponse
+        impulsionnelle</strong> au signal. Concrètement : on lui donne
+        un enregistrement d'un lieu (église, salle de concert, stade),
+        et il transforme n'importe quel son comme s'il était joué
+        <strong>dans ce lieu</strong>.
+    </p>
+
+<pre><code>// 1. Le contexte
+const audioCtx = new AudioContext();
+
+// 2. La source (supposée déjà créée)
+// const source = ...
+
+// 3. Le convolver
+const convolver = audioCtx.createConvolver();
+
+// 4. Charger une réponse impulsionnelle
+fetch("eglise.wav")
+    .then(reponse => reponse.arrayBuffer())
+    .then(tableau => audioCtx.decodeAudioData(tableau))
+    .then(buffer => {
+        convolver.buffer = buffer;
+
+        // 5. Les connexions
+        source.connect(convolver);
+        convolver.connect(audioCtx.destination);
+    });</code></pre>
+
+    <p>
+        <strong>Ce qu'on appelle « réponse impulsionnelle » :</strong>
+        c'est l'enregistrement de la réaction d'un lieu à un son très
+        bref (une impulsion). Cette « signature » contient toute
+        l'acoustique du lieu : durée de la réverbération, réflexions
+        sur les murs, etc.
+    </p>
+
+    <h4><code>AnalyserNode</code> — la visualisation</h4>
+
+    <p>
+        L'<code>AnalyserNode</code> <strong>ne modifie pas le son</strong>.
+        Il <strong>lit</strong> le signal en temps réel et donne son
+        spectre de fréquences (FFT) ou sa forme d'onde. C'est ce qu'on
+        utilise pour dessiner un visualiseur audio.
+    </p>
+
+<pre><code>// 1. Le contexte
+const audioCtx = new AudioContext();
+
+// 2. La source (supposée déjà créée)
+// const source = ...
+
+// 3. L'analyseur
+const analyser = audioCtx.createAnalyser();
+analyser.fftSize = 2048;          // résolution de l'analyse
+
+// 4. Les connexions
+//    Le signal passe par l'analyseur PUIS va à la destination
+source.connect(analyser);
+analyser.connect(audioCtx.destination);
+
+// 5. Lecture des données
+const donnees = new Uint8Array(analyser.frequencyBinCount);
+
+function dessiner() {
+    analyser.getByteFrequencyData(donnees);
+    // donnees[] contient l'amplitude de chaque bande de fréquence
+    // (0 à 255), du grave à l'aigu
+    requestAnimationFrame(dessiner);
+}
+
+dessiner();</code></pre>
+
+    <div class="callout info">
+        <strong>Pourquoi brancher l'analyseur avant la destination ?</strong>
+        <p>
+            L'<code>AnalyserNode</code> est un nœud <strong>passif</strong> :
+            il laisse passer le signal. On l'insère dans la chaîne entre
+            la source et la destination. Le son n'est pas modifié, mais
+            on peut lire ses données en temps réel.
+        </p>
+    </div>
+
+    <h3>7.4 — Tableau récapitulatif</h3>
 
     <table>
         <tr><th>Nœud</th><th>Rôle</th></tr>
@@ -2053,7 +2249,7 @@ chargerEtJouer("son-court.mp3");</code></pre>
         <tr><td><code>MediaElementSourceNode</code></td><td>Source depuis un élément audio/vidéo</td></tr>
     </table>
 
-    <h3>Rappel : brancher des nœuds</h3>
+    <h3>7.5 — Rappel : brancher des nœuds</h3>
 
 <pre><code>// audioCtx est supposé déjà créé et démarré (section 2)
 
@@ -2073,9 +2269,8 @@ oscillateur.start();</code></pre>
         <code>audioCtx.destination</code>.
     </p>
 </section>
-
 <!-- ============================================================
-     8. OSCILLATEURS — conservé + 8.3 (PeriodicWave)
+     8. OSCILLATEURS
 ============================================================ -->
 <section id="oscillateurs">
     <h2>8. Générer un son : les oscillateurs</h2>
@@ -2259,51 +2454,127 @@ osc.stop(maintenant + 1);</code></pre>
 </section>
 
 <!-- ============================================================
-     9. ENVELOPPE — conservé
+     9. ENVELOPPE — ENRICHIE
 ============================================================ -->
 <section id="enveloppe">
     <h2>9. Façonner le son : enveloppe</h2>
 
+    <h3>9.1 — Le problème : un son brut claque</h3>
+
     <p>
         Un son brut qui commence et s'arrête brutalement produit un
-        clic désagréable. On façonne son amplitude avec une
-        <strong>enveloppe ADSR</strong> :
+        <strong>clic</strong> désagréable. Pourquoi ? Parce que l'amplitude
+        passe instantanément de 0 à sa valeur maximale (ou l'inverse),
+        ce qui crée une discontinuité dans le signal. On entend cette
+        discontinuité comme un claquement.
     </p>
+
+    <p>
+        La solution : <strong>façonner l'amplitude dans le temps</strong>
+        avec une enveloppe. La plus courante est l'<strong>enveloppe
+        ADSR</strong>, qui découpe la vie d'une note en quatre phases.
+    </p>
+
+    <h3>9.2 — Les quatre phases de l'enveloppe ADSR</h3>
 
     <table>
         <tr><th>Phase</th><th>Signification</th></tr>
-        <tr><td>Attack</td><td>Temps pour atteindre le volume maximal</td></tr>
-        <tr><td>Decay</td><td>Temps pour redescendre au volume de maintien</td></tr>
-        <tr><td>Sustain</td><td>Volume maintenu tant que la note est tenue</td></tr>
-        <tr><td>Release</td><td>Temps pour revenir à zéro après relâchement</td></tr>
+        <tr><td><strong>A</strong>ttack</td><td>Temps pour atteindre le volume maximal</td></tr>
+        <tr><td><strong>D</strong>ecay</td><td>Temps pour redescendre au volume de maintien</td></tr>
+        <tr><td><strong>S</strong>ustain</td><td>Volume maintenu tant que la note est tenue</td></tr>
+        <tr><td><strong>R</strong>elease</td><td>Temps pour revenir à zéro après relâchement</td></tr>
     </table>
 
-    <h3>Implémentation avec un GainNode</h3>
+    <div class="schema">
+        <h4>Schéma — Enveloppe ADSR annotée</h4>
+        <canvas id="schemaADSR" width="900" height="320"></canvas>
+        <p class="caption">
+            La courbe montre l'évolution du volume dans le temps.
+            <strong>Attack</strong> : montée jusqu'au maximum.
+            <strong>Decay</strong> : descente vers le niveau de maintien.
+            <strong>Sustain</strong> : maintien tant que la touche est
+            enfoncée. <strong>Release</strong> : extinction après
+            relâchement.
+        </p>
+    </div>
 
-<pre><code>// audioCtx est supposé déjà créé et démarré
+    <h3>9.3 — Le même timbre, trois enveloppes, trois instruments</h3>
+
+    <p>
+        L'enveloppe a un impact <strong>aussi important</strong> que le
+        timbre sur l'identité d'un son. Voici trois instruments jouant
+        la <strong>même note</strong>, avec le <strong>même timbre</strong>,
+        mais des enveloppes différentes :
+    </p>
+
+    <ul>
+        <li><strong>Percussion</strong> : attaque instantanée (5 ms),
+            decay rapide (150 ms), sustain nul, release nul.
+            Le son disparaît vite.</li>
+        <li><strong>Corde pincée</strong> : attaque courte (20 ms),
+            decay moyen (400 ms), sustain bas (0,3), release moyen (200 ms).</li>
+        <li><strong>Nappe</strong> : attaque lente (500 ms), decay long
+            (500 ms), sustain haut (0,7), release long (800 ms).
+            Le son monte doucement et s'installe.</li>
+    </ul>
+
+    <div class="schema">
+        <h4>Schéma — Trois enveloppes comparées</h4>
+        <canvas id="schemaEnveloppes" width="900" height="360"></canvas>
+        <p class="caption">
+            Même note, même timbre, trois enveloppes différentes.
+            La courbe verte (percussion) disparaît presque aussitôt.
+            La courbe bleue (corde pincée) tient un peu plus.
+            La courbe jaune (nappe) monte lentement et tient longtemps.
+        </p>
+    </div>
+
+    <h3>9.4 — Implémentation avec un GainNode</h3>
+
+    <p>
+        L'enveloppe se programme en manipulant le <code>gain</code> d'un
+        <code>GainNode</code> dans le temps. On utilise les méthodes vues
+        en section 2.13.
+    </p>
+
+<pre><code>// 1. Le contexte et les nœuds (supposés déjà créés)
+// const audioCtx = ...
+// const osc = ...
+
 const gain = audioCtx.createGain();
 gain.gain.value = 0;
 
+osc.connect(gain);
+gain.connect(audioCtx.destination);
+
+// 2. Programmation de l'enveloppe
 const maintenant = audioCtx.currentTime;
 
-// Attaque
+// Attack : montée à 0.5 en 50 ms
+gain.gain.setValueAtTime(0, maintenant);
 gain.gain.linearRampToValueAtTime(0.5, maintenant + 0.05);
 
-// Decay
+// Decay : descente à 0.3 en 200 ms
 gain.gain.linearRampToValueAtTime(0.3, maintenant + 0.2);
 
-// Sustain (maintien)
-gain.gain.setValueAtTime(0.3, maintenant + 0.2);</code></pre>
+// Sustain : maintien à 0.3
+gain.gain.setValueAtTime(0.3, maintenant + 0.2);
+
+// 3. L'oscillateur démarre
+osc.start(maintenant);</code></pre>
 
     <p>Puis, au relâchement de la touche :</p>
 
-<pre><code>// audioCtx est supposé déjà créé et démarré
+<pre><code>// Release : extinction à 0 en 300 ms
 const maintenant = audioCtx.currentTime;
 gain.gain.cancelScheduledValues(maintenant);
 gain.gain.setValueAtTime(gain.gain.value, maintenant);
-gain.gain.linearRampToValueAtTime(0, maintenant + 0.3);</code></pre>
+gain.gain.linearRampToValueAtTime(0, maintenant + 0.3);
 
-    <h3>Méthodes de programmation</h3>
+// Arrêt de l'oscillateur après l'extinction
+osc.stop(maintenant + 0.3);</code></pre>
+
+    <h3>9.5 — Méthodes de programmation</h3>
 
     <table>
         <tr><th>Méthode</th><th>Effet</th></tr>
@@ -2321,30 +2592,72 @@ gain.gain.linearRampToValueAtTime(0, maintenant + 0.3);</code></pre>
 </section>
 
 <!-- ============================================================
-     10. FILTRES — conservé
+     10. FILTRES — ENRICHI
 ============================================================ -->
 <section id="filtres">
     <h2>10. Filtres fréquentiels</h2>
 
+    <h3>10.1 — À quoi sert un filtre ?</h3>
+
     <p>
-        Un <code>BiquadFilterNode</code> atténue ou amplifie certaines
-        fréquences du signal.
+        Un <code>BiquadFilterNode</code> <strong>atténue ou amplifie</strong>
+        certaines fréquences du signal. C'est l'outil de base du traitement
+        audio : on peut rendre un son plus grave, plus brillant, plus
+        étouffé, plus téléphonique, etc.
     </p>
 
-    <h3>Types de filtres</h3>
+    <p>
+        Le principe : un filtre a une <strong>fréquence de coupure</strong>
+        <code>frequency</code> et un <strong>facteur de qualité</strong>
+        <code>Q</code>. Selon son <code>type</code>, il laisse passer
+        les fréquences en dessous, au-dessus, ou autour de cette coupure.
+    </p>
+
+    <h3>10.2 — Les quatre types principaux</h3>
+
+    <p>
+        Voici les quatre filtres les plus utilisés, avec leur courbe de
+        réponse (gain en fonction de la fréquence) :
+    </p>
+
+    <table>
+        <tr>
+            <th>Type</th>
+            <th>Effet</th>
+            <th>Courbe de réponse</th>
+        </tr>
+        <tr>
+            <td><code>lowpass</code></td>
+            <td>Conserve les basses, atténue les aiguës</td>
+            <td class="filter-cell"><canvas id="filterLowpass" width="240" height="130"></canvas></td>
+        </tr>
+        <tr>
+            <td><code>highpass</code></td>
+            <td>Conserve les aiguës, atténue les basses</td>
+            <td class="filter-cell"><canvas id="filterHighpass" width="240" height="130"></canvas></td>
+        </tr>
+        <tr>
+            <td><code>bandpass</code></td>
+            <td>Conserve une bande de fréquences</td>
+            <td class="filter-cell"><canvas id="filterBandpass" width="240" height="130"></canvas></td>
+        </tr>
+        <tr>
+            <td><code>notch</code></td>
+            <td>Supprime une bande étroite</td>
+            <td class="filter-cell"><canvas id="filterNotch" width="240" height="130"></canvas></td>
+        </tr>
+    </table>
+
+    <h3>10.3 — Les autres types</h3>
 
     <table>
         <tr><th>Type</th><th>Effet</th></tr>
-        <tr><td><code>lowpass</code></td><td>Conserve les basses, atténue les aiguës</td></tr>
-        <tr><td><code>highpass</code></td><td>Conserve les aiguës, atténue les basses</td></tr>
-        <tr><td><code>bandpass</code></td><td>Conserve une bande de fréquences</td></tr>
-        <tr><td><code>notch</code></td><td>Supprime une bande étroite</td></tr>
         <tr><td><code>lowshelf</code></td><td>Amplifie ou atténue les basses</td></tr>
         <tr><td><code>highshelf</code></td><td>Amplifie ou atténue les aiguës</td></tr>
         <tr><td><code>peaking</code></td><td>Amplifie ou atténue une bande centrale</td></tr>
     </table>
 
-    <h3>Paramètres</h3>
+    <h3>10.4 — Paramètres</h3>
 
     <table>
         <tr><th>Paramètre</th><th>Rôle</th></tr>
@@ -2353,22 +2666,85 @@ gain.gain.linearRampToValueAtTime(0, maintenant + 0.3);</code></pre>
         <tr><td><code>gain</code></td><td>Amplification (pour shelf et peaking)</td></tr>
     </table>
 
-    <h3>Exemple : filtre passe-bas</h3>
+    <h3>10.5 — L'effet de Q</h3>
+
+    <p>
+        Le paramètre <code>Q</code> contrôle la <strong>résonance</strong>
+        autour de la fréquence de coupure. Plus <code>Q</code> est élevé,
+        plus le filtre « résonne » à cette fréquence :
+    </p>
+
+    <ul>
+        <li><code>Q = 0.7</code> : filtre doux, pas de résonance (courbe classique).</li>
+        <li><code>Q = 5</code> : résonance modérée, la fréquence de coupure est mise en avant.</li>
+        <li><code>Q = 20</code> : résonance forte, presque un son sifflant à la coupure.</li>
+    </ul>
+
+    <div class="schema">
+        <h4>Schéma — Effet de Q sur un filtre passe-bas</h4>
+        <canvas id="schemaQ" width="900" height="280"></canvas>
+        <p class="caption">
+            Trois filtres passe-bas avec la même fréquence de coupure
+            (1000 Hz) mais des Q différents. La courbe verte
+            (Q = 0,7) descend doucement. La courbe jaune (Q = 5)
+            présente une bosse. La courbe rouge (Q = 20) a un pic
+            très marqué.
+        </p>
+    </div>
+
+    <h3>10.6 — Effet d'un filtre sur un signal complexe</h3>
+
+    <p>
+        Un filtre passe-bas appliqué à un signal riche en harmoniques
+        <strong>supprime les harmoniques hautes</strong>. Le son devient
+        plus doux, plus étouffé.
+    </p>
+
+    <div class="schema">
+        <h4>Schéma — Avant / après filtrage passe-bas</h4>
+        <canvas id="schemaFiltreAvantApres" width="900" height="340"></canvas>
+        <p class="caption">
+            En haut, le signal original (fondamentale + 6 harmoniques).
+            En bas, le même signal après passage dans un filtre passe-bas
+            à 800 Hz. Les harmoniques hautes ont disparu : la courbe
+            est plus lisse, moins « riche ».
+        </p>
+    </div>
+
+    <h3>10.7 — Exemple : filtre passe-bas</h3>
 
 <pre><code>// audioCtx est supposé déjà créé et démarré
 // oscillateur est supposé déjà créé
 
 const filtre = audioCtx.createBiquadFilter();
 filtre.type = "lowpass";
-filtre.frequency.value = 800;
-filtre.Q.value = 1;
+filtre.frequency.value = 800;   // coupure à 800 Hz
+filtre.Q.value = 1;             // résonance douce
 
 oscillateur.connect(filtre);
 filtre.connect(audioCtx.destination);</code></pre>
+
+    <p>
+        Pour modifier la coupure en temps réel (par exemple avec un
+        slider), il suffit de changer <code>filtre.frequency.value</code>.
+        Le filtre s'applique immédiatement.
+    </p>
+
+    <div class="callout info">
+        <strong>Chaîner les filtres</strong>
+        <p>
+            On peut mettre plusieurs filtres en série pour un effet
+            plus marqué. Par exemple, deux passe-bas à 1000 Hz donnent
+            une pente plus raide qu'un seul :
+        </p>
+<pre><code>osc.connect(filtre1);
+filtre1.connect(filtre2);
+filtre2.connect(audioCtx.destination);</code></pre>
+    </div>
 </section>
 
 <!-- ============================================================
-     11. TP1 — PIANO VIRTUEL (consigne seule)
+     11. TP1 — PIANO VIRTUEL
 ============================================================ -->
 <section id="tp1">
     <h2>11. TP 1 — Piano virtuel</h2>
@@ -2407,7 +2783,8 @@ filtre.connect(audioCtx.destination);</code></pre>
         <p>
             Pour un timbre plus riche qu'une simple sinusoïde, utilisez
             <code>PeriodicWave</code> (section 8.3) au lieu de
-            <code>type = "sine"</code>.
+            <code>type = "sine"</code>. Pour un effet d'écho, ajoutez
+            un <code>DelayNode</code> (section 7.3) dans la chaîne.
         </p>
     </div>
 </section>
@@ -2441,7 +2818,9 @@ filtre.connect(audioCtx.destination);</code></pre>
             Ajouter un second oscillateur désaccordé (detune)
             pour un son plus riche. Ou remplacer l'oscillateur
             simple par un oscillateur à <code>PeriodicWave</code>
-            (section 8.3) pour un timbre personnalisé.
+            (section 8.3) pour un timbre personnalisé. Ou encore
+            ajouter un <code>DelayNode</code> (section 7.3) pour
+            un effet d'écho.
         </p>
     </div>
 </section>
@@ -2491,9 +2870,15 @@ filtre.connect(audioCtx.destination);</code></pre>
                 graphe Web Audio via <code>MediaElementSource</code>.</li>
             <li>La Web Audio API modélise le traitement audio comme un
                 graphe de nœuds.</li>
-            <li>Pour un timbre riche : <code>PeriodicWave</code> (synthèse)
-                ou échantillonnage (instrument réel).</li>
-            <li>L'enveloppe ADSR façonne l'amplitude dans le temps.</li>
+            <li>Trois nœuds de traitement à connaître : <code>DelayNode</code>
+                (écho), <code>ConvolverNode</code> (réverbération),
+                <code>AnalyserNode</code> (visualisation).</li>
+            <li>Un filtre a une fréquence de coupure et un facteur de qualité
+                <code>Q</code>. Plus <code>Q</code> est grand, plus le filtre
+                résonne à la coupure.</li>
+            <li>L'enveloppe ADSR façonne l'amplitude dans le temps. Le même
+                timbre avec des enveloppes différentes donne des instruments
+                très différents.</li>
         </ul>
     </div>
 
@@ -2565,7 +2950,6 @@ filtre.connect(audioCtx.destination);</code></pre>
             btnSuspend.disabled = false;
             btnClose.disabled = false;
         } else {
-            // suspended
             btnCreate.disabled = true;
             btnResume.disabled = false;
             btnSuspend.disabled = true;
@@ -2774,7 +3158,7 @@ filtre.connect(audioCtx.destination);</code></pre>
         ctx.fillText("fondamentale + harmoniques (même durée)", left, h - 12);
     }
 
-    /* ---------- Schéma A : trois timbres, une fondamentale ---------- */
+    /* ---------- Schéma A : trois timbres ---------- */
     const sA = setup("schemaTimbreA");
     if (sA) {
         const { ctx, w, h } = sA;
@@ -2824,7 +3208,7 @@ filtre.connect(audioCtx.destination);</code></pre>
         ctx.fillText("même fondamentale (200 Hz), trois timbres différents", left, h - 12);
     }
 
-    /* ---------- Schéma B : décomposition en harmoniques ---------- */
+    /* ---------- Schéma B : décomposition ---------- */
     const sB = setup("schemaTimbreB");
     if (sB) {
         const { ctx, w, h } = sB;
@@ -2888,7 +3272,7 @@ filtre.connect(audioCtx.destination);</code></pre>
         });
     }
 
-    /* ---------- Schéma C : reconstruction d'une onde carrée ---------- */
+    /* ---------- Schéma C : reconstruction onde carrée ---------- */
     const sC = setup("schemaTimbreC");
     if (sC) {
         const { ctx, w, h } = sC;
@@ -3219,7 +3603,7 @@ filtre.connect(audioCtx.destination);</code></pre>
         ctx.fillText("après compression (harmoniques 5–8 supprimées)", left, h - 12);
     }
 
-    /* ---------- Schéma I : masquage fréquentiel ---------- */
+    /* ---------- Schéma I : masquage ---------- */
     const sI = setup("schemaI");
     if (sI) {
         const { ctx, w, h } = sI;
@@ -3368,6 +3752,581 @@ filtre.connect(audioCtx.destination);</code></pre>
         ctx.fillStyle = "#d8e0ec";
         ctx.font = "13px monospace";
         ctx.fillText("signal capturé, traité, puis envoyé aux haut-parleurs", 40, h - 20);
+    }
+
+    /* =====================================================
+       NOUVEAUX SCHÉMAS — Section 7 (graphe), 9 (enveloppe), 10 (filtres)
+    ===================================================== */
+
+    /* ---------- Schéma graphe complet (section 7) ---------- */
+    const sGC = setup("schemaGrapheComplet");
+    if (sGC) {
+        const { ctx, w, h } = sGC;
+        fond(ctx, w, h);
+
+        // Trois colonnes : sources, traitements, destination
+        const colSources = 80;
+        const colTraitements = 400;
+        const colDest = 780;
+
+        ctx.font = "13px monospace";
+
+        // Titres de colonnes
+        ctx.fillStyle = "#8fa3c0";
+        ctx.textAlign = "center";
+        ctx.fillText("sources", colSources + 60, 30);
+        ctx.fillText("traitements", colTraitements + 120, 30);
+        ctx.fillText("sortie", colDest + 60, 30);
+        ctx.textAlign = "left";
+
+        // Boîtes sources
+        const sources = [
+            { label: "OscillatorNode", y: 70 },
+            { label: "AudioBufferSource", y: 130 },
+            { label: "<audio>", y: 190 }
+        ];
+
+        sources.forEach(s => {
+            ctx.fillStyle = "#eef1f5";
+            ctx.strokeStyle = "#718096";
+            ctx.lineWidth = 1;
+            ctx.fillRect(colSources, s.y, 120, 40);
+            ctx.strokeRect(colSources, s.y, 120, 40);
+            ctx.fillStyle = "#1a2b4a";
+            ctx.textAlign = "center";
+            ctx.fillText(s.label, colSources + 60, s.y + 25);
+            ctx.textAlign = "left";
+        });
+
+        // Boîtes traitements
+        const traitements = [
+            { label: "GainNode", y: 60 },
+            { label: "BiquadFilter", y: 110 },
+            { label: "DelayNode", y: 160 },
+            { label: "ConvolverNode", y: 210 },
+            { label: "AnalyserNode", y: 260 }
+        ];
+
+        traitements.forEach(t => {
+            ctx.fillStyle = "#eef1f5";
+            ctx.strokeStyle = "#718096";
+            ctx.lineWidth = 1;
+            ctx.fillRect(colTraitements, t.y, 160, 36);
+            ctx.strokeRect(colTraitements, t.y, 160, 36);
+            ctx.fillStyle = "#1a2b4a";
+            ctx.textAlign = "center";
+            ctx.fillText(t.label, colTraitements + 80, t.y + 23);
+            ctx.textAlign = "left";
+        });
+
+        // Boîte destination
+        ctx.fillStyle = "#eef1f5";
+        ctx.strokeStyle = "#718096";
+        ctx.fillRect(colDest, 130, 120, 60);
+        ctx.strokeRect(colDest, 130, 120, 60);
+        ctx.fillStyle = "#1a2b4a";
+        ctx.textAlign = "center";
+        ctx.fillText("destination", colDest + 60, 155);
+        ctx.fillText("(haut-parleurs)", colDest + 60, 175);
+        ctx.textAlign = "left";
+
+        // Flèches sources → traitements (une seule, simplifiée)
+        ctx.strokeStyle = "#9bc3e3";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(colSources + 120, 110);
+        ctx.lineTo(colTraitements, 110);
+        ctx.stroke();
+        ctx.fillStyle = "#9bc3e3";
+        ctx.beginPath();
+        ctx.moveTo(colTraitements - 8, 102);
+        ctx.lineTo(colTraitements, 110);
+        ctx.lineTo(colTraitements - 8, 118);
+        ctx.fill();
+
+        // Flèche traitements → destination
+        ctx.strokeStyle = "#9bc3e3";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(colTraitements + 160, 160);
+        ctx.lineTo(colDest, 160);
+        ctx.stroke();
+        ctx.fillStyle = "#9bc3e3";
+        ctx.beginPath();
+        ctx.moveTo(colDest - 8, 152);
+        ctx.lineTo(colDest, 160);
+        ctx.lineTo(colDest - 8, 168);
+        ctx.fill();
+
+        // Légende en bas
+        ctx.fillStyle = "#8fa3c0";
+        ctx.font = "12px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText("chaque nœud a une entrée et une sortie — on les chaîne avec connect()",
+                     w / 2, h - 15);
+        ctx.textAlign = "left";
+    }
+
+    /* ---------- Schéma DelayNode (section 7) ---------- */
+    const sDelay = setup("schemaDelay");
+    if (sDelay) {
+        const { ctx, w, h } = sDelay;
+        fond(ctx, w, h);
+        const left = 60;
+        const right = w - 40;
+        const duree = 1.5;
+
+        // Signal original : impulsion à t=0
+        const yTop = 60;
+        ctx.strokeStyle = "#607080";
+        ctx.beginPath();
+        ctx.moveTo(left, yTop);
+        ctx.lineTo(right, yTop);
+        ctx.stroke();
+
+        // Impulsion
+        ctx.strokeStyle = "#9bc3e3";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const x0 = left + 20;
+        ctx.moveTo(x0, yTop);
+        ctx.lineTo(x0, yTop - 40);
+        ctx.stroke();
+
+        ctx.fillStyle = "#d8e0ec";
+        ctx.font = "13px monospace";
+        ctx.fillText("signal original", left, 25);
+
+        // Signal après delay : impulsion + répétitions atténuées
+        const yBot = 180;
+        ctx.strokeStyle = "#607080";
+        ctx.beginPath();
+        ctx.moveTo(left, yBot);
+        ctx.lineTo(right, yBot);
+        ctx.stroke();
+
+        const repetitions = 5;
+        const delay = 0.3;   // secondes
+        for (let i = 0; i < repetitions; i++) {
+            const t = i * delay;
+            const x = left + 20 + (t / duree) * (right - left - 40);
+            const amplitude = 40 * Math.pow(0.4, i);
+
+            ctx.strokeStyle = i === 0 ? "#9bc3e3" : "#f0c674";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x, yBot);
+            ctx.lineTo(x, yBot - amplitude);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = "#f0c674";
+        ctx.fillText("après DelayNode (delay 300 ms, feedback 40 %)", left, h - 20);
+    }
+
+    /* ---------- Schéma ADSR (section 9) ---------- */
+    const sADSR = setup("schemaADSR");
+    if (sADSR) {
+        const { ctx, w, h } = sADSR;
+        fond(ctx, w, h);
+        const left = 60;
+        const right = w - 40;
+        const base = h - 50;
+        const top = 50;
+
+        // Axes
+        ctx.strokeStyle = "#607080";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(left, base);
+        ctx.lineTo(right, base);
+        ctx.moveTo(left, base);
+        ctx.lineTo(left, top - 10);
+        ctx.stroke();
+
+        // Labels axes
+        ctx.fillStyle = "#8fa3c0";
+        ctx.font = "13px monospace";
+        ctx.fillText("amplitude", left + 5, top);
+        ctx.fillText("temps", right - 40, base + 22);
+
+        // Valeurs de l'enveloppe (proportions)
+        const A = 0.1, D = 0.2, S = 0.5, R = 0.3;   // relative
+        const total = A + D + S + R;
+        const amplitudeMax = 0.9;
+        const amplitudeSustain = 0.6;
+
+        const xA = left + (A / total) * (right - left);
+        const xD = left + ((A + D) / total) * (right - left);
+        const xS = left + ((A + D + S) / total) * (right - left);
+        const xR = left + ((A + D + S + R) / total) * (right - left);
+
+        const yMax = base - amplitudeMax * (base - top);
+        const ySustain = base - amplitudeSustain * (base - top);
+
+        // Courbe
+        ctx.strokeStyle = "#9bc3e3";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(left, base);
+        ctx.lineTo(xA, yMax);              // Attack
+        ctx.lineTo(xD, ySustain);          // Decay
+        ctx.lineTo(xS, ySustain);          // Sustain
+        ctx.lineTo(xR, base);              // Release
+        ctx.stroke();
+
+        // Traits verticaux délimitant les phases
+        ctx.strokeStyle = "#3a4d6e";
+        ctx.setLineDash([4, 4]);
+        ctx.lineWidth = 1;
+        [xA, xD, xS, xR].forEach(x => {
+            ctx.beginPath();
+            ctx.moveTo(x, top - 5);
+            ctx.lineTo(x, base);
+            ctx.stroke();
+        });
+        ctx.setLineDash([]);
+
+        // Labels des phases
+        ctx.fillStyle = "#f0c674";
+        ctx.font = "13px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText("A", (left + xA) / 2, top - 15);
+        ctx.fillText("D", (xA + xD) / 2, top - 15);
+        ctx.fillText("S", (xD + xS) / 2, top - 15);
+        ctx.fillText("R", (xS + xR) / 2, top - 15);
+        ctx.textAlign = "left";
+
+        // Sous-labels
+        ctx.fillStyle = "#8fa3c0";
+        ctx.font = "11px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText("Attack", (left + xA) / 2, top - 2);
+        ctx.fillText("Decay", (xA + xD) / 2, top - 2);
+        ctx.fillText("Sustain", (xD + xS) / 2, top - 2);
+        ctx.fillText("Release", (xS + xR) / 2, top - 2);
+        ctx.textAlign = "left";
+    }
+
+    /* ---------- Schéma comparatif des 3 enveloppes (section 9) ---------- */
+    const sEnv = setup("schemaEnveloppes");
+    if (sEnv) {
+        const { ctx, w, h } = sEnv;
+        fond(ctx, w, h);
+        const left = 60;
+        const right = w - 40;
+        const duree = 2.5;   // secondes
+
+        const base = h - 40;
+        const top = 40;
+
+        // Axe
+        ctx.strokeStyle = "#607080";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(left, base);
+        ctx.lineTo(right, base);
+        ctx.moveTo(left, base);
+        ctx.lineTo(left, top);
+        ctx.stroke();
+
+        // Enveloppe : fonction qui renvoie l'amplitude à un instant t
+        function enveloppe(t, A, D, S, R, dureeNote) {
+            if (t < 0) return 0;
+            if (t < A) return t / A;                       // attack
+            if (t < A + D) return 1 - (1 - S) * ((t - A) / D);  // decay
+            if (t < dureeNote) return S;                   // sustain
+            if (t < dureeNote + R) return S * (1 - (t - dureeNote) / R);  // release
+            return 0;
+        }
+
+        const enveloppes = [
+            {
+                nom: "Percussion",
+                A: 0.005, D: 0.15, S: 0.0, R: 0.0,
+                dureeNote: 0.2,
+                couleur: "#8be0a3"
+            },
+            {
+                nom: "Corde pincée",
+                A: 0.02, D: 0.4, S: 0.3, R: 0.2,
+                dureeNote: 1.0,
+                couleur: "#9bc3e3"
+            },
+            {
+                nom: "Nappe",
+                A: 0.5, D: 0.5, S: 0.7, R: 0.8,
+                dureeNote: 1.5,
+                couleur: "#f0c674"
+            }
+        ];
+
+        enveloppes.forEach(env => {
+            ctx.strokeStyle = env.couleur;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = left; x <= right; x++) {
+                const t = (x - left) / (right - left) * duree;
+                const v = enveloppe(t, env.A, env.D, env.S, env.R, env.dureeNote);
+                const y = base - v * (base - top - 20);
+                if (x === left) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        });
+
+        // Légende
+        ctx.font = "13px monospace";
+        enveloppes.forEach((env, i) => {
+            ctx.fillStyle = env.couleur;
+            ctx.fillText(env.nom, right - 180, top + 20 + i * 20);
+        });
+
+        ctx.fillStyle = "#d8e0ec";
+        ctx.font = "12px monospace";
+        ctx.fillText("même note, même timbre, trois enveloppes", left, h - 12);
+    }
+
+    /* =====================================================
+       SCHÉMAS DE FILTRES — 4 mini-graphes dans le tableau
+    ===================================================== */
+
+    function dessinerFiltre(id, type) {
+        const s = setup(id);
+        if (!s) return;
+        const { ctx, w, h } = s;
+        fond(ctx, w, h);
+
+        const left = 25;
+        const right = w - 15;
+        const base = h - 20;
+        const top = 15;
+        const cut = 1000;   // fréquence de coupure (arbitraire)
+        const minF = 100;
+        const maxF = 10000;
+
+        // Axe horizontal (fréquence)
+        ctx.strokeStyle = "#607080";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(left, base);
+        ctx.lineTo(right, base);
+        ctx.stroke();
+
+        // Courbe de réponse
+        ctx.strokeStyle = "#9bc3e3";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+
+        for (let x = left; x <= right; x++) {
+            // Fréquence en échelle log
+            const logMin = Math.log10(minF);
+            const logMax = Math.log10(maxF);
+            const logF = logMin + (x - left) / (right - left) * (logMax - logMin);
+            const freq = Math.pow(10, logF);
+            const ratio = freq / cut;
+
+            let gain;
+
+            if (type === "lowpass") {
+                gain = 1 / Math.sqrt(1 + Math.pow(ratio, 4));
+            } else if (type === "highpass") {
+                gain = 1 / Math.sqrt(1 + Math.pow(1 / ratio, 4));
+            } else if (type === "bandpass") {
+                const Q = 2;
+                const r = ratio - 1 / ratio;
+                gain = 1 / Math.sqrt(1 + Q * Q * r * r);
+            } else if (type === "notch") {
+                const Q = 2;
+                const r = ratio - 1 / ratio;
+                gain = Math.sqrt(1 + Q * Q * r * r) / Math.sqrt(1 + Q * Q * r * r + 1);
+                gain = 1 - 1 / (1 + Q * Q * r * r);
+                gain = Math.max(0, 1 - gain * 1.2);
+            }
+
+            const y = base - gain * (base - top);
+            if (x === left) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Marqueur de coupure
+        const logMin = Math.log10(minF);
+        const logMax = Math.log10(maxF);
+        const logCut = Math.log10(cut);
+        const xCut = left + (logCut - logMin) / (logMax - logMin) * (right - left);
+
+        ctx.strokeStyle = "#f0c674";
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(xCut, top);
+        ctx.lineTo(xCut, base);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    dessinerFiltre("filterLowpass", "lowpass");
+    dessinerFiltre("filterHighpass", "highpass");
+    dessinerFiltre("filterBandpass", "bandpass");
+    dessinerFiltre("filterNotch", "notch");
+
+    /* ---------- Schéma Q (section 10) ---------- */
+    const sQ = setup("schemaQ");
+    if (sQ) {
+        const { ctx, w, h } = sQ;
+        fond(ctx, w, h);
+        const left = 60;
+        const right = w - 40;
+        const base = h - 40;
+        const top = 40;
+        const cut = 1000;
+        const minF = 100;
+        const maxF = 10000;
+
+        // Axe
+        ctx.strokeStyle = "#607080";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(left, base);
+        ctx.lineTo(right, base);
+        ctx.moveTo(left, base);
+        ctx.lineTo(left, top);
+        ctx.stroke();
+
+        // Labels axes
+        ctx.fillStyle = "#8fa3c0";
+        ctx.font = "13px monospace";
+        ctx.fillText("gain", left + 5, top);
+        ctx.fillText("fréquence →", right - 100, base + 25);
+
+        // Marqueur de coupure
+        const logMin = Math.log10(minF);
+        const logMax = Math.log10(maxF);
+        const logCut = Math.log10(cut);
+        const xCut = left + (logCut - logMin) / (logMax - logMin) * (right - left);
+
+        ctx.strokeStyle = "#3a4d6e";
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(xCut, top);
+        ctx.lineTo(xCut, base);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = "#8fa3c0";
+        ctx.font = "11px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText("1000 Hz", xCut, base + 15);
+        ctx.textAlign = "left";
+
+        // Trois courbes : Q = 0.7, Q = 5, Q = 20
+        const courbes = [
+            { Q: 0.7, couleur: "#8be0a3", label: "Q = 0,7" },
+            { Q: 5,   couleur: "#f0c674", label: "Q = 5" },
+            { Q: 20,  couleur: "#e08b8b", label: "Q = 20" }
+        ];
+
+        courbes.forEach(({ Q, couleur }) => {
+            ctx.strokeStyle = couleur;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = left; x <= right; x++) {
+                const logF = logMin + (x - left) / (right - left) * (logMax - logMin);
+                const freq = Math.pow(10, logF);
+                const ratio = freq / cut;
+
+                // Réponse approximative d'un passe-bas avec Q
+                const omega = ratio;
+                const denom = Math.sqrt(
+                    Math.pow(1 - omega * omega, 2) +
+                    Math.pow(omega / Q, 2)
+                );
+                let gain = 1 / denom;
+                if (gain > 3) gain = 3;   // clamp pour ne pas exploser
+
+                const y = base - (gain / 3) * (base - top - 30);
+                if (x === left) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        });
+
+        // Légende
+        ctx.font = "13px monospace";
+        courbes.forEach((c, i) => {
+            ctx.fillStyle = c.couleur;
+            ctx.fillText(c.label, right - 100, top + 20 + i * 20);
+        });
+    }
+
+    /* ---------- Schéma avant/après filtrage (section 10) ---------- */
+    const sFAP = setup("schemaFiltreAvantApres");
+    if (sFAP) {
+        const { ctx, w, h } = sFAP;
+        fond(ctx, w, h);
+        const left = 60;
+        const right = w - 40;
+        const duree = 0.012;
+        const f0 = 200;
+
+        // Signal original : 6 harmoniques
+        const ampOriginal = [1.0, 0.7, 0.5, 0.4, 0.3, 0.2];
+
+        function signal(t, amp) {
+            let v = 0;
+            for (let i = 0; i < amp.length; i++) {
+                v += amp[i] * Math.sin(2 * Math.PI * f0 * (i + 1) * t);
+            }
+            return v;
+        }
+
+        const yTop = 70;
+        const yBot = 240;
+
+        // Original
+        ctx.strokeStyle = "#607080";
+        ctx.beginPath();
+        ctx.moveTo(left, yTop);
+        ctx.lineTo(right, yTop);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#9bc3e3";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let x = left; x <= right; x++) {
+            const t = (x - left) / (right - left) * duree;
+            const y = yTop - signal(t, ampOriginal) * 16;
+            if (x === left) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Après filtre : on ne garde que les 3 premières harmoniques
+        const ampFiltre = [1.0, 0.7, 0.5, 0.05, 0, 0];
+
+        ctx.strokeStyle = "#607080";
+        ctx.beginPath();
+        ctx.moveTo(left, yBot);
+        ctx.lineTo(right, yBot);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#f0c674";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let x = left; x <= right; x++) {
+            const t = (x - left) / (right - left) * duree;
+            const y = yBot - signal(t, ampFiltre) * 16;
+            if (x === left) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Légendes
+        ctx.font = "13px monospace";
+        ctx.fillStyle = "#9bc3e3";
+        ctx.fillText("original (fondamentale + 6 harmoniques)", left, 25);
+        ctx.fillStyle = "#f0c674";
+        ctx.fillText("après filtre passe-bas à 800 Hz (harmoniques hautes atténuées)", left, h - 12);
     }
 })();
 </script>
